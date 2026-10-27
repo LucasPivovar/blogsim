@@ -653,22 +653,10 @@
         h('div', { className: 'pv-post' }, h('div', { className: 'pv-title' }, BLOG_POST['Treino em Casa']), ...[0, 1, 2, 3, 4, 5].map(i => h('div', { key: i, className: 'pv-line' }))),
         h('div', { className: 'pv-side' },
           phase >= 5 ? h('div', { className: 'hd-ad-in' + (phase === 6 && local < 350 ? ' is-clicked' : '') }, h(AdCard, { ad: DEMO_AD, vertical: true })) : h('div', { className: 'pv-side-box hd-slot' }))),
-      // O leitor: aparece quando o anúncio entra e estica o braço para clicar.
-      h('svg', { className: 'hd-person' + (phase >= 5 ? ' is-in' : '') + (phase === 6 && local < 450 ? ' is-tap' : ''), viewBox: '0 0 150 150', 'aria-hidden': true },
-        h('path', { className: 'p-shirt', d: 'M14 150c0-40 22-58 56-58s56 18 56 58z' }),
-        h('rect', { className: 'p-skin', x: 62, y: 76, width: 16, height: 20, rx: 6 }),
-        h('circle', { className: 'p-skin', cx: 70, cy: 56, r: 24 }),
-        h('path', { className: 'p-hair', d: 'M45 58c-3-22 11-34 27-34 17 0 28 11 26 28-7-8-18-12-30-9-10 2-17 8-23 15z' }),
-        h('circle', { className: 'p-hair', cx: 82, cy: 58, r: 2.2 }),
-        h('path', { className: 'p-mouth', d: 'M78 68q4 3 8 0' }),
-        h('g', { className: 'hd-arm' },
-          h('path', { className: 'p-sleeve', d: 'M100 108L128 70' }),
-          h('circle', { className: 'p-skin', cx: 131, cy: 64, r: 9 }),
-          h('path', { className: 'p-finger', d: 'M134 58l7-9' }))),
       phase === 6 && local >= 350 ? h('div', { className: 'hd-sale' }, '+1 venda contada') : null);
 
     return h('div', { className: 'hd' },
-      h('div', { className: 'hd-frame', role: 'img', 'aria-label': 'Animação: o anunciante escolhe o blog Treino em Casa, escreve o anúncio, publica, e o anúncio aparece na lateral do blog. Um leitor clica no anúncio e uma venda é contada.' },
+      h('div', { className: 'hd-frame', role: 'img', 'aria-label': 'Animação: o anunciante escolhe o blog Treino em Casa, escreve o anúncio, publica, e o anúncio aparece na lateral do blog. Um clique no anúncio conta uma venda.' },
         h('div', { className: 'hd-chrome', 'aria-hidden': true }, onBlog ? 'treinoemcasa.com.br' : 'BlogSim · Criar campanha'),
         h('div', { className: 'hd-stage', 'aria-hidden': true },
           h('div', { className: 'hd-scene hd-panel' + (onBlog ? '' : ' is-on') }, panel),
@@ -697,6 +685,19 @@
         h('div', { className: 'mp-side' }, has('lateral') ? slot('lateral') : h('i', { className: 'box' }), h('i', { className: 'box' }))),
       has('popup') ? h('div', { className: 'mp-pop' }, slot('popup')) : null);
   }
+
+  // Leitora ilustrada, usada na tela de login.
+  const Reader = () => h('svg', { className: 'reader', viewBox: '0 0 150 150', 'aria-hidden': true },
+    h('path', { className: 'p-shirt', d: 'M14 150c0-40 22-58 56-58s56 18 56 58z' }),
+    h('rect', { className: 'p-skin', x: 62, y: 76, width: 16, height: 20, rx: 6 }),
+    h('circle', { className: 'p-skin', cx: 70, cy: 56, r: 24 }),
+    h('path', { className: 'p-hair', d: 'M45 58c-3-22 11-34 27-34 17 0 28 11 26 28-7-8-18-12-30-9-10 2-17 8-23 15z' }),
+    h('circle', { className: 'p-hair', cx: 82, cy: 58, r: 2.2 }),
+    h('path', { className: 'p-mouth', d: 'M78 68q4 3 8 0' }),
+    h('g', { className: 'reader-arm' },
+      h('path', { className: 'p-sleeve', d: 'M100 108L128 70' }),
+      h('circle', { className: 'p-skin', cx: 131, cy: 64, r: 9 }),
+      h('path', { className: 'p-finger', d: 'M134 58l7-9' })));
 
   const ILL = {
     visitas: h('svg', { className: 'lp-ill', viewBox: '0 0 72 56', 'aria-hidden': true },
@@ -888,9 +889,23 @@
       const tl = g.timeline({ defaults: { ease: 'power3.out' } });
       from(tl, root.querySelectorAll('.lg-card'), { y: 24, opacity: 0, duration: .7 });
       from(tl, root.querySelectorAll('.lg-acc'), { y: 8, opacity: 0, stagger: .06, duration: .4 }, '-=.3');
-      from(tl, root.querySelectorAll('.lg-art .mp'), { y: 40, opacity: 0, rotate: i => (i ? 2.5 : -2.5), stagger: .15, duration: 1, ease: 'expo.out' }, .15);
-      from(tl, root.querySelectorAll('.lg-art .mp-slot'), { ...RENT_FROM, stagger: .25, duration: .5 }, '-=.4');
-      from(tl, root.querySelectorAll('.lg-art p'), { y: 10, opacity: 0, duration: .6 }, '-=.3');
+      const scene = root.querySelector('.lg-scene');
+      if (!scene) return;
+      from(tl, [scene], { y: 30, opacity: 0, duration: 1, ease: 'expo.out' }, .15);
+      from(tl, root.querySelectorAll('.lg-art p'), { y: 10, opacity: 0, duration: .6 }, '-=.5');
+      // Loop: o espaço é alugado, a leitora toca no anúncio e a venda é contada.
+      const slot = scene.querySelector('.mp-slot'), person = scene.querySelector('.reader'), arm = scene.querySelector('.reader-arm'), chip = scene.querySelector('.lg-result');
+      const FILLED = { backgroundColor: '#f26a1b', borderColor: '#f26a1b', color: '#1d0d03', borderStyle: 'solid' };
+      g.timeline({ repeat: -1, repeatDelay: .8, delay: .9 })
+        .set(chip, { opacity: 0 }).set(person, { yPercent: 105 }).set(slot, RENT_FROM)
+        .to(slot, { ...FILLED, duration: .6, ease: 'power1.inOut' })
+        .to(person, { yPercent: 0, duration: .7, ease: 'power3.out' }, '+=.2')
+        .to(arm, { rotation: -12, x: 6, y: -8, svgOrigin: '100 108', duration: .35, ease: 'power2.out' })
+        .to(slot, { scale: .93, duration: .12, yoyo: true, repeat: 1, ease: 'power1.inOut' })
+        .fromTo(chip, { y: 12, opacity: 0, scale: .9 }, { y: 0, opacity: 1, scale: 1, duration: .45, ease: 'back.out(2)' }, '-=.05')
+        .to(arm, { rotation: 0, x: 0, y: 0, svgOrigin: '100 108', duration: .4, ease: 'power2.inOut' }, '+=.3')
+        .to(chip, { opacity: 0, y: -8, duration: .4 }, '+=1.2')
+        .to(person, { yPercent: 105, duration: .6, ease: 'power2.in' }, '<');
     }, []);
     return h('main', { className: 'lg', ref },
       h('div', { className: 'lg-card' },
@@ -908,9 +923,11 @@
           ACCOUNTS.map(a => h('button', { key: a.email, type: 'button', className: 'lg-acc' + (suggest === a.role ? ' is-suggested' : ''), onClick: () => fill(a) },
             h(B.Badge, { tone: ROLE_TONE[a.role] }, ROLE_LABEL[a.role]), h('span', null, a.email))))),
       h('div', { className: 'lg-art', 'aria-hidden': true },
-        h(MiniPage, { blog: 'Grana no Bolso', slots: ['banner'], delay: 0.3 }),
-        h(MiniPage, { blog: 'Treino em Casa', slots: ['lateral'], delay: 0.7 }),
-        h('p', null, 'Do outro lado do login: os seus blogs, campanhas e resultados.')));
+        h('div', { className: 'lg-scene' },
+          h(MiniPage, { blog: 'Treino em Casa', slots: ['lateral'], large: true }),
+          h('div', { className: 'lg-person' }, h(Reader)),
+          h('div', { className: 'lg-result' }, h('span', null, 'Tênis de corrida · Treino em Casa'), h('b', null, '+1 venda'))),
+        h('p', null, 'Entre para ver seus blogs, campanhas e resultados.')));
   }
   // ---------- App ----------
   function App() {
