@@ -115,12 +115,13 @@ body { margin: 0; background: var(--surface-0); color: var(--ink); font-family: 
 .bs-nav-role-opt:hover, .bs-nav-role-opt[aria-current="true"] { background: var(--surface-200); }
 .bs-nav-role-btn:focus-visible, .bs-nav-role-opt:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
 .bs-nav-user { width: 100%; min-width: 0; }
-.bs-nav-user span:last-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bs-nav-user span:last-child { min-width: 0; }
 .bs-nav-avatar { flex: none; }
 @media (prefers-reduced-motion: reduce) { .bs-nav-role-chev { transition: none; } }
 .bs-table-blogs { max-width: 300px; white-space: normal; }
 
-.bs-nav-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.bs-nav-logout { flex: none; margin-left: auto; padding: 4px 8px; border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--brand); font: 600 13px/18px var(--font-sans); cursor: pointer; }
-.bs-nav-logout:hover { background: var(--brand-soft); }
+.bs-nav-name { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.bs-nav-logout { flex: 1 0 100%; padding: 8px 12px; border: 0; border-radius: var(--radius-md); background: transparent; color: var(--ink-muted); font: 500 14px/20px var(--font-sans); text-align: left; cursor: pointer; }
+.bs-nav-logout:hover { background: var(--surface-200); color: var(--ink); }
+.bs-nav-user:has(.bs-nav-logout) { flex-wrap: wrap; row-gap: var(--space-2); padding-top: var(--space-3); border-top: 1px solid var(--line); }
 .bs-nav-logout:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
