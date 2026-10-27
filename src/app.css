@@ -303,7 +303,7 @@ h1, h2, h3 { text-wrap: balance; }
   .hd-caret { animation: none; }
 }
 /* Login */
-.lg { overflow-x: clip; display: grid; grid-template-columns: minmax(0, 420px) minmax(0, 400px); justify-content: center; align-items: center; gap: 72px; min-height: 100vh; padding-block: 48px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); background: var(--surface-200); }
+.lg { overflow-x: clip; display: grid; grid-template-columns: minmax(0, 420px) minmax(0, 400px); justify-content: center; align-content: center; align-items: center; gap: 72px; box-sizing: border-box; min-height: 100vh; min-height: 100dvh; padding-block: 32px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); background: var(--surface-200); }
 .lg-card { box-sizing: border-box; display: grid; gap: var(--space-4); width: 100%; padding: var(--space-8) var(--space-6); background: var(--surface-100); border: 1px solid var(--line); border-radius: var(--radius-lg); }
 .lg-card h1 { margin: 0; font: 800 28px/34px var(--font-display); letter-spacing: -.02em; color: var(--ink); }
 .lg-back { justify-self: start; padding: 0; border: 0; background: none; color: var(--brand); font: 600 13px/18px var(--font-sans); cursor: pointer; }
@@ -320,7 +320,7 @@ h1, h2, h3 { text-wrap: balance; }
 .lg-scene { position: relative; margin-top: 24px; }
 .lg-result { position: absolute; top: -26px; left: -20px; display: grid; gap: 2px; padding: 10px 14px; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface-100); box-shadow: var(--shadow-pop); font: 500 12px/16px var(--font-sans); color: var(--ink-muted); }
 .lg-result b { font: 800 20px/24px var(--font-sans); color: var(--success); }
-@media (max-width: 860px) { .lg { grid-template-columns: minmax(0, 420px); align-content: start; } .lg-art { display: none; } }
+@media (max-width: 860px) { .lg { grid-template-columns: minmax(0, 420px); } .lg-art { display: none; } }
 @media (max-width: 860px) {
   .app-root { height: auto; }
   .app-shell { flex-direction: column; }
