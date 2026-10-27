@@ -860,17 +860,32 @@
       h('footer', { className: 'lp-foot lp-wrap' }, 'BlogSim · protótipo para validação · outubro de 2026'));
   }
 
+  const REMEMBER_KEY = 'blogsim-email';
+  const readSaved = () => { try { return localStorage.getItem(REMEMBER_KEY) || ''; } catch (e) { return ''; } };
+
   function Login({ suggest, onLogin, onBack }) {
-    const [email, setEmail] = useState('');
+    const [email, setEmail] = useState(readSaved);
     const [pw, setPw] = useState('');
+    const [remember, setRemember] = useState(() => !!readSaved());
     const [err, setErr] = useState('');
+    const [view, setView] = useState('login');
+    const [resetEmail, setResetEmail] = useState('');
+    const [resetErr, setResetErr] = useState('');
     function submit(e) {
       e.preventDefault();
       const acc = ACCOUNTS.find(a => a.email === email.trim().toLowerCase() && a.password === pw);
-      if (!acc) { setErr('E-mail ou senha incorretos. Confira os dados ou use uma das contas de teste abaixo.'); return; }
+      if (!acc) { setErr('E-mail ou senha incorretos. Confira os dados ou escolha uma das contas abaixo.'); return; }
+      // Guarda só o e-mail, e só neste navegador. A senha nunca é guardada.
+      try { if (remember) localStorage.setItem(REMEMBER_KEY, acc.email); else localStorage.removeItem(REMEMBER_KEY); } catch (e2) {}
       onLogin(acc.role);
     }
     function fill(a) { setEmail(a.email); setPw(a.password); setErr(''); }
+    function openForgot() { setResetEmail(email); setResetErr(''); setView('forgot'); }
+    function sendReset(e) {
+      e.preventDefault();
+      if (!/^\S+@\S+\.\S+$/.test(resetEmail.trim())) { setResetErr('Informe um e-mail válido, como nome@empresa.com.br.'); return; }
+      setView('sent');
+    }
     const ref = React.useRef(null);
     useMotion(ref, (g, root) => {
       const tl = g.timeline({ defaults: { ease: 'power3.out' } });
@@ -887,20 +902,51 @@
         .to(slot, { ...FILLED, duration: .6, ease: 'power1.inOut' })
         .to(slot, { scale: .93, duration: .12, yoyo: true, repeat: 1, ease: 'power1.inOut' }, '+=.5')
         .fromTo(chip, { y: 12, opacity: 0, scale: .9 }, { y: 0, opacity: 1, scale: 1, duration: .45, ease: 'back.out(2)' }, '-=.05')
-        .to(chip, { opacity: 0, y: -8, duration: .4 }, '+=1.6');    }, []);
+        .to(chip, { opacity: 0, y: -8, duration: .4 }, '+=1.6');
+    }, []);
+    // Troca de passo dentro do card (entrar, esqueci a senha, e-mail enviado).
+    const bodyRef = React.useRef(null), firstView = React.useRef(true);
+    React.useLayoutEffect(() => {
+      const g = window.gsap;
+      if (firstView.current) { firstView.current = false; return; }
+      if (!g || !bodyRef.current || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      const tw = g.fromTo(bodyRef.current, { x: view === 'login' ? -20 : 20, opacity: 0 }, { x: 0, opacity: 1, duration: .4, ease: 'power3.out', clearProps: 'transform,opacity' });
+      return () => tw.kill();
+    }, [view]);
+    const backToLogin = h('button', { type: 'button', className: 'lg-link', onClick: () => setView('login') }, 'Voltar para o login');
+
+    let body;
+    if (view === 'login') body = h(React.Fragment, null,
+      h('h1', null, 'Entrar'),
+      h('form', { className: 'lg-form', onSubmit: submit, noValidate: true },
+        h(B.TextField, { id: 'login-email', label: 'E-mail', type: 'email', autoComplete: 'username', value: email, onChange: e => setEmail(e.target.value) }),
+        h(B.TextField, { id: 'login-senha', label: 'Senha', type: 'password', autoComplete: 'current-password', value: pw, onChange: e => setPw(e.target.value) }),
+        h('div', { className: 'lg-row' },
+          h('label', { className: 'lg-check', htmlFor: 'login-lembrar' },
+            h('input', { id: 'login-lembrar', type: 'checkbox', checked: remember, onChange: e => setRemember(e.target.checked) }),
+            'Lembrar de mim'),
+          h('button', { type: 'button', className: 'lg-link', onClick: openForgot }, 'Esqueci a senha')),
+        err ? h('p', { className: 'app-error', role: 'alert' }, err) : null,
+        h(B.Button, { type: 'submit', className: 'lg-submit' }, 'Entrar')),
+      h('div', { className: 'lg-demo' },
+        ACCOUNTS.map(a => h('button', { key: a.email, type: 'button', className: 'lg-acc' + (suggest === a.role ? ' is-suggested' : ''), onClick: () => fill(a) },
+          h(B.Badge, { tone: ROLE_TONE[a.role] }, ROLE_LABEL[a.role]), h('span', null, a.email)))));
+    if (view === 'forgot') body = h(React.Fragment, null,
+      h('h1', null, 'Recuperar senha'),
+      h('p', { className: 'lg-text' }, 'Informe o e-mail da sua conta. Enviamos um link para você criar uma senha nova.'),
+      h('form', { className: 'lg-form', onSubmit: sendReset, noValidate: true },
+        h(B.TextField, { id: 'reset-email', label: 'E-mail', type: 'email', autoComplete: 'username', value: resetEmail, onChange: e => { setResetEmail(e.target.value); setResetErr(''); }, error: resetErr || undefined }),
+        h(B.Button, { type: 'submit', className: 'lg-submit' }, 'Enviar link')),
+      backToLogin);
+    if (view === 'sent') body = h(React.Fragment, null,
+      h('h1', null, 'Confira seu e-mail'),
+      h('p', { className: 'lg-text', role: 'status' }, 'Se ', h('b', null, resetEmail.trim()), ' tiver uma conta no BlogSim, você vai receber um link para criar uma senha nova.'),
+      h(B.Button, { className: 'lg-submit', onClick: () => setView('login') }, 'Voltar para o login'));
+
     return h('main', { className: 'lg', ref },
       h('div', { className: 'lg-card' },
-        h('button', { type: 'button', className: 'lg-back', onClick: onBack }, '← Voltar para o site'),
-        Wordmark(),
-        h('h1', null, 'Entrar'),
-        h('form', { className: 'lg-form', onSubmit: submit, noValidate: true },
-          h(B.TextField, { id: 'login-email', label: 'E-mail', type: 'email', autoComplete: 'username', value: email, onChange: e => setEmail(e.target.value) }),
-          h(B.TextField, { id: 'login-senha', label: 'Senha', type: 'password', autoComplete: 'current-password', value: pw, onChange: e => setPw(e.target.value) }),
-          err ? h('p', { className: 'app-error', role: 'alert' }, err) : null,
-          h(B.Button, { type: 'submit', className: 'lg-submit' }, 'Entrar')),
-        h('div', { className: 'lg-demo' },
-          ACCOUNTS.map(a => h('button', { key: a.email, type: 'button', className: 'lg-acc' + (suggest === a.role ? ' is-suggested' : ''), onClick: () => fill(a) },
-            h(B.Badge, { tone: ROLE_TONE[a.role] }, ROLE_LABEL[a.role]), h('span', null, a.email))))),
+        h('button', { type: 'button', className: 'lg-home', onClick: onBack, 'aria-label': 'Ir para o site do BlogSim' }, Wordmark()),
+        h('div', { className: 'lg-body', ref: bodyRef }, body)),
       h('div', { className: 'lg-art', 'aria-hidden': true },
         h('div', { className: 'lg-scene' },
           h(MiniPage, { blog: 'Treino em Casa', slots: ['lateral'], large: true }),

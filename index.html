@@ -322,7 +322,7 @@ h1, h2, h3 { text-wrap: balance; }
 .lp-links { display: flex; gap: var(--space-6); }
 .lp-links a { color: var(--ink-muted); text-decoration: none; font: 500 14px/20px var(--font-sans); border-radius: var(--radius-sm); }
 .lp-links a:hover { color: var(--ink); }
-.lp-links a:focus-visible, .lg-back:focus-visible, .lg-acc:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.lp-links a:focus-visible, .lg-acc:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
 .lp-section h2, .lp-band h2, .lp-close h2 { margin: 0 0 12px; max-width: 22ch; font: 800 34px/1.1 var(--font-display); letter-spacing: -.03em; color: var(--ink); text-wrap: balance; }
 .lp-section { padding-block: 88px 0; }
 .lp-sub { margin: 0 0 28px; max-width: 60ch; font-size: 16px; line-height: 24px; color: var(--ink-muted); }
@@ -480,7 +480,16 @@ h1, h2, h3 { text-wrap: balance; }
 .lg { overflow-x: clip; display: grid; grid-template-columns: minmax(0, 420px) minmax(0, 400px); justify-content: center; align-content: center; align-items: center; gap: 72px; box-sizing: border-box; min-height: 100vh; min-height: 100dvh; padding-block: 32px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); background: var(--surface-200); }
 .lg-card { box-sizing: border-box; display: grid; gap: var(--space-4); width: 100%; padding: var(--space-8) var(--space-6); background: var(--surface-100); border: 1px solid var(--line); border-radius: var(--radius-lg); }
 .lg-card h1 { margin: 0; font: 800 28px/34px var(--font-display); letter-spacing: -.02em; color: var(--ink); }
-.lg-back { justify-self: start; padding: 0; border: 0; background: none; color: var(--brand); font: 600 13px/18px var(--font-sans); cursor: pointer; }
+.lg-home { justify-self: start; padding: 0; border: 0; border-radius: var(--radius-sm); background: none; cursor: pointer; }
+.lg-body { display: grid; gap: var(--space-4); min-width: 0; }
+.lg-text { margin: 0; font-size: 14px; line-height: 21px; color: var(--ink-muted); overflow-wrap: anywhere; }
+.lg-text b { color: var(--ink); }
+.lg-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2) var(--space-4); }
+.lg-check { display: inline-flex; align-items: center; gap: 8px; font: 500 14px/20px var(--font-sans); color: var(--ink); cursor: pointer; }
+.lg-check input { width: 18px; height: 18px; margin: 0; accent-color: var(--brand); cursor: pointer; }
+.lg-link { justify-self: start; padding: 2px 0; border: 0; border-radius: var(--radius-sm); background: none; color: var(--brand); font: 600 14px/20px var(--font-sans); cursor: pointer; }
+.lg-link:hover { text-decoration: underline; text-underline-offset: 3px; }
+.lg-home:focus-visible, .lg-link:focus-visible, .lg-check input:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
 .lg-form { display: grid; gap: var(--space-4); }
 .lg-submit { width: 100%; }
 .lg-demo { display: grid; gap: var(--space-2); }
@@ -1573,17 +1582,32 @@ h1, h2, h3 { text-wrap: balance; }
       h('footer', { className: 'lp-foot lp-wrap' }, 'BlogSim · protótipo para validação · outubro de 2026'));
   }
 
+  const REMEMBER_KEY = 'blogsim-email';
+  const readSaved = () => { try { return localStorage.getItem(REMEMBER_KEY) || ''; } catch (e) { return ''; } };
+
   function Login({ suggest, onLogin, onBack }) {
-    const [email, setEmail] = useState('');
+    const [email, setEmail] = useState(readSaved);
     const [pw, setPw] = useState('');
+    const [remember, setRemember] = useState(() => !!readSaved());
     const [err, setErr] = useState('');
+    const [view, setView] = useState('login');
+    const [resetEmail, setResetEmail] = useState('');
+    const [resetErr, setResetErr] = useState('');
     function submit(e) {
       e.preventDefault();
       const acc = ACCOUNTS.find(a => a.email === email.trim().toLowerCase() && a.password === pw);
-      if (!acc) { setErr('E-mail ou senha incorretos. Confira os dados ou use uma das contas de teste abaixo.'); return; }
+      if (!acc) { setErr('E-mail ou senha incorretos. Confira os dados ou escolha uma das contas abaixo.'); return; }
+      // Guarda só o e-mail, e só neste navegador. A senha nunca é guardada.
+      try { if (remember) localStorage.setItem(REMEMBER_KEY, acc.email); else localStorage.removeItem(REMEMBER_KEY); } catch (e2) {}
       onLogin(acc.role);
     }
     function fill(a) { setEmail(a.email); setPw(a.password); setErr(''); }
+    function openForgot() { setResetEmail(email); setResetErr(''); setView('forgot'); }
+    function sendReset(e) {
+      e.preventDefault();
+      if (!/^\S+@\S+\.\S+$/.test(resetEmail.trim())) { setResetErr('Informe um e-mail válido, como nome@empresa.com.br.'); return; }
+      setView('sent');
+    }
     const ref = React.useRef(null);
     useMotion(ref, (g, root) => {
       const tl = g.timeline({ defaults: { ease: 'power3.out' } });
@@ -1600,20 +1624,51 @@ h1, h2, h3 { text-wrap: balance; }
         .to(slot, { ...FILLED, duration: .6, ease: 'power1.inOut' })
         .to(slot, { scale: .93, duration: .12, yoyo: true, repeat: 1, ease: 'power1.inOut' }, '+=.5')
         .fromTo(chip, { y: 12, opacity: 0, scale: .9 }, { y: 0, opacity: 1, scale: 1, duration: .45, ease: 'back.out(2)' }, '-=.05')
-        .to(chip, { opacity: 0, y: -8, duration: .4 }, '+=1.6');    }, []);
+        .to(chip, { opacity: 0, y: -8, duration: .4 }, '+=1.6');
+    }, []);
+    // Troca de passo dentro do card (entrar, esqueci a senha, e-mail enviado).
+    const bodyRef = React.useRef(null), firstView = React.useRef(true);
+    React.useLayoutEffect(() => {
+      const g = window.gsap;
+      if (firstView.current) { firstView.current = false; return; }
+      if (!g || !bodyRef.current || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      const tw = g.fromTo(bodyRef.current, { x: view === 'login' ? -20 : 20, opacity: 0 }, { x: 0, opacity: 1, duration: .4, ease: 'power3.out', clearProps: 'transform,opacity' });
+      return () => tw.kill();
+    }, [view]);
+    const backToLogin = h('button', { type: 'button', className: 'lg-link', onClick: () => setView('login') }, 'Voltar para o login');
+
+    let body;
+    if (view === 'login') body = h(React.Fragment, null,
+      h('h1', null, 'Entrar'),
+      h('form', { className: 'lg-form', onSubmit: submit, noValidate: true },
+        h(B.TextField, { id: 'login-email', label: 'E-mail', type: 'email', autoComplete: 'username', value: email, onChange: e => setEmail(e.target.value) }),
+        h(B.TextField, { id: 'login-senha', label: 'Senha', type: 'password', autoComplete: 'current-password', value: pw, onChange: e => setPw(e.target.value) }),
+        h('div', { className: 'lg-row' },
+          h('label', { className: 'lg-check', htmlFor: 'login-lembrar' },
+            h('input', { id: 'login-lembrar', type: 'checkbox', checked: remember, onChange: e => setRemember(e.target.checked) }),
+            'Lembrar de mim'),
+          h('button', { type: 'button', className: 'lg-link', onClick: openForgot }, 'Esqueci a senha')),
+        err ? h('p', { className: 'app-error', role: 'alert' }, err) : null,
+        h(B.Button, { type: 'submit', className: 'lg-submit' }, 'Entrar')),
+      h('div', { className: 'lg-demo' },
+        ACCOUNTS.map(a => h('button', { key: a.email, type: 'button', className: 'lg-acc' + (suggest === a.role ? ' is-suggested' : ''), onClick: () => fill(a) },
+          h(B.Badge, { tone: ROLE_TONE[a.role] }, ROLE_LABEL[a.role]), h('span', null, a.email)))));
+    if (view === 'forgot') body = h(React.Fragment, null,
+      h('h1', null, 'Recuperar senha'),
+      h('p', { className: 'lg-text' }, 'Informe o e-mail da sua conta. Enviamos um link para você criar uma senha nova.'),
+      h('form', { className: 'lg-form', onSubmit: sendReset, noValidate: true },
+        h(B.TextField, { id: 'reset-email', label: 'E-mail', type: 'email', autoComplete: 'username', value: resetEmail, onChange: e => { setResetEmail(e.target.value); setResetErr(''); }, error: resetErr || undefined }),
+        h(B.Button, { type: 'submit', className: 'lg-submit' }, 'Enviar link')),
+      backToLogin);
+    if (view === 'sent') body = h(React.Fragment, null,
+      h('h1', null, 'Confira seu e-mail'),
+      h('p', { className: 'lg-text', role: 'status' }, 'Se ', h('b', null, resetEmail.trim()), ' tiver uma conta no BlogSim, você vai receber um link para criar uma senha nova.'),
+      h(B.Button, { className: 'lg-submit', onClick: () => setView('login') }, 'Voltar para o login'));
+
     return h('main', { className: 'lg', ref },
       h('div', { className: 'lg-card' },
-        h('button', { type: 'button', className: 'lg-back', onClick: onBack }, '← Voltar para o site'),
-        Wordmark(),
-        h('h1', null, 'Entrar'),
-        h('form', { className: 'lg-form', onSubmit: submit, noValidate: true },
-          h(B.TextField, { id: 'login-email', label: 'E-mail', type: 'email', autoComplete: 'username', value: email, onChange: e => setEmail(e.target.value) }),
-          h(B.TextField, { id: 'login-senha', label: 'Senha', type: 'password', autoComplete: 'current-password', value: pw, onChange: e => setPw(e.target.value) }),
-          err ? h('p', { className: 'app-error', role: 'alert' }, err) : null,
-          h(B.Button, { type: 'submit', className: 'lg-submit' }, 'Entrar')),
-        h('div', { className: 'lg-demo' },
-          ACCOUNTS.map(a => h('button', { key: a.email, type: 'button', className: 'lg-acc' + (suggest === a.role ? ' is-suggested' : ''), onClick: () => fill(a) },
-            h(B.Badge, { tone: ROLE_TONE[a.role] }, ROLE_LABEL[a.role]), h('span', null, a.email))))),
+        h('button', { type: 'button', className: 'lg-home', onClick: onBack, 'aria-label': 'Ir para o site do BlogSim' }, Wordmark()),
+        h('div', { className: 'lg-body', ref: bodyRef }, body)),
       h('div', { className: 'lg-art', 'aria-hidden': true },
         h('div', { className: 'lg-scene' },
           h(MiniPage, { blog: 'Treino em Casa', slots: ['lateral'], large: true }),
