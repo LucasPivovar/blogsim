@@ -179,13 +179,9 @@ html, body { min-height: 100%; }
 body { background: var(--surface-0); }
 h1, h2, h3 { text-wrap: balance; }
 
-/* Faixa do protótipo */
-.app-bar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-4); padding-block: 8px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); background: var(--surface-200); color: var(--ink-muted); font: 400 12px/16px var(--font-sans); }
-.app-bar b { font-weight: 700; color: var(--ink); }
 
 /* Casca */
 .app-root { display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
-.app-bar { flex: none; }
 .app-shell { flex: 1; min-height: 0; display: flex; align-items: stretch; }
 .app-side { position: relative; flex: none; display: flex; overflow-y: auto; }
 .app-mobilebar, .app-backdrop, .app-drawer-close { display: none; }
@@ -473,12 +469,6 @@ h1, h2, h3 { text-wrap: balance; }
 .hd-pause { padding: 4px 10px; border: 1px solid var(--line-strong); border-radius: var(--radius-pill); background: var(--surface-100); color: var(--ink); font: 600 12px/16px var(--font-sans); cursor: pointer; }
 .hd-pause:hover { background: var(--surface-200); }
 .hd-pause:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
-.p-skin { fill: #eebf9c; }
-.p-hair, .p-mouth { fill: #2a2238; }
-.p-mouth { fill: none; stroke: #2a2238; stroke-width: 2; stroke-linecap: round; }
-.p-shirt { fill: var(--teal); }
-.p-sleeve { fill: none; stroke: var(--teal); stroke-width: 16; stroke-linecap: round; }
-.p-finger { fill: none; stroke: #eebf9c; stroke-width: 6; stroke-linecap: round; }
 @keyframes hd-pop { from { opacity: 0; transform: translateY(10px) scale(.96); } to { opacity: 1; transform: none; } }
 @keyframes hd-blink { 50% { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) {
@@ -487,13 +477,13 @@ h1, h2, h3 { text-wrap: balance; }
   .hd-caret { animation: none; }
 }
 /* Login */
-.lg { overflow-x: clip; display: grid; grid-template-columns: minmax(0, 420px) minmax(0, 400px); justify-content: center; align-items: center; gap: 72px; min-height: calc(100vh - 32px); padding-block: 48px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); background: var(--surface-200); }
+.lg { overflow-x: clip; display: grid; grid-template-columns: minmax(0, 420px) minmax(0, 400px); justify-content: center; align-items: center; gap: 72px; min-height: 100vh; padding-block: 48px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); background: var(--surface-200); }
 .lg-card { box-sizing: border-box; display: grid; gap: var(--space-4); width: 100%; padding: var(--space-8) var(--space-6); background: var(--surface-100); border: 1px solid var(--line); border-radius: var(--radius-lg); }
 .lg-card h1 { margin: 0; font: 800 28px/34px var(--font-display); letter-spacing: -.02em; color: var(--ink); }
 .lg-back { justify-self: start; padding: 0; border: 0; background: none; color: var(--brand); font: 600 13px/18px var(--font-sans); cursor: pointer; }
 .lg-form { display: grid; gap: var(--space-4); }
 .lg-submit { width: 100%; }
-.lg-demo { display: grid; gap: var(--space-2); padding-top: var(--space-4); border-top: 1px solid var(--line); }
+.lg-demo { display: grid; gap: var(--space-2); }
 .lg-demo b { font: 600 14px/20px var(--font-sans); color: var(--ink); }
 .lg-demo p { margin: 0 0 4px; font-size: 13px; line-height: 18px; color: var(--ink-muted); }
 .lg-acc { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface-100); color: var(--ink); font: 500 13px/18px var(--font-sans); text-align: left; cursor: pointer; }
@@ -501,10 +491,7 @@ h1, h2, h3 { text-wrap: balance; }
 .lg-acc:hover { border-color: var(--line-strong); background: var(--surface-200); }
 .lg-acc.is-suggested { border-color: var(--brand); box-shadow: inset 0 0 0 1px var(--brand); }
 .lg-art { display: grid; gap: 32px; }
-.lg-art p { margin: 0; max-width: 30ch; font: 700 20px/28px var(--font-sans); letter-spacing: -.01em; color: var(--ink); }
-.lg-scene { position: relative; margin: 24px 64px 0 0; }
-.lg-person { position: absolute; right: -86px; bottom: -14px; width: 150px; overflow: hidden; transform: scaleX(-1); }
-.reader { display: block; width: 100%; height: auto; }
+.lg-scene { position: relative; margin-top: 24px; }
 .lg-result { position: absolute; top: -26px; left: -20px; display: grid; gap: 2px; padding: 10px 14px; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface-100); box-shadow: var(--shadow-pop); font: 500 12px/16px var(--font-sans); color: var(--ink-muted); }
 .lg-result b { font: 800 20px/24px var(--font-sans); color: var(--success); }
 @media (max-width: 860px) { .lg { grid-template-columns: minmax(0, 420px); align-content: start; } .lg-art { display: none; } }
@@ -1412,19 +1399,6 @@ h1, h2, h3 { text-wrap: balance; }
       has('popup') ? h('div', { className: 'mp-pop' }, slot('popup')) : null);
   }
 
-  // Leitora ilustrada, usada na tela de login.
-  const Reader = () => h('svg', { className: 'reader', viewBox: '0 0 150 150', 'aria-hidden': true },
-    h('path', { className: 'p-shirt', d: 'M14 150c0-40 22-58 56-58s56 18 56 58z' }),
-    h('rect', { className: 'p-skin', x: 62, y: 76, width: 16, height: 20, rx: 6 }),
-    h('circle', { className: 'p-skin', cx: 70, cy: 56, r: 24 }),
-    h('path', { className: 'p-hair', d: 'M45 58c-3-22 11-34 27-34 17 0 28 11 26 28-7-8-18-12-30-9-10 2-17 8-23 15z' }),
-    h('circle', { className: 'p-hair', cx: 82, cy: 58, r: 2.2 }),
-    h('path', { className: 'p-mouth', d: 'M78 68q4 3 8 0' }),
-    h('g', { className: 'reader-arm' },
-      h('path', { className: 'p-sleeve', d: 'M100 108L128 70' }),
-      h('circle', { className: 'p-skin', cx: 131, cy: 64, r: 9 }),
-      h('path', { className: 'p-finger', d: 'M134 58l7-9' })));
-
   const ILL = {
     visitas: h('svg', { className: 'lp-ill', viewBox: '0 0 72 56', 'aria-hidden': true },
       h('rect', { className: 'ill-page', x: 2, y: 4, width: 60, height: 46, rx: 6 }),
@@ -1618,21 +1592,15 @@ h1, h2, h3 { text-wrap: balance; }
       const scene = root.querySelector('.lg-scene');
       if (!scene) return;
       from(tl, [scene], { y: 30, opacity: 0, duration: 1, ease: 'expo.out' }, .15);
-      from(tl, root.querySelectorAll('.lg-art p'), { y: 10, opacity: 0, duration: .6 }, '-=.5');
-      // Loop: o espaço é alugado, a leitora toca no anúncio e a venda é contada.
-      const slot = scene.querySelector('.mp-slot'), person = scene.querySelector('.reader'), arm = scene.querySelector('.reader-arm'), chip = scene.querySelector('.lg-result');
+      // Loop: o espaço é alugado, o anúncio recebe um clique e a venda é contada.
+      const slot = scene.querySelector('.mp-slot'), chip = scene.querySelector('.lg-result');
       const FILLED = { backgroundColor: '#f26a1b', borderColor: '#f26a1b', color: '#1d0d03', borderStyle: 'solid' };
       g.timeline({ repeat: -1, repeatDelay: .8, delay: .9 })
-        .set(chip, { opacity: 0 }).set(person, { yPercent: 105 }).set(slot, RENT_FROM)
+        .set(chip, { opacity: 0 }).set(slot, RENT_FROM)
         .to(slot, { ...FILLED, duration: .6, ease: 'power1.inOut' })
-        .to(person, { yPercent: 0, duration: .7, ease: 'power3.out' }, '+=.2')
-        .to(arm, { rotation: -12, x: 6, y: -8, svgOrigin: '100 108', duration: .35, ease: 'power2.out' })
-        .to(slot, { scale: .93, duration: .12, yoyo: true, repeat: 1, ease: 'power1.inOut' })
+        .to(slot, { scale: .93, duration: .12, yoyo: true, repeat: 1, ease: 'power1.inOut' }, '+=.5')
         .fromTo(chip, { y: 12, opacity: 0, scale: .9 }, { y: 0, opacity: 1, scale: 1, duration: .45, ease: 'back.out(2)' }, '-=.05')
-        .to(arm, { rotation: 0, x: 0, y: 0, svgOrigin: '100 108', duration: .4, ease: 'power2.inOut' }, '+=.3')
-        .to(chip, { opacity: 0, y: -8, duration: .4 }, '+=1.2')
-        .to(person, { yPercent: 105, duration: .6, ease: 'power2.in' }, '<');
-    }, []);
+        .to(chip, { opacity: 0, y: -8, duration: .4 }, '+=1.6');    }, []);
     return h('main', { className: 'lg', ref },
       h('div', { className: 'lg-card' },
         h('button', { type: 'button', className: 'lg-back', onClick: onBack }, '← Voltar para o site'),
@@ -1644,16 +1612,12 @@ h1, h2, h3 { text-wrap: balance; }
           err ? h('p', { className: 'app-error', role: 'alert' }, err) : null,
           h(B.Button, { type: 'submit', className: 'lg-submit' }, 'Entrar')),
         h('div', { className: 'lg-demo' },
-          h('b', null, 'Contas de teste'),
-          h('p', null, 'O cadastro ainda não faz parte do protótipo. Clique numa conta para preencher e depois em Entrar. A senha de todas é demo123.'),
           ACCOUNTS.map(a => h('button', { key: a.email, type: 'button', className: 'lg-acc' + (suggest === a.role ? ' is-suggested' : ''), onClick: () => fill(a) },
             h(B.Badge, { tone: ROLE_TONE[a.role] }, ROLE_LABEL[a.role]), h('span', null, a.email))))),
       h('div', { className: 'lg-art', 'aria-hidden': true },
         h('div', { className: 'lg-scene' },
           h(MiniPage, { blog: 'Treino em Casa', slots: ['lateral'], large: true }),
-          h('div', { className: 'lg-person' }, h(Reader)),
-          h('div', { className: 'lg-result' }, h('span', null, 'Tênis de corrida · Treino em Casa'), h('b', null, '+1 venda'))),
-        h('p', null, 'Entre para ver seus blogs, campanhas e resultados.')));
+          h('div', { className: 'lg-result' }, h('span', null, 'Tênis de corrida · Treino em Casa'), h('b', null, '+1 venda')))));
   }
   // ---------- App ----------
   function App() {
@@ -1705,10 +1669,9 @@ h1, h2, h3 { text-wrap: balance; }
       notify('Saque solicitado. O valor cai em até 2 dias úteis.');
     }
 
-    const bar = h('div', { className: 'app-bar' }, h('span', null, h('b', null, 'Protótipo BlogSim'), ' · dados de exemplo, nada é salvo'));
     const toastEl = h('div', { className: 'app-toast', role: 'status', 'aria-live': 'polite', hidden: !toast }, toast ? toast.msg : '');
-    if (screen === 'site') return h('div', { className: 'lp-root' }, bar, h(Landing, { onLogin: openLogin, blogs }), toastEl);
-    if (screen === 'login') return h('div', { className: 'lp-root' }, bar, h(Login, { suggest, onLogin: login, onBack: () => { setScreen('site'); top(); } }), toastEl);
+    if (screen === 'site') return h('div', { className: 'lp-root' }, h(Landing, { onLogin: openLogin, blogs }), toastEl);
+    if (screen === 'login') return h('div', { className: 'lp-root' }, h(Login, { suggest, onLogin: login, onBack: () => { setScreen('site'); top(); } }), toastEl);
 
     const ctx = { go, notify, campaigns, setCampaigns, cart, setCart, balance, blogs };
     const screens = {
@@ -1739,7 +1702,6 @@ h1, h2, h3 { text-wrap: balance; }
     const screenFn = screens[role][page];
 
     return h('div', { className: 'app-root' },
-      bar,
       h('div', { className: 'app-shell' },
         h('header', { className: 'app-mobilebar' },
           Wordmark(),

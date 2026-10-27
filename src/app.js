@@ -686,19 +686,6 @@
       has('popup') ? h('div', { className: 'mp-pop' }, slot('popup')) : null);
   }
 
-  // Leitora ilustrada, usada na tela de login.
-  const Reader = () => h('svg', { className: 'reader', viewBox: '0 0 150 150', 'aria-hidden': true },
-    h('path', { className: 'p-shirt', d: 'M14 150c0-40 22-58 56-58s56 18 56 58z' }),
-    h('rect', { className: 'p-skin', x: 62, y: 76, width: 16, height: 20, rx: 6 }),
-    h('circle', { className: 'p-skin', cx: 70, cy: 56, r: 24 }),
-    h('path', { className: 'p-hair', d: 'M45 58c-3-22 11-34 27-34 17 0 28 11 26 28-7-8-18-12-30-9-10 2-17 8-23 15z' }),
-    h('circle', { className: 'p-hair', cx: 82, cy: 58, r: 2.2 }),
-    h('path', { className: 'p-mouth', d: 'M78 68q4 3 8 0' }),
-    h('g', { className: 'reader-arm' },
-      h('path', { className: 'p-sleeve', d: 'M100 108L128 70' }),
-      h('circle', { className: 'p-skin', cx: 131, cy: 64, r: 9 }),
-      h('path', { className: 'p-finger', d: 'M134 58l7-9' })));
-
   const ILL = {
     visitas: h('svg', { className: 'lp-ill', viewBox: '0 0 72 56', 'aria-hidden': true },
       h('rect', { className: 'ill-page', x: 2, y: 4, width: 60, height: 46, rx: 6 }),
@@ -892,21 +879,15 @@
       const scene = root.querySelector('.lg-scene');
       if (!scene) return;
       from(tl, [scene], { y: 30, opacity: 0, duration: 1, ease: 'expo.out' }, .15);
-      from(tl, root.querySelectorAll('.lg-art p'), { y: 10, opacity: 0, duration: .6 }, '-=.5');
-      // Loop: o espaço é alugado, a leitora toca no anúncio e a venda é contada.
-      const slot = scene.querySelector('.mp-slot'), person = scene.querySelector('.reader'), arm = scene.querySelector('.reader-arm'), chip = scene.querySelector('.lg-result');
+      // Loop: o espaço é alugado, o anúncio recebe um clique e a venda é contada.
+      const slot = scene.querySelector('.mp-slot'), chip = scene.querySelector('.lg-result');
       const FILLED = { backgroundColor: '#f26a1b', borderColor: '#f26a1b', color: '#1d0d03', borderStyle: 'solid' };
       g.timeline({ repeat: -1, repeatDelay: .8, delay: .9 })
-        .set(chip, { opacity: 0 }).set(person, { yPercent: 105 }).set(slot, RENT_FROM)
+        .set(chip, { opacity: 0 }).set(slot, RENT_FROM)
         .to(slot, { ...FILLED, duration: .6, ease: 'power1.inOut' })
-        .to(person, { yPercent: 0, duration: .7, ease: 'power3.out' }, '+=.2')
-        .to(arm, { rotation: -12, x: 6, y: -8, svgOrigin: '100 108', duration: .35, ease: 'power2.out' })
-        .to(slot, { scale: .93, duration: .12, yoyo: true, repeat: 1, ease: 'power1.inOut' })
+        .to(slot, { scale: .93, duration: .12, yoyo: true, repeat: 1, ease: 'power1.inOut' }, '+=.5')
         .fromTo(chip, { y: 12, opacity: 0, scale: .9 }, { y: 0, opacity: 1, scale: 1, duration: .45, ease: 'back.out(2)' }, '-=.05')
-        .to(arm, { rotation: 0, x: 0, y: 0, svgOrigin: '100 108', duration: .4, ease: 'power2.inOut' }, '+=.3')
-        .to(chip, { opacity: 0, y: -8, duration: .4 }, '+=1.2')
-        .to(person, { yPercent: 105, duration: .6, ease: 'power2.in' }, '<');
-    }, []);
+        .to(chip, { opacity: 0, y: -8, duration: .4 }, '+=1.6');    }, []);
     return h('main', { className: 'lg', ref },
       h('div', { className: 'lg-card' },
         h('button', { type: 'button', className: 'lg-back', onClick: onBack }, '← Voltar para o site'),
@@ -918,16 +899,12 @@
           err ? h('p', { className: 'app-error', role: 'alert' }, err) : null,
           h(B.Button, { type: 'submit', className: 'lg-submit' }, 'Entrar')),
         h('div', { className: 'lg-demo' },
-          h('b', null, 'Contas de teste'),
-          h('p', null, 'O cadastro ainda não faz parte do protótipo. Clique numa conta para preencher e depois em Entrar. A senha de todas é demo123.'),
           ACCOUNTS.map(a => h('button', { key: a.email, type: 'button', className: 'lg-acc' + (suggest === a.role ? ' is-suggested' : ''), onClick: () => fill(a) },
             h(B.Badge, { tone: ROLE_TONE[a.role] }, ROLE_LABEL[a.role]), h('span', null, a.email))))),
       h('div', { className: 'lg-art', 'aria-hidden': true },
         h('div', { className: 'lg-scene' },
           h(MiniPage, { blog: 'Treino em Casa', slots: ['lateral'], large: true }),
-          h('div', { className: 'lg-person' }, h(Reader)),
-          h('div', { className: 'lg-result' }, h('span', null, 'Tênis de corrida · Treino em Casa'), h('b', null, '+1 venda'))),
-        h('p', null, 'Entre para ver seus blogs, campanhas e resultados.')));
+          h('div', { className: 'lg-result' }, h('span', null, 'Tênis de corrida · Treino em Casa'), h('b', null, '+1 venda')))));
   }
   // ---------- App ----------
   function App() {
@@ -979,10 +956,9 @@
       notify('Saque solicitado. O valor cai em até 2 dias úteis.');
     }
 
-    const bar = h('div', { className: 'app-bar' }, h('span', null, h('b', null, 'Protótipo BlogSim'), ' · dados de exemplo, nada é salvo'));
     const toastEl = h('div', { className: 'app-toast', role: 'status', 'aria-live': 'polite', hidden: !toast }, toast ? toast.msg : '');
-    if (screen === 'site') return h('div', { className: 'lp-root' }, bar, h(Landing, { onLogin: openLogin, blogs }), toastEl);
-    if (screen === 'login') return h('div', { className: 'lp-root' }, bar, h(Login, { suggest, onLogin: login, onBack: () => { setScreen('site'); top(); } }), toastEl);
+    if (screen === 'site') return h('div', { className: 'lp-root' }, h(Landing, { onLogin: openLogin, blogs }), toastEl);
+    if (screen === 'login') return h('div', { className: 'lp-root' }, h(Login, { suggest, onLogin: login, onBack: () => { setScreen('site'); top(); } }), toastEl);
 
     const ctx = { go, notify, campaigns, setCampaigns, cart, setCart, balance, blogs };
     const screens = {
@@ -1013,7 +989,6 @@
     const screenFn = screens[role][page];
 
     return h('div', { className: 'app-root' },
-      bar,
       h('div', { className: 'app-shell' },
         h('header', { className: 'app-mobilebar' },
           Wordmark(),
