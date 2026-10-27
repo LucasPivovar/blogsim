@@ -6,7 +6,9 @@ Protótipo navegável do BlogSim, um marketplace de anúncios em blogs. Anuncian
 
 ## Como abrir
 
-Abra `index.html` no navegador. Não precisa de servidor nem de instalação; o React vem do cdnjs e as fontes do Google Fonts, então é preciso estar online.
+Abra `index.html` no navegador. Não precisa de servidor nem de instalação; o React e o GSAP (animações) vêm do cdnjs e as fontes do Google Fonts, então é preciso estar online.
+
+As animações usam GSAP com ScrollTrigger e respeitam a opção "reduzir movimento" do sistema: com ela ligada, tudo aparece parado e completo.
 
 ## Contas de teste
 

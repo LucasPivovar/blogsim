@@ -2,6 +2,35 @@
 (function () {
   const { useState, useEffect } = React;
   const B = window.BlogSim, h = React.createElement;
+  if (window.gsap && window.ScrollTrigger) window.gsap.registerPlugin(window.ScrollTrigger);
+
+  // Animações com GSAP. Só rodam sem "reduzir movimento"; sem GSAP, tudo aparece no estado final.
+  function useMotion(ref, fn, deps) {
+    React.useLayoutEffect(() => {
+      const g = window.gsap;
+      if (!g || !ref.current) return;
+      const mm = g.matchMedia();
+      mm.add('(prefers-reduced-motion: no-preference)', () => { fn(g, ref.current); });
+      return () => mm.revert();
+    }, deps);
+  }
+  // Conta o número de um MetricCard até o valor, mexendo só no texto que o React já criou.
+  function countUp(g, el) {
+    const node = el.firstChild;
+    if (!node || node.nodeType !== 3) return;
+    const txt = node.nodeValue, n = parseFloat(txt.replace(/[^\d,-]/g, '').replace(',', '.'));
+    if (isNaN(n) || n === 0) return;
+    const dec = /,\d+/.test(txt) ? txt.split(',').pop().replace(/\D/g, '').length : 0;
+    const fmt = txt.includes('R$') ? v => BRL.format(v)
+      : txt.trim().endsWith('%') ? v => v.toFixed(dec).replace('.', ',') + '%'
+      : v => new Intl.NumberFormat('pt-BR', { minimumFractionDigits: dec, maximumFractionDigits: dec }).format(v);
+    const o = { v: 0 };
+    g.to(o, { v: n, duration: 1.1, ease: 'power2.out', onUpdate: () => { node.nodeValue = fmt(o.v); }, onComplete: () => { node.nodeValue = txt; } });
+  }
+  // Separa um texto em palavras com máscara, para a animação de entrada dos títulos.
+  const Words = text => text.split(' ').map((w, i, all) => [h('span', { key: i, className: 'w' }, h('span', { className: 'wi' }, w)), i < all.length - 1 ? ' ' : null]);
+  const from = (tl, targets, vars, pos) => { const list = [...targets].filter(Boolean); if (list.length) tl.from(list, vars, pos); return tl; };
+  const RENT_FROM = { backgroundColor: 'rgba(255,255,255,0)', borderColor: '#8a90ab', color: '#585e7e', borderStyle: 'dashed' };
 
   const BRL = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
   const NUM = new Intl.NumberFormat('pt-BR');
@@ -281,6 +310,15 @@
     const t = TRACK[obj];
     const ad = { img: adImg, title: adTitle.trim(), text: adText.trim(), cta: CTA[obj] };
     const pvSlot = sel.find(s => s.id === pv) || sel[0];
+    const bodyRef = React.useRef(null), prevStep = React.useRef(step);
+    React.useLayoutEffect(() => {
+      const g = window.gsap, dir = Math.sign(step - prevStep.current);
+      prevStep.current = step;
+      if (!g || !dir || !bodyRef.current || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      const a = g.fromTo(bodyRef.current, { x: 28 * dir, opacity: 0 }, { x: 0, opacity: 1, duration: .45, ease: 'power3.out', clearProps: 'transform,opacity' });
+      const b = g.from(document.querySelectorAll('.app-steps .is-current span'), { scale: .5, duration: .45, ease: 'back.out(3)' });
+      return () => { a.kill(); b.kill(); };
+    }, [step]);
 
     function next() { if (!valid) { setTried(true); return; } setTried(false); setStep(step + 1); }
     function back() { setTried(false); setErr(''); setStep(step - 1); }
@@ -348,7 +386,7 @@
     return h(Page, { title: 'Criar campanha', subtitle: `Passo ${step + 1} de ${STEPS.length} · ${STEPS[step]}`, action: h(B.Button, { variant: 'ghost', onClick: () => go('Campanhas') }, 'Cancelar') },
       h('ol', { className: 'app-steps', 'aria-label': 'Passos' }, STEPS.map((s, i) =>
         h('li', { key: s, className: i < step ? 'is-done' : i === step ? 'is-current' : undefined, 'aria-current': i === step ? 'step' : undefined }, h('span', null, i + 1), s))),
-      h(Card, null, body,
+      h(Card, null, h('div', { className: 'app-step-body', key: step, ref: bodyRef }, body),
         h('div', { className: 'app-wizard-foot' },
           step > 0 ? h(B.Button, { variant: 'secondary', onClick: back }, 'Voltar') : h('span'),
           step < STEPS.length - 1 ? h(B.Button, { onClick: next }, 'Continuar') : h(B.Button, { variant: 'accent', onClick: publish }, `Pagar ${money(total)} e publicar`))));
@@ -670,7 +708,97 @@
   };
 
 
+  // Entrada de cada tela dos painéis: cabeçalho, blocos em cascata, números contando, barras crescendo.
+  function Reveal({ children }) {
+    const ref = React.useRef(null);
+    useMotion(ref, (g, root) => {
+      const q = s => root.querySelectorAll(s);
+      const tl = g.timeline({ defaults: { ease: 'power3.out', duration: .55 } });
+      from(tl, q('.app-head h1, .app-head p, .app-head-actions'), { y: 14, opacity: 0, stagger: .05 });
+      from(tl, [...root.children].filter(c => !c.classList.contains('app-head')), { y: 18, opacity: 0, stagger: .07 }, '-=.35');
+      from(tl, q('.bs-metric'), { y: 12, opacity: 0, stagger: .06 }, '<');
+      from(tl, q('.app-chart .bar'), { scaleY: 0, transformOrigin: '50% 100%', stagger: .025, duration: .5, ease: 'power2.out' }, '-=.3');
+      from(tl, q('.bs-table tbody tr'), { x: -10, opacity: 0, stagger: .035, duration: .4 }, '-=.45');
+      from(tl, q('.bs-slot, .app-review-row, .app-steps li'), { y: 10, opacity: 0, stagger: .04, duration: .45 }, '-=.45');
+      q('.bs-metric-value').forEach(el => countUp(g, el));
+    }, []);
+    return h('div', { ref, className: 'app-content' }, children);
+  }
+
+  function useLandingMotion(ref) {
+    useMotion(ref, (g, root) => {
+      const q = s => [...root.querySelectorAll(s)];
+      const ST = window.ScrollTrigger;
+      const hero = g.timeline({ defaults: { ease: 'power4.out' } });
+      from(hero, q('.lp-hero h1 .wi'), { yPercent: 112, duration: 1, stagger: .045 });
+      from(hero, q('.lp-hero .lp-slotword'), { backgroundColor: 'rgba(255,234,220,0)', borderColor: 'rgba(242,106,27,0)', duration: .7, ease: 'power2.out' }, '-=.45');
+      from(hero, q('.lp-hero-text > p, .lp-hero-text > .app-actions, .lp-proof'), { y: 18, opacity: 0, duration: .8, stagger: .08 }, '-=.65');
+      from(hero, q('.lp-hero .hd'), { x: 56, opacity: 0, rotate: 1.5, duration: 1.3, ease: 'expo.out' }, .25);
+      if (!ST) return;
+
+      ST.create({ trigger: document.documentElement, start: 'top+=8 top', end: 'bottom top', toggleClass: { targets: q('.lp-nav'), className: 'is-scrolled' } });
+      g.to(q('.lp-hero .hd'), { yPercent: -6, ease: 'none', scrollTrigger: { trigger: q('.lp-hero')[0], start: 'top top', end: 'bottom top', scrub: .6 } });
+
+      q('.lp-section h2, .lp-band h2, .lp-close h2').forEach(el => g.from(el.querySelectorAll('.wi'), { yPercent: 112, duration: .9, stagger: .035, ease: 'power4.out', scrollTrigger: { trigger: el, start: 'top 86%' } }));
+      q('.lp-sub, .lp-blogger p, .lp-close p').forEach(el => g.from(el, { y: 16, opacity: 0, duration: .8, ease: 'power3.out', scrollTrigger: { trigger: el, start: 'top 88%' } }));
+
+      q('.lp-measure').forEach((m, i) => {
+        const t = g.timeline({ delay: i * .12, defaults: { ease: 'power3.out' }, scrollTrigger: { trigger: m, start: 'top 84%' } });
+        from(t, [m.querySelector('.lp-rule')], { scaleX: 0, transformOrigin: '0 50%', duration: .8, ease: 'power2.inOut' });
+        from(t, [m.querySelector('.lp-ill')], { opacity: 0, duration: .3 }, '-=.35');
+        if (m.classList.contains('lp-m-visitas')) from(t, [m.querySelector('.ill-brand')], { x: -18, y: -14, opacity: 0, duration: .7, ease: 'back.out(2)' }, '-=.05');
+        if (m.classList.contains('lp-m-conversas')) {
+          from(t, [m.querySelector('.ill-teal-soft')], { scale: 0, transformOrigin: '0% 100%', duration: .5, ease: 'back.out(2)' }, '-=.05');
+          from(t, [m.querySelector('.ill-teal')], { scale: 0, transformOrigin: '100% 100%', duration: .5, ease: 'back.out(2)' }, '-=.2');
+          from(t, m.querySelectorAll('.ill-on'), { y: 3, opacity: 0, stagger: .08, duration: .3 }, '-=.1');
+        }
+        if (m.classList.contains('lp-m-vendas')) {
+          const check = m.querySelector('.ill-check');
+          g.set(check, { strokeDasharray: 20 });
+          from(t, [m.querySelector('.ill-page')], { y: -14, opacity: 0, duration: .6 }, '-=.05');
+          from(t, [m.querySelector('circle.ill-accent')], { scale: 0, transformOrigin: '50% 50%', duration: .5, ease: 'back.out(2.5)' });
+          from(t, [check], { strokeDashoffset: 20, duration: .35, ease: 'power1.out' });
+        }
+        from(t, [m.querySelector('b'), m.querySelector('p'), m.querySelector('.lp-eg')], { y: 12, opacity: 0, stagger: .06, duration: .6 }, '-=.45');
+      });
+
+      const big = q('.mp.is-large')[0];
+      if (big) {
+        const t = g.timeline({ scrollTrigger: { trigger: big, start: 'top 78%' } });
+        from(t, [big], { y: 30, opacity: 0, duration: .9, ease: 'expo.out' });
+        from(t, big.querySelectorAll('.mp-post > i, .mp-side > i'), { scaleX: 0, transformOrigin: '0 50%', stagger: .05, duration: .5, ease: 'power2.out' }, '-=.55');
+        from(t, big.querySelectorAll('.mp-slot'), { ...RENT_FROM, stagger: .35, duration: .5, ease: 'power1.inOut' }, '-=.2');
+        from(t, big.querySelectorAll('.mp-slot em'), { y: 8, opacity: 0, stagger: .35, duration: .4, ease: 'back.out(2)' }, '<.25');
+      }
+      q('.lp-checks').forEach(list => g.from(list.children, { x: -12, opacity: 0, stagger: .08, duration: .5, ease: 'power3.out', scrollTrigger: { trigger: list, start: 'top 88%' } }));
+
+      const cards = q('.lp-blog');
+      if (cards.length) {
+        g.set(cards, { y: 28, opacity: 0 });
+        ST.batch(cards, {
+          start: 'top 90%',
+          onEnter: els => {
+            g.to(els, { y: 0, opacity: 1, stagger: .08, duration: .8, ease: 'power3.out', overwrite: true });
+            g.from(els.map(e => e.querySelector('.mp-slot')).filter(Boolean), { ...RENT_FROM, stagger: .08, delay: .35, duration: .5 });
+          }
+        });
+      }
+
+      const close = q('.lp-close')[0];
+      if (close) {
+        const t = g.timeline({ scrollTrigger: { trigger: close, start: 'top 82%' } });
+        from(t, [close], { scale: .94, opacity: 0, duration: .9, ease: 'expo.out' });
+        from(t, [close], { backgroundColor: 'rgba(255,234,220,0)', duration: .6 }, '-=.45');
+        from(t, [close.querySelector('.lp-close-tag')], { y: 10, opacity: 0, duration: .5 }, '-=.45');
+        from(t, close.querySelectorAll('.app-actions > *'), { y: 12, opacity: 0, stagger: .08, duration: .5 }, '-=.2');
+      }
+      if (document.fonts) document.fonts.ready.then(() => ST.refresh());
+    }, []);
+  }
+
   function Landing({ onLogin, blogs }) {
+    const ref = React.useRef(null);
+    useLandingMotion(ref);
     const active = blogs.filter(b => b.status === 'ativo');
     const partners = active.map(b => {
       const own = SLOTS.filter(s => s.blogId === b.id);
@@ -685,7 +813,7 @@
       ['conversas', 'Conversas no WhatsApp', 'O link redirecionador abre o seu WhatsApp e registra a conversa antes.', '204 conversas'],
       ['vendas', 'Vendas', 'O pixel na página de confirmação registra cada compra que começou num blog.', '86 vendas']
     ];
-    return h(React.Fragment, null,
+    return h('div', { ref, className: 'lp-page' },
       h('header', { className: 'lp-nav' }, h('div', { className: 'lp-wrap lp-nav-in' },
         Wordmark(),
         h('nav', { className: 'lp-links', 'aria-label': 'Seções' },
@@ -696,19 +824,19 @@
       h('main', null,
         h('section', { className: 'lp-hero lp-wrap' },
           h('div', { className: 'lp-hero-text' },
-            h('h1', null, 'Seu anúncio ', h('span', { className: 'lp-slotword' }, 'no meio do post'), ' que o seu cliente está lendo.'),
+            h('h1', null, Words('Seu anúncio'), ' ', h('span', { className: 'lp-slotword' }, Words('no meio do post')), ' ', Words('que o seu cliente está lendo.')),
             h('p', null, 'O BlogSim junta blogs de vários nichos num lugar só. Você escolhe o blog e o espaço, paga por semana e vê quantas visitas, conversas e vendas cada anúncio trouxe.'),
             ctas,
             h('span', { className: 'lp-proof' }, `${active.length} blogs parceiros · ${readers} leitores por mês`)),
           h(HeroDemo)),
         h('section', { id: 'como-funciona', className: 'lp-section lp-wrap' },
-          h('h2', null, 'Você escolhe o que conta como resultado.'),
+          h('h2', null, Words('Você escolhe o que conta como resultado.')),
           h('div', { className: 'lp-measures' }, measures.map(([k, title, text, eg]) => h('div', { key: k, className: 'lp-measure lp-m-' + k },
-            ILL[k], h('b', null, title), h('p', null, text), h('span', { className: 'lp-eg' }, 'Exemplo: ' + eg))))),
+            h('div', { className: 'lp-rule' }), ILL[k], h('b', null, title), h('p', null, text), h('span', { className: 'lp-eg' }, 'Exemplo: ' + eg))))),
 
         h('section', { id: 'para-blogs', className: 'lp-band' }, h('div', { className: 'lp-wrap lp-blogger' },
           h('div', null,
-            h('h2', null, 'Tem um blog? Alugue os espaços dele.'),
+            h('h2', null, Words('Tem um blog? Alugue os espaços dele.')),
             h('p', null, 'Você marca onde os anúncios podem aparecer e quanto custa cada espaço por semana. O BlogSim traz os anunciantes e repassa o valor, já descontada a comissão.'),
             h('ul', { className: 'lp-checks' }, ['Instale um script no blog uma vez.', 'Pause um espaço quando quiser.', 'Peça o saque pelo painel.'].map(x => h('li', { key: x }, x))),
             h(B.Button, { variant: 'secondary', onClick: () => onLogin('blogueiro') }, 'Cadastrar meu blog')),
@@ -716,7 +844,7 @@
             h(MiniPage, { blog: 'Viagem com Criança', large: true, slots: ['banner', 'lateral', 'inline'], tags: { banner: 'R$ 350/semana', lateral: 'R$ 280/semana', inline: 'R$ 160/semana' } })))),
 
         h('section', { id: 'blogs-parceiros', className: 'lp-section lp-wrap' },
-          h('h2', null, 'Blogs parceiros'),
+          h('h2', null, Words('Blogs parceiros')),
           h('p', { className: 'lp-sub' }, 'Onde dá para anunciar hoje. Preço do espaço mais barato de cada blog.'),
           h('div', { className: 'lp-blogs' }, partners.map(b => h('div', { key: b.id, className: 'lp-blog' },
             h('div', { 'aria-hidden': true }, h(MiniPage, { blog: b.name, slots: [b.place] })),
@@ -726,7 +854,7 @@
 
         h('section', { className: 'lp-wrap lp-close-wrap' }, h('div', { className: 'lp-close' },
           h('span', { className: 'lp-close-tag' }, 'Espaço disponível'),
-          h('h2', null, 'Este espaço pode ser do seu anúncio.'),
+          h('h2', null, Words('Este espaço pode ser do seu anúncio.')),
           h('p', null, 'Ou, se você tem um blog, do anúncio de alguém que quer falar com os seus leitores.'),
           ctas))),
       h('footer', { className: 'lp-foot lp-wrap' }, 'BlogSim · protótipo para validação · outubro de 2026'));
@@ -743,7 +871,16 @@
       onLogin(acc.role);
     }
     function fill(a) { setEmail(a.email); setPw(a.password); setErr(''); }
-    return h('main', { className: 'lg' },
+    const ref = React.useRef(null);
+    useMotion(ref, (g, root) => {
+      const tl = g.timeline({ defaults: { ease: 'power3.out' } });
+      from(tl, root.querySelectorAll('.lg-card'), { y: 24, opacity: 0, duration: .7 });
+      from(tl, root.querySelectorAll('.lg-acc'), { y: 8, opacity: 0, stagger: .06, duration: .4 }, '-=.3');
+      from(tl, root.querySelectorAll('.lg-art .mp'), { y: 40, opacity: 0, rotate: i => (i ? 2.5 : -2.5), stagger: .15, duration: 1, ease: 'expo.out' }, .15);
+      from(tl, root.querySelectorAll('.lg-art .mp-slot'), { ...RENT_FROM, stagger: .25, duration: .5 }, '-=.4');
+      from(tl, root.querySelectorAll('.lg-art p'), { y: 10, opacity: 0, duration: .6 }, '-=.3');
+    }, []);
+    return h('main', { className: 'lg', ref },
       h('div', { className: 'lg-card' },
         h('button', { type: 'button', className: 'lg-back', onClick: onBack }, '← Voltar para o site'),
         Wordmark(),
@@ -780,6 +917,10 @@
     const [bloggerBalance, setBloggerBalance] = useState(1640);
     const [toast, setToast] = useState(null);
     const [menuOpen, setMenuOpen] = useState(false);
+    const sideRef = React.useRef(null);
+    useMotion(sideRef, (g, root) => {
+      g.from(root.querySelectorAll('.bs-wordmark, .bs-nav > .bs-badge, .bs-nav-item, .bs-nav-user'), { x: -12, opacity: 0, stagger: .035, duration: .45, ease: 'power3.out' });
+    }, [screen, role]);
 
     const notify = msg => setToast({ msg, k: Date.now() });
     useEffect(() => { if (!toast) return; const t = setTimeout(() => setToast(null), 3200); return () => clearTimeout(t); }, [toast]);
@@ -849,10 +990,10 @@
           Wordmark(),
           h('button', { type: 'button', className: 'app-burger', 'aria-expanded': menuOpen, 'aria-controls': 'app-nav', 'aria-label': 'Abrir menu', onClick: () => setMenuOpen(true) }, ICON('M4 6h16M4 12h16M4 18h16'))),
         menuOpen ? h('div', { className: 'app-backdrop', onClick: () => setMenuOpen(false) }) : null,
-        h('aside', { id: 'app-nav', className: 'app-side' + (menuOpen ? ' is-open' : '') },
+        h('aside', { id: 'app-nav', ref: sideRef, className: 'app-side' + (menuOpen ? ' is-open' : '') },
           h('button', { type: 'button', className: 'app-drawer-close', 'aria-label': 'Fechar menu', onClick: () => setMenuOpen(false) }, ICON('M6 6l12 12M18 6L6 18')),
           h(B.SideNav, { key: role, role, active: page === 'Criar campanha' ? 'Campanhas' : page, onNavigate: go, onLogout: logout, user: USER[role] })),
-        h('main', { className: 'app-main', key: role + page }, h('div', { className: 'app-content' }, screenFn ? screenFn() : null))),
+        h('main', { className: 'app-main', key: role + page }, h(Reveal, null, screenFn ? screenFn() : null))),
       toastEl);
   }
 

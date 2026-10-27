@@ -8,6 +8,8 @@ DS = ROOT / "design-system"
 FONTS = "https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400&display=swap"
 REACT = "https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"
 REACT_DOM = "https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"
+GSAP = "https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"
+SCROLL_TRIGGER = "https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"
 
 
 def tokens_css(tokens):
@@ -57,6 +59,8 @@ def main():
 <div id="app"></div>
 <script src="{REACT}"></script>
 <script src="{REACT_DOM}"></script>
+<script src="{GSAP}"></script>
+<script src="{SCROLL_TRIGGER}"></script>
 <script>
 {scripts["bundle.js"]}
 </script>
