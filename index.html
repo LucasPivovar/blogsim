@@ -1,0 +1,1569 @@
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BlogSim</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400&display=swap">
+<style>
+:root {
+  --surface-0: #f5f6fa;
+  --surface-100: #ffffff;
+  --surface-200: #eceef5;
+  --line: #d8dce9;
+  --line-strong: #8a90ab;
+  --ink: #121633;
+  --ink-muted: #585e7e;
+  --brand: #2a49de;
+  --brand-hover: #2039b8;
+  --on-brand: #ffffff;
+  --brand-soft: #e5eaff;
+  --accent: #f26a1b;
+  --on-accent: #1d0d03;
+  --accent-ink: #b4460a;
+  --accent-soft: #ffeadc;
+  --teal: #087357;
+  --on-teal: #ffffff;
+  --teal-soft: #dcf5ec;
+  --success: #1d7f52;
+  --success-soft: #def3e7;
+  --warning: #8f5a00;
+  --warning-soft: #fdf0d6;
+  --danger: #b52f26;
+  --danger-soft: #fde4e1;
+  --focus-ring: #2a49de;
+  --shadow-card: 0 1px 2px rgba(18,22,51,0.06), 0 2px 8px rgba(18,22,51,0.05);
+  --shadow-pop: 0 12px 32px rgba(18,22,51,0.18);
+  --font-display: Figtree, "Segoe UI", system-ui, sans-serif;
+  --font-sans: Figtree, "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-pill: 999px;
+}
+
+body { margin: 0; background: var(--surface-0); color: var(--ink); font-family: var(--font-sans); font-size: 15px; line-height: 22px; }
+.bs-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; padding: var(--space-4); }
+.bs-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--space-4); padding: var(--space-4); }
+.bs-stack { display: grid; gap: var(--space-3); padding: var(--space-4); }
+.bs-btn:focus-visible, .bs-obj:focus-visible, .bs-nav-item:focus-visible, .bs-input-wrap:focus-within { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+
+/* Button */
+.bs-btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); height: 40px; padding: 0 var(--space-4); border-radius: var(--radius-md); border: 1px solid transparent; font: 600 14px/1 var(--font-sans); cursor: pointer; white-space: nowrap; transition: background-color .15s, border-color .15s; }
+.bs-btn-sm { height: 32px; padding: 0 var(--space-3); font-size: 13px; }
+.bs-btn-primary { background: var(--brand); color: var(--on-brand); }
+.bs-btn-primary:hover { background: var(--brand-hover); }
+.bs-btn-accent { background: var(--accent); color: var(--on-accent); }
+.bs-btn-accent:hover { filter: brightness(1.06); }
+.bs-btn-secondary { background: var(--surface-100); color: var(--ink); border-color: var(--line-strong); }
+.bs-btn-secondary:hover { background: var(--surface-200); }
+.bs-btn-ghost { background: transparent; color: var(--brand); }
+.bs-btn-ghost:hover { background: var(--brand-soft); }
+.bs-btn:disabled { background: var(--surface-200); color: var(--ink-muted); border-color: transparent; cursor: not-allowed; filter: none; }
+.bs-btn[aria-busy="true"] { cursor: progress; }
+.bs-spin { width: 14px; height: 14px; border-radius: 50%; border: 2px solid currentColor; border-right-color: transparent; animation: bs-spin .7s linear infinite; }
+@keyframes bs-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .bs-spin { animation-duration: 2.4s; } .bs-btn { transition: none; } }
+
+/* Badge */
+.bs-badge { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 10px; border-radius: var(--radius-pill); font: 600 12px/1 var(--font-sans); white-space: nowrap; }
+.bs-badge-dot::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.bs-badge-neutral { background: var(--surface-200); color: var(--ink); }
+.bs-badge-brand { background: var(--brand-soft); color: var(--brand); }
+.bs-badge-accent { background: var(--accent-soft); color: var(--accent-ink); }
+.bs-badge-teal { background: var(--teal-soft); color: var(--teal); }
+.bs-badge-success { background: var(--success-soft); color: var(--success); }
+.bs-badge-warning { background: var(--warning-soft); color: var(--warning); }
+.bs-badge-danger { background: var(--danger-soft); color: var(--danger); }
+
+/* TextField */
+.bs-field { display: grid; gap: 6px; min-width: 0; }
+.bs-field-label { font: 600 13px/18px var(--font-sans); letter-spacing: .01em; color: var(--ink); }
+.bs-input-wrap { display: flex; align-items: center; gap: var(--space-2); height: 40px; padding: 0 var(--space-3); border: 1px solid var(--line-strong); border-radius: var(--radius-md); background: var(--surface-100); }
+.bs-input { flex: 1; min-width: 0; height: 100%; border: 0; padding: 0; background: transparent; color: var(--ink); font: 400 15px/22px var(--font-sans); outline: none; }
+.bs-input::placeholder { color: var(--ink-muted); }
+.bs-input-affix { color: var(--ink-muted); font: 500 14px/1 var(--font-sans); }
+.bs-field-hint { font: 400 12px/16px var(--font-sans); color: var(--ink-muted); }
+.bs-field-error .bs-input-wrap { border-color: var(--danger); }
+.bs-field-error .bs-field-hint { color: var(--danger); font-weight: 500; }
+
+/* MetricCard */
+.bs-metric { display: grid; gap: var(--space-2); min-width: 0; padding: var(--space-4); background: var(--surface-100); border: 1px solid var(--line); border-radius: var(--radius-lg); }
+.bs-metric-label { font: 600 13px/18px var(--font-sans); color: var(--ink-muted); }
+.bs-metric-value { font: 600 30px/34px var(--font-sans); letter-spacing: -.02em; font-variant-numeric: tabular-nums; color: var(--ink); }
+.bs-metric-foot { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; font: 400 12px/16px var(--font-sans); color: var(--ink-muted); }
+.bs-metric-delta { font-weight: 600; font-variant-numeric: tabular-nums; }
+.bs-metric-delta.is-good { color: var(--success); }
+.bs-metric-delta.is-bad { color: var(--danger); }
+.bs-spark { display: block; width: 100%; height: 40px; }
+.bs-spark-area { fill: var(--brand-soft); }
+.bs-spark-line { fill: none; stroke: var(--brand); stroke-width: 2; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
+
+/* ObjectivePicker */
+.bs-obj-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-3); }
+.bs-obj { display: grid; gap: var(--space-2); justify-items: start; text-align: left; padding: var(--space-4); border: 1px solid var(--line-strong); border-radius: var(--radius-lg); background: var(--surface-100); color: var(--ink); font: inherit; cursor: pointer; }
+.bs-obj-visitas { --obj: var(--brand); --obj-on: var(--on-brand); --obj-soft: var(--brand-soft); --obj-ink: var(--brand); }
+.bs-obj-conversas { --obj: var(--teal); --obj-on: var(--on-teal); --obj-soft: var(--teal-soft); --obj-ink: var(--teal); }
+.bs-obj-vendas { --obj: var(--accent); --obj-on: var(--on-accent); --obj-soft: var(--accent-soft); --obj-ink: var(--accent-ink); }
+.bs-obj:hover { border-color: var(--obj-ink); }
+.bs-obj[aria-checked="true"] { border-color: var(--obj-ink); box-shadow: inset 0 0 0 1px var(--obj-ink); background: var(--obj-soft); }
+.bs-obj-icon { display: grid; place-items: center; width: 36px; height: 36px; border-radius: var(--radius-md); background: var(--obj); color: var(--obj-on); }
+.bs-obj-title { font: 600 15px/22px var(--font-sans); }
+.bs-obj-desc { font: 400 13px/18px var(--font-sans); color: var(--ink-muted); }
+.bs-obj-track { font: 500 12px/16px var(--font-sans); color: var(--obj-ink); }
+
+/* SlotCard */
+.bs-slot { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); padding: var(--space-3); background: var(--surface-100); border: 1px solid var(--line); border-radius: var(--radius-lg); }
+.bs-slot.is-selected { background: var(--brand-soft); border-color: var(--brand); box-shadow: inset 0 0 0 1px var(--brand); }
+.bs-wf { flex: none; width: 66px; height: 52px; }
+.bs-wf-page { fill: var(--surface-0); stroke: var(--line-strong); }
+.bs-wf-text { fill: var(--line); }
+.bs-wf-slot { fill: var(--accent); }
+.bs-slot-body { flex: 1 1 180px; min-width: 0; display: grid; gap: 2px; }
+.bs-slot-head { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+.bs-slot-blog { margin: 0; font: 600 15px/22px var(--font-sans); color: var(--ink); }
+.bs-slot-meta, .bs-slot-price { font: 400 13px/18px var(--font-sans); color: var(--ink-muted); }
+.bs-slot-price strong { font: 700 15px/22px var(--font-sans); font-variant-numeric: tabular-nums; color: var(--accent-ink); }
+
+/* CampaignTable */
+.bs-table-wrap { overflow-x: auto; background: var(--surface-100); border: 1px solid var(--line); border-radius: var(--radius-lg); }
+.bs-table { width: 100%; border-collapse: collapse; font: 400 14px/20px var(--font-sans); color: var(--ink); }
+.bs-table th { text-align: left; padding: 10px 16px; font: 600 12px/16px var(--font-sans); letter-spacing: .01em; color: var(--ink-muted); border-bottom: 1px solid var(--line); white-space: nowrap; }
+.bs-table td { padding: 12px 16px; border-bottom: 1px solid var(--line); vertical-align: middle; white-space: nowrap; }
+.bs-table tbody tr:last-child td { border-bottom: 0; }
+.bs-table .num { text-align: right; font-family: var(--font-sans); font-size: 13px; font-variant-numeric: tabular-nums; }
+.bs-table th.num { font-family: var(--font-sans); font-size: 12px; }
+.bs-table-name { font-weight: 600; }
+.bs-table-sub { font-size: 12px; line-height: 16px; color: var(--ink-muted); }
+.bs-table-empty { text-align: center; color: var(--ink-muted); padding: var(--space-8) var(--space-4); white-space: normal; }
+
+/* SideNav */
+.bs-nav { box-sizing: border-box; display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-4); width: 240px; min-height: 100%; padding: var(--space-6) var(--space-4); background: var(--surface-100); border-right: 1px solid var(--line); }
+.bs-wordmark { font: 800 22px/1 var(--font-display); letter-spacing: -.03em; color: var(--ink); }
+.bs-wordmark b { font-weight: 700; color: var(--brand); }
+.bs-nav-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; width: 100%; }
+.bs-nav-item { width: 100%; text-align: left; padding: 8px 12px; border: 0; border-radius: var(--radius-md); background: transparent; color: var(--ink-muted); font: 500 14px/20px var(--font-sans); cursor: pointer; }
+.bs-nav-item:hover { background: var(--surface-200); color: var(--ink); }
+.bs-nav-item[aria-current="page"] { background: var(--brand-soft); color: var(--brand); font-weight: 600; }
+.bs-nav-user { margin-top: auto; display: flex; align-items: center; gap: var(--space-2); font: 500 13px/18px var(--font-sans); color: var(--ink); }
+.bs-nav-avatar { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--surface-200); font-size: 12px; font-weight: 700; }
+.bs-nav-role { position: relative; width: 100%; }
+.bs-nav-role-btn { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); width: 100%; padding: 8px 10px 8px 8px; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface-0); color: var(--ink-muted); font: inherit; cursor: pointer; }
+.bs-nav-role-btn:hover { border-color: var(--line-strong); color: var(--ink); }
+.bs-nav-role-chev { flex: none; transition: transform .15s; }
+.bs-nav-role-btn[aria-expanded="true"] .bs-nav-role-chev { transform: rotate(180deg); }
+.bs-nav-role-menu { position: absolute; z-index: 20; top: calc(100% + 4px); left: 0; right: 0; min-width: 200px; display: grid; gap: 2px; margin: 0; padding: 4px; list-style: none; background: var(--surface-100); border: 1px solid var(--line); border-radius: var(--radius-md); box-shadow: var(--shadow-pop); }
+.bs-nav-role-opt { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); width: 100%; padding: 6px 8px; border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--ink-muted); font: 500 12px/16px var(--font-sans); cursor: pointer; }
+.bs-nav-role-opt:hover, .bs-nav-role-opt[aria-current="true"] { background: var(--surface-200); }
+.bs-nav-role-btn:focus-visible, .bs-nav-role-opt:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.bs-nav-user { width: 100%; min-width: 0; }
+.bs-nav-user span:last-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bs-nav-avatar { flex: none; }
+@media (prefers-reduced-motion: reduce) { .bs-nav-role-chev { transition: none; } }
+.bs-table-blogs { max-width: 300px; white-space: normal; }
+
+.bs-nav-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bs-nav-logout { flex: none; margin-left: auto; padding: 4px 8px; border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--brand); font: 600 13px/18px var(--font-sans); cursor: pointer; }
+.bs-nav-logout:hover { background: var(--brand-soft); }
+.bs-nav-logout:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+/* Layout do protótipo BlogSim. Cores, tipos e componentes vêm do design system (design-system/). */
+/* Visual claro e branco: fundo da página igual ao dos cards, separação só por bordas. */
+:root { --surface-0: #ffffff; }
+html, body { min-height: 100%; }
+body { background: var(--surface-0); }
+h1, h2, h3 { text-wrap: balance; }
+
+/* Faixa do protótipo */
+.app-bar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-4); padding-block: 8px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); background: var(--surface-200); color: var(--ink-muted); font: 400 12px/16px var(--font-sans); }
+.app-bar b { font-weight: 700; color: var(--ink); }
+
+/* Casca */
+.app-root { display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
+.app-bar { flex: none; }
+.app-shell { flex: 1; min-height: 0; display: flex; align-items: stretch; }
+.app-side { position: relative; flex: none; display: flex; overflow-y: auto; }
+.app-mobilebar, .app-backdrop, .app-drawer-close { display: none; }
+.app-burger, .app-drawer-close { place-items: center; width: 40px; height: 40px; border: 0; border-radius: var(--radius-md); background: transparent; color: var(--ink); cursor: pointer; }
+.app-burger { display: grid; }
+.app-burger:hover, .app-drawer-close:hover { background: var(--surface-200); }
+.app-burger:focus-visible, .app-drawer-close:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.app-drawer-close { position: absolute; top: max(16px, env(safe-area-inset-top, 0px)); right: 12px; z-index: 1; }
+.app-side .bs-nav { padding-left: max(16px, env(safe-area-inset-left, 0px)); }
+.app-main { flex: 1; min-width: 0; overflow-y: auto; }
+.app-content { max-width: 1200px; display: grid; align-content: start; gap: var(--space-6); padding-block: var(--space-8) 96px; padding-left: max(24px, env(safe-area-inset-left, 0px)); padding-right: max(24px, env(safe-area-inset-right, 0px)); }
+
+.app-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: var(--space-4); }
+.app-head h1 { margin: 0; font: 800 28px/34px var(--font-display); letter-spacing: -.02em; color: var(--ink); }
+.app-head p { margin: 4px 0 0; color: var(--ink-muted); }
+.app-head-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+
+.app-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-4); }
+.app-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: var(--space-4); align-items: start; }
+
+.app-card { display: grid; gap: var(--space-3); min-width: 0; padding: var(--space-4); background: var(--surface-100); border: 1px solid var(--line); border-radius: var(--radius-lg); }
+.app-card-head, .app-section-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2); }
+.app-card h2, .app-section h2 { margin: 0; font: 600 16px/22px var(--font-sans); color: var(--ink); }
+.app-card p { margin: 0; color: var(--ink-muted); font-size: 14px; line-height: 20px; max-width: 65ch; }
+.app-section { display: grid; gap: var(--space-3); min-width: 0; }
+
+.app-filters { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--space-4); }
+.app-filters .bs-field { flex: 0 1 280px; }
+.app-chips { display: grid; gap: 6px; min-width: 0; }
+.app-chips-label { font: 600 13px/18px var(--font-sans); color: var(--ink); }
+.app-chips-row { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.app-chip { height: 32px; padding: 0 12px; border: 1px solid var(--line-strong); border-radius: var(--radius-pill); background: var(--surface-100); color: var(--ink); font: 500 13px/1 var(--font-sans); cursor: pointer; }
+.app-chip:hover { background: var(--surface-200); }
+.app-chip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--surface-0); }
+.app-chip:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+
+.app-slots { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr)); gap: var(--space-3); }
+.app-empty { margin: 0; padding: var(--space-8) var(--space-4); text-align: center; color: var(--ink-muted); background: var(--surface-100); border: 1px dashed var(--line-strong); border-radius: var(--radius-lg); }
+
+.app-cartbar { position: sticky; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); z-index: 5; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-3) var(--space-4); background: var(--surface-100); border: 1px solid var(--line-strong); border-radius: var(--radius-lg); box-shadow: var(--shadow-pop); }
+
+/* Assistente de campanha */
+.app-steps { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4); margin: 0; padding: 0; list-style: none; }
+.app-steps li { display: flex; align-items: center; gap: var(--space-2); font: 500 13px/18px var(--font-sans); color: var(--ink-muted); }
+.app-steps li span { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--line-strong); font: 600 12px/1 var(--font-sans); }
+.app-steps li.is-done span { background: var(--brand-soft); border-color: var(--brand-soft); color: var(--brand); }
+.app-steps li.is-current { color: var(--ink); font-weight: 600; }
+.app-steps li.is-current span { background: var(--brand); border-color: var(--brand); color: var(--on-brand); }
+.app-wizard-foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--space-2); padding-top: var(--space-3); border-top: 1px solid var(--line); }
+.app-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: var(--space-4); }
+.app-error { margin: 0; color: var(--danger); font: 500 13px/18px var(--font-sans); }
+
+.app-dl { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: var(--space-2) var(--space-6); margin: 0; font-size: 14px; }
+.app-dl dt { color: var(--ink-muted); }
+.app-dl dd { margin: 0; color: var(--ink); font-weight: 600; overflow-wrap: anywhere; }
+.app-dl .money { color: var(--accent-ink); font-family: var(--font-sans); font-variant-numeric: tabular-nums; }
+
+.app-code { display: flex; align-items: flex-start; gap: var(--space-2); min-width: 0; padding: var(--space-3); background: var(--surface-200); border-radius: var(--radius-md); }
+.app-code pre { flex: 1; min-width: 0; margin: 0; overflow-x: auto; font: 400 13px/20px var(--font-mono); color: var(--ink); white-space: pre; }
+.app-code-label { font: 600 13px/18px var(--font-sans); color: var(--ink); }
+
+.app-ol { margin: 0; padding-left: 20px; display: grid; gap: 4px; color: var(--ink); font-size: 14px; }
+.app-note { margin: 0; color: var(--ink-muted); font: 400 12px/16px var(--font-sans); }
+.app-money { color: var(--accent-ink); font-family: var(--font-sans); font-variant-numeric: tabular-nums; }
+.app-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; }
+
+.app-review { display: grid; gap: 0; background: var(--surface-100); border: 1px solid var(--line); border-radius: var(--radius-lg); }
+.app-review-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-top: 1px solid var(--line); }
+.app-review-row:first-child { border-top: 0; }
+.app-review-main { display: grid; gap: 2px; min-width: 0; }
+.app-review-main b { font-weight: 600; }
+.app-review-main span { color: var(--ink-muted); font-size: 13px; }
+
+/* Gráfico */
+.app-chart { display: block; width: 100%; height: auto; }
+.app-chart text { fill: var(--ink-muted); font: 400 11px var(--font-sans); font-variant-numeric: tabular-nums; }
+.app-chart text.val { fill: var(--ink); font-weight: 600; }
+.app-chart .grid { stroke: var(--line); stroke-width: 1; }
+.app-chart .bar { fill: var(--brand); }
+.app-chart .bar.last { fill: var(--accent); }
+
+.app-toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); z-index: 30; transform: translateX(-50%); max-width: calc(100% - 32px); padding: 10px 16px; background: var(--ink); color: var(--surface-0); border-radius: var(--radius-md); box-shadow: var(--shadow-pop); font: 500 14px/20px var(--font-sans); }
+
+/* Passo Anúncio */
+.app-adstep { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: var(--space-6); align-items: start; }
+.app-adform { display: grid; gap: var(--space-4); min-width: 0; }
+.app-adpreview { display: grid; gap: var(--space-3); min-width: 0; }
+.app-file { max-width: 100%; font: 400 13px/18px var(--font-sans); color: var(--ink-muted); }
+.app-file::file-selector-button { margin-right: var(--space-3); padding: 8px 12px; border: 1px solid var(--line-strong); border-radius: var(--radius-md); background: var(--surface-100); color: var(--ink); font: 600 13px/1 var(--font-sans); cursor: pointer; }
+.app-file:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; border-radius: var(--radius-md); }
+@media (max-width: 1000px) { .app-adstep { grid-template-columns: 1fr; } }
+
+/* Prévia da página do blog */
+.pv { margin: 0; min-width: 0; }
+.pv-chrome { padding: 8px 12px; border: 1px solid var(--line); border-radius: var(--radius-lg) var(--radius-lg) 0 0; background: var(--surface-200); color: var(--ink-muted); font: 400 12px/16px var(--font-sans); }
+.pv-page { position: relative; overflow: hidden; display: grid; align-content: start; gap: var(--space-3); padding: var(--space-4); border: 1px solid var(--line); border-top: 0; border-radius: 0 0 var(--radius-lg) var(--radius-lg); background: var(--surface-100); }
+.pv-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--space-2); padding-bottom: var(--space-2); border-bottom: 1px solid var(--line); font: 400 12px/16px var(--font-sans); color: var(--ink-muted); }
+.pv-head b { font: 700 15px/20px var(--font-sans); color: var(--ink); }
+.pv-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(110px, 32%); gap: var(--space-4); }
+.pv-post { display: grid; gap: 8px; align-content: start; min-width: 0; }
+.pv-title { margin-bottom: 4px; font: 700 17px/1.25 var(--font-sans); color: var(--ink); }
+.pv-line { height: 7px; border-radius: 4px; background: var(--surface-200); }
+.pv-line:nth-child(3n) { width: 82%; }
+.pv-line:nth-child(4n) { width: 64%; }
+.pv-side { display: grid; gap: var(--space-3); align-content: start; min-width: 0; }
+.pv-side-box { height: 56px; border-radius: var(--radius-sm); background: var(--surface-200); }
+.pv-ad { display: flex; align-items: center; gap: 10px; min-width: 0; padding: 10px; border: 1px solid var(--line-strong); border-radius: var(--radius-md); background: var(--surface-100); outline: 2px dashed var(--accent); outline-offset: 3px; }
+.pv-ad.is-vertical { flex-direction: column; align-items: stretch; }
+.pv-ad-img { flex: none; display: grid; place-items: center; width: 88px; aspect-ratio: 4 / 3; object-fit: cover; border-radius: var(--radius-sm); background: var(--accent-soft); color: var(--accent-ink); font: 600 11px/1 var(--font-sans); }
+.pv-ad.is-vertical .pv-ad-img { width: 100%; }
+.pv-ad.is-empty .pv-ad-img { background: var(--surface-200); color: var(--ink-muted); }
+.pv-ad-body { display: grid; gap: 3px; min-width: 0; }
+.pv-ad-tag { font: 600 10px/12px var(--font-sans); letter-spacing: .04em; color: var(--ink-muted); }
+.pv-ad-title { font: 600 13px/17px var(--font-sans); color: var(--ink); overflow-wrap: anywhere; }
+.pv-ad-text { font: 400 12px/16px var(--font-sans); color: var(--ink-muted); overflow-wrap: anywhere; }
+.pv-ad-cta { justify-self: start; margin-top: 4px; padding: 5px 10px; border-radius: var(--radius-sm); background: var(--accent); color: var(--on-accent); font: 600 11px/1.2 var(--font-sans); }
+.pv-overlay { position: absolute; inset: 0; display: grid; place-items: center; padding: var(--space-4); background: rgba(18, 22, 51, .45); }
+.pv-pop { position: relative; width: min(230px, 100%); padding: var(--space-2); border-radius: var(--radius-lg); background: var(--surface-100); box-shadow: var(--shadow-pop); }
+.pv-pop .pv-ad { outline-offset: -2px; }
+.pv-pop .pv-ad-img { width: 100%; height: 72px; aspect-ratio: auto; }
+.pv-page:has(.pv-overlay) { min-height: 320px; }
+.pv-close { position: absolute; top: -10px; right: -10px; z-index: 1; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--surface-100); box-shadow: var(--shadow-card); color: var(--ink); font: 600 16px/1 var(--font-sans); }
+.pv-caption { margin-top: var(--space-2); font: 400 12px/16px var(--font-sans); color: var(--ink-muted); }
+@media (max-width: 520px) { .pv-body { grid-template-columns: 1fr; } }
+/* Site (landing) */
+.lp-root { min-height: 100%; background: var(--surface-100); }
+.lp-wrap { max-width: 1160px; margin-inline: auto; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
+.lp-nav { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface-100); border-bottom: 1px solid var(--line); }
+.lp-nav-in { display: flex; align-items: center; gap: var(--space-6); padding-block: 12px; }
+.lp-nav-in .bs-wordmark { margin-right: auto; }
+.lp-links { display: flex; gap: var(--space-6); }
+.lp-links a { color: var(--ink-muted); text-decoration: none; font: 500 14px/20px var(--font-sans); border-radius: var(--radius-sm); }
+.lp-links a:hover { color: var(--ink); }
+.lp-links a:focus-visible, .lg-back:focus-visible, .lg-acc:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.lp-section h2, .lp-band h2, .lp-close h2 { margin: 0 0 12px; max-width: 22ch; font: 800 34px/1.1 var(--font-display); letter-spacing: -.03em; color: var(--ink); text-wrap: balance; }
+.lp-section { padding-block: 88px 0; }
+.lp-sub { margin: 0 0 28px; max-width: 60ch; font-size: 16px; line-height: 24px; color: var(--ink-muted); }
+
+/* Hero */
+.lp-hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 56px; align-items: center; padding-block: 64px 24px; }
+.lp-hero-text { display: grid; gap: 24px; justify-items: start; }
+.lp-hero-text p { margin: 0; max-width: 50ch; font-size: 18px; line-height: 28px; color: var(--ink-muted); }
+.lp-hero h1 { margin: 0; max-width: 14ch; font: 800 54px/1.04 var(--font-display); letter-spacing: -.045em; color: var(--ink); }
+.lp-slotword { white-space: nowrap; padding: 0 .14em; border: 3px dashed var(--accent); border-radius: .16em; background: var(--accent-soft); -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+.lp-proof { font: 500 13px/18px var(--font-sans); color: var(--ink-muted); }
+
+/* Ilustração de página de blog */
+.mp { position: relative; display: grid; gap: 8px; align-content: start; min-width: 0; padding: 12px; overflow: hidden; background: var(--surface-100); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow-card); }
+.mp-top { display: flex; align-items: center; gap: 5px; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
+.mp-top b { margin-right: auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 700 11px/14px var(--font-sans); color: var(--ink); }
+.mp-top i { flex: none; width: 14px; height: 4px; border-radius: 2px; background: var(--line); }
+.mp-body { display: grid; grid-template-columns: minmax(0, 1fr) 34%; gap: 8px; }
+.mp-post { display: grid; gap: 5px; align-content: start; }
+.mp-h { margin-bottom: 2px; font: 700 11px/1.25 var(--font-sans); color: var(--ink); }
+.mp-post > i { height: 4px; border-radius: 2px; background: var(--surface-200); }
+.mp-post > i.s { width: 68%; }
+.mp-side { display: grid; gap: 6px; align-content: start; }
+.mp-side > i.box { height: 34px; border-radius: 6px; background: var(--surface-200); }
+.mp-slot { display: grid; place-content: center; justify-items: center; gap: 2px; min-height: 24px; padding: 4px; border: 1.5px solid var(--accent); border-radius: 8px; background: var(--accent); color: var(--on-accent); font: 700 9px/1.1 var(--font-sans); letter-spacing: .05em; text-transform: uppercase; text-align: center; animation: mp-fill .6s ease both; animation-delay: var(--d, 0s); }
+.mp-slot em { font: 600 9px/1.2 var(--font-sans); font-style: normal; letter-spacing: 0; text-transform: none; }
+.mp-lateral { min-height: 74px; }
+.mp-inline { margin-block: 2px; }
+.mp-pop { position: absolute; inset: 0; display: grid; place-items: center; padding: 10% 16%; background: rgba(18, 22, 51, .22); animation: mp-dim .6s ease both; animation-delay: var(--d, 0s); }
+.mp-pop .mp-slot { width: 100%; min-height: 64px; }
+@keyframes mp-fill { from { background: transparent; border-color: var(--line-strong); border-style: dashed; color: var(--ink-muted); } }
+@keyframes mp-dim { from { background: transparent; } }
+.mp.is-large { gap: 12px; padding: 20px; border-radius: 18px; }
+.mp.is-large .mp-top b { font-size: 15px; line-height: 20px; }
+.mp.is-large .mp-top i { width: 28px; height: 6px; }
+.mp.is-large .mp-h { font-size: 18px; }
+.mp.is-large .mp-post { gap: 9px; }
+.mp.is-large .mp-post > i { height: 7px; border-radius: 4px; }
+.mp.is-large .mp-side > i.box { height: 64px; }
+.mp.is-large .mp-slot { min-height: 44px; font-size: 11px; }
+.mp.is-large .mp-slot em { font-size: 13px; }
+.mp.is-large .mp-lateral { min-height: 150px; }
+
+/* Demonstração */
+.lp-demo { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); gap: 56px; align-items: center; }
+.lp-demo-text p { margin: 0 0 24px; max-width: 46ch; font-size: 16px; line-height: 24px; color: var(--ink-muted); }
+
+/* Três jeitos de medir */
+.lp-measures { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 40px; margin-top: 32px; }
+.lp-measure { display: grid; gap: 8px; align-content: start; padding-top: 20px; border-top: 2px solid var(--ink); }
+.lp-measure b { font: 700 18px/24px var(--font-sans); color: var(--ink); }
+.lp-measure p { margin: 0; font-size: 15px; line-height: 22px; color: var(--ink-muted); }
+.lp-eg { justify-self: start; margin-top: 4px; font: 600 13px/18px var(--font-sans); font-variant-numeric: tabular-nums; }
+.lp-m-visitas .lp-eg { color: var(--brand); }
+.lp-m-conversas .lp-eg { color: var(--teal); }
+.lp-m-vendas .lp-eg { color: var(--accent-ink); }
+.lp-ill { width: 72px; height: 56px; margin-bottom: 8px; }
+.ill-page { fill: var(--surface-100); stroke: var(--line-strong); stroke-width: 1.5; }
+.ill-line { fill: var(--line); }
+.ill-brand { fill: var(--brand); }
+.ill-edge { stroke: var(--surface-100); stroke-width: 1.5; stroke-linejoin: round; }
+.ill-teal { fill: var(--teal); }
+.ill-teal-soft { fill: var(--teal-soft); }
+.ill-on { fill: var(--on-teal); }
+.ill-accent { fill: var(--accent); }
+.ill-check { fill: none; stroke: var(--on-accent); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Para quem tem blog */
+.lp-band { margin-top: 88px; padding-block: 72px; background: var(--surface-200); }
+.lp-blogger { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 56px; align-items: center; }
+.lp-blogger p { margin: 0 0 20px; max-width: 50ch; font-size: 16px; line-height: 24px; color: var(--ink-muted); }
+.lp-checks { display: grid; gap: 10px; margin: 0 0 28px; padding: 0; list-style: none; }
+.lp-checks li { display: flex; gap: 10px; align-items: flex-start; font-size: 15px; line-height: 22px; color: var(--ink); }
+.lp-checks li::before { content: ""; flex: none; width: 6px; height: 6px; margin-top: 8px; border-radius: 50%; background: var(--accent); }
+
+/* Blogs parceiros */
+.lp-blogs { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); gap: 20px; }
+.lp-blog { display: grid; gap: 4px; align-content: start; font-size: 14px; line-height: 20px; color: var(--ink-muted); }
+.lp-blog .mp { min-height: 190px; margin-bottom: 10px; box-shadow: none; }
+.lp-blog-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2); }
+.lp-blog b { font-size: 15px; color: var(--ink); }
+
+/* Fechamento */
+.lp-close-wrap { padding-block: 96px 72px; }
+.lp-close { display: grid; justify-items: start; gap: 4px; padding: 48px; border: 3px dashed var(--accent); border-radius: 24px; background: var(--accent-soft); }
+.lp-close-tag { margin-bottom: 8px; font: 700 12px/16px var(--font-sans); letter-spacing: .08em; text-transform: uppercase; color: var(--accent-ink); }
+.lp-close p { margin: 0 0 24px; max-width: 52ch; font-size: 16px; line-height: 24px; color: var(--ink); }
+.lp-foot { padding-block: 24px 40px; border-top: 1px solid var(--line); font-size: 13px; color: var(--ink-muted); }
+
+@media (max-width: 960px) {
+  .lp-hero { grid-template-columns: 1fr; gap: 40px; }
+  .lp-hero h1 { font-size: 48px; }
+  .lp-demo, .lp-blogger { grid-template-columns: 1fr; gap: 40px; }
+  .lp-measures { grid-template-columns: 1fr; gap: 32px; }
+}
+@media (max-width: 860px) {
+  .lp-links { display: none; }
+  .lp-hero { padding-block: 40px 8px; }
+  .lp-hero h1 { font-size: 40px; }
+  .lp-hero-text p { font-size: 16px; line-height: 24px; }
+  .lp-section { padding-block: 64px 0; }
+  .lp-section h2, .lp-band h2, .lp-close h2 { font-size: 28px; }
+  .lp-band { margin-top: 64px; padding-block: 56px; }
+  .lp-close { padding: 28px 22px; }
+}
+@media (prefers-reduced-motion: reduce) { .mp-slot, .mp-pop { animation: none; } }
+/* Animação do topo da landing */
+.hd { display: grid; gap: var(--space-3); min-width: 0; }
+.hd-frame { overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface-100); box-shadow: var(--shadow-card); }
+.hd-chrome { padding: 8px 12px; border-bottom: 1px solid var(--line); background: var(--surface-200); color: var(--ink-muted); font: 400 12px/16px var(--font-sans); }
+.hd-stage { position: relative; height: 360px; }
+.hd-scene { position: absolute; inset: 0; opacity: 0; transform: translateY(8px); transition: opacity .45s ease, transform .45s ease; }
+.hd-scene.is-on { opacity: 1; transform: none; }
+.hd-panel { display: grid; align-content: start; gap: var(--space-3); padding: var(--space-4); }
+.hd-title { font: 700 17px/24px var(--font-sans); color: var(--ink); }
+.hd-chips { display: flex; gap: 6px; }
+.hd-chip { padding: 5px 10px; border: 1px solid var(--line-strong); border-radius: var(--radius-pill); font: 500 12px/1 var(--font-sans); color: var(--ink); }
+.hd-chip.is-on { background: var(--ink); border-color: var(--ink); color: var(--surface-100); }
+.hd-row { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-3); border: 1px solid var(--line); border-radius: var(--radius-md); transition: background-color .3s, border-color .3s; }
+.hd-row.is-sel { background: var(--brand-soft); border-color: var(--brand); }
+.hd-row-main { display: grid; gap: 1px; min-width: 0; font-size: 12px; line-height: 16px; color: var(--ink-muted); }
+.hd-row-main b { font-size: 14px; line-height: 20px; color: var(--ink); }
+.hd-btn { flex: none; display: inline-grid; place-items: center; height: 32px; padding: 0 12px; border-radius: var(--radius-md); border: 1px solid transparent; font: 600 12px/1 var(--font-sans); transition: transform .12s, box-shadow .12s; }
+.hd-btn.is-accent { background: var(--accent); color: var(--on-accent); }
+.hd-btn.is-secondary { background: var(--surface-100); border-color: var(--line-strong); color: var(--ink); }
+.hd-btn.is-wide { justify-self: start; height: 40px; padding: 0 16px; font-size: 13px; }
+.hd-btn.is-pressed { transform: scale(.95); box-shadow: 0 0 0 4px var(--accent-soft); }
+.hd-field { display: grid; gap: 6px; font: 600 12px/16px var(--font-sans); color: var(--ink); }
+.hd-input { display: flex; align-items: center; height: 38px; padding: 0 12px; border: 1px solid var(--focus-ring); border-radius: var(--radius-md); font: 400 14px/1 var(--font-sans); color: var(--ink); white-space: nowrap; overflow: hidden; }
+.hd-caret { width: 1px; height: 18px; margin-left: 1px; background: var(--ink); animation: hd-blink 1s steps(1) infinite; }
+.hd-toast { justify-self: start; padding: 8px 12px; border-radius: var(--radius-md); background: var(--success-soft); color: var(--success); font: 600 13px/18px var(--font-sans); animation: hd-pop .35s ease both; }
+.hd-blog { position: absolute; inset: 0; border: 0; border-radius: 0; }
+.hd .pv-body { grid-template-columns: minmax(0, 1fr) minmax(120px, 38%); }
+.hd .pv-ad { outline: 0; }
+.hd-slot { height: 190px; border: 1px dashed var(--line-strong); background: transparent; }
+.hd-ad-in { animation: hd-pop .5s ease both; border-radius: var(--radius-md); transition: box-shadow .15s, transform .15s; }
+.hd-ad-in.is-clicked { transform: scale(.97); box-shadow: 0 0 0 4px var(--accent-soft); }
+.hd-sale { position: absolute; top: 56px; right: 16px; padding: 6px 10px; border-radius: var(--radius-pill); background: var(--success-soft); color: var(--success); font: 700 12px/16px var(--font-sans); box-shadow: var(--shadow-card); animation: hd-pop .35s ease both; }
+.hd-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2) var(--space-4); }
+.hd-steps { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 0; padding: 0; list-style: none; counter-reset: hd; }
+.hd-steps li { counter-increment: hd; font: 500 12px/18px var(--font-sans); color: var(--ink-muted); transition: color .3s; }
+.hd-steps li::before { content: counter(hd) ". "; }
+.hd-steps li.is-done { color: var(--ink-muted); }
+.hd-steps li.is-on { color: var(--brand); font-weight: 700; }
+.hd-pause { padding: 4px 10px; border: 1px solid var(--line-strong); border-radius: var(--radius-pill); background: var(--surface-100); color: var(--ink); font: 600 12px/16px var(--font-sans); cursor: pointer; }
+.hd-pause:hover { background: var(--surface-200); }
+.hd-pause:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+@keyframes hd-pop { from { opacity: 0; transform: translateY(10px) scale(.96); } to { opacity: 1; transform: none; } }
+@keyframes hd-blink { 50% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .hd-scene, .hd-row, .hd-btn, .hd-ad-in, .hd-steps li { transition: none; }
+  .hd-toast, .hd-sale, .hd-ad-in { animation: none; }
+  .hd-caret { animation: none; }
+}
+/* Login */
+.lg { display: grid; grid-template-columns: minmax(0, 420px) minmax(0, 400px); justify-content: center; align-items: center; gap: 72px; min-height: calc(100vh - 32px); padding-block: 48px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); background: var(--surface-200); }
+.lg-card { box-sizing: border-box; display: grid; gap: var(--space-4); width: 100%; padding: var(--space-8) var(--space-6); background: var(--surface-100); border: 1px solid var(--line); border-radius: var(--radius-lg); }
+.lg-card h1 { margin: 0; font: 800 28px/34px var(--font-display); letter-spacing: -.02em; color: var(--ink); }
+.lg-back { justify-self: start; padding: 0; border: 0; background: none; color: var(--brand); font: 600 13px/18px var(--font-sans); cursor: pointer; }
+.lg-form { display: grid; gap: var(--space-4); }
+.lg-submit { width: 100%; }
+.lg-demo { display: grid; gap: var(--space-2); padding-top: var(--space-4); border-top: 1px solid var(--line); }
+.lg-demo b { font: 600 14px/20px var(--font-sans); color: var(--ink); }
+.lg-demo p { margin: 0 0 4px; font-size: 13px; line-height: 18px; color: var(--ink-muted); }
+.lg-acc { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface-100); color: var(--ink); font: 500 13px/18px var(--font-sans); text-align: left; cursor: pointer; }
+.lg-acc span:last-child { min-width: 0; overflow-wrap: anywhere; }
+.lg-acc:hover { border-color: var(--line-strong); background: var(--surface-200); }
+.lg-acc.is-suggested { border-color: var(--brand); box-shadow: inset 0 0 0 1px var(--brand); }
+.lg-art { display: grid; gap: 20px; }
+.lg-art .mp:first-child { width: 78%; }
+.lg-art .mp:nth-child(2) { width: 78%; justify-self: end; margin-top: -40px; }
+.lg-art p { margin: 8px 0 0; max-width: 32ch; font: 600 18px/26px var(--font-sans); color: var(--ink); }
+@media (max-width: 860px) { .lg { grid-template-columns: minmax(0, 420px); align-content: start; } .lg-art { display: none; } }
+@media (max-width: 860px) {
+  .app-root { height: auto; }
+  .app-shell { flex-direction: column; }
+  .app-main { overflow: visible; }
+  .app-mobilebar { display: flex; position: sticky; top: 0; z-index: 15; align-items: center; justify-content: space-between; padding-block: 8px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(8px, env(safe-area-inset-right, 0px)); background: var(--surface-100); border-bottom: 1px solid var(--line); }
+  .app-side { position: fixed; top: 0; bottom: 0; left: 0; z-index: 40; width: min(300px, 86vw); background: var(--surface-100); box-shadow: var(--shadow-pop); transform: translateX(-100%); visibility: hidden; transition: transform .2s ease, visibility .2s; }
+  .app-side.is-open { transform: none; visibility: visible; }
+  .app-side .bs-nav { width: 100%; border-right: 0; padding-top: max(24px, env(safe-area-inset-top, 0px)); padding-bottom: max(24px, env(safe-area-inset-bottom, 0px)); }
+  .app-drawer-close { display: grid; }
+  .app-backdrop { display: block; position: fixed; inset: 0; z-index: 35; background: rgba(18, 22, 51, .35); }
+  .app-content { padding-block: var(--space-6) 96px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+}
+@media (prefers-reduced-motion: reduce) { .app-side { transition: none; } }
+</style>
+<div id="app"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script>
+/* @ds-bundle: {"format":4,"namespace":"BlogSim","components":[{"name":"Button"},{"name":"Badge"},{"name":"TextField"},{"name":"MetricCard"},{"name":"ObjectivePicker"},{"name":"SlotCard"},{"name":"CampaignTable"},{"name":"SideNav"}]} */
+(function () {
+  var React = window.React, h = React.createElement;
+  function cx() { var o = []; for (var i = 0; i < arguments.length; i++) if (arguments[i]) o.push(arguments[i]); return o.join(' '); }
+  function omit(p, keys) { var o = {}; for (var k in p) if (keys.indexOf(k) < 0) o[k] = p[k]; return o; }
+  var BRL = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+  var NUM = new Intl.NumberFormat('pt-BR');
+  var PCT = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 1 });
+  function money(v) { return typeof v === 'number' ? BRL.format(v) : v; }
+  function count(v) { return typeof v === 'number' ? NUM.format(v) : v; }
+  function icon(d, extra) {
+    return h('svg', { width: 20, height: 20, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': true }, h('path', { d: d }), extra);
+  }
+
+  function Button(p) {
+    var rest = omit(p, ['variant', 'size', 'loading', 'className', 'children']);
+    return h('button', Object.assign({ type: 'button' }, rest, {
+      className: cx('bs-btn', 'bs-btn-' + (p.variant || 'primary'), p.size === 'sm' && 'bs-btn-sm', p.className),
+      disabled: !!(p.disabled || p.loading),
+      'aria-busy': p.loading ? true : undefined
+    }), p.loading ? h('span', { className: 'bs-spin', 'aria-hidden': true }) : null, p.children);
+  }
+
+  function Badge(p) {
+    return h('span', { className: cx('bs-badge', 'bs-badge-' + (p.tone || 'neutral'), p.dot && 'bs-badge-dot', p.className) }, p.children);
+  }
+
+  function TextField(p) {
+    var auto = React.useId();
+    var id = p.id || auto, hid = id + '-hint', msg = p.error || p.hint;
+    var rest = omit(p, ['label', 'hint', 'error', 'prefix', 'suffix', 'className', 'id']);
+    return h('div', { className: cx('bs-field', p.error && 'bs-field-error', p.className) },
+      h('label', { className: 'bs-field-label', htmlFor: id }, p.label),
+      h('div', { className: 'bs-input-wrap' },
+        p.prefix ? h('span', { className: 'bs-input-affix' }, p.prefix) : null,
+        h('input', Object.assign({}, rest, { id: id, className: 'bs-input', 'aria-invalid': p.error ? true : undefined, 'aria-describedby': msg ? hid : undefined })),
+        p.suffix ? h('span', { className: 'bs-input-affix' }, p.suffix) : null),
+      msg ? h('div', { id: hid, className: 'bs-field-hint' }, msg) : null);
+  }
+
+  function Spark(p) {
+    var d = p.data; if (!d || d.length < 2) return null;
+    var w = 200, ht = 40, min = Math.min.apply(null, d), max = Math.max.apply(null, d), r = (max - min) || 1;
+    var line = d.map(function (v, i) { return (i ? 'L' : 'M') + (i * w / (d.length - 1)).toFixed(1) + ' ' + (ht - 3 - (v - min) / r * (ht - 6)).toFixed(1); }).join(' ');
+    return h('svg', { className: 'bs-spark', viewBox: '0 0 ' + w + ' ' + ht, preserveAspectRatio: 'none', 'aria-hidden': true },
+      h('path', { className: 'bs-spark-area', d: line + ' L' + w + ' ' + ht + ' L0 ' + ht + ' Z' }),
+      h('path', { className: 'bs-spark-line', d: line }));
+  }
+
+  function MetricCard(p) {
+    var val = p.format === 'money' ? money(p.value) : p.format === 'count' ? count(p.value) : p.value;
+    var delta = null;
+    if (typeof p.delta === 'number') {
+      var up = p.delta >= 0, good = p.invertDelta ? !up : up;
+      delta = h('span', { className: cx('bs-metric-delta', good ? 'is-good' : 'is-bad') }, (up ? '▲ +' : '▼ ') + PCT.format(p.delta) + '%');
+    }
+    return h('div', { className: cx('bs-metric', p.className) },
+      h('div', { className: 'bs-metric-label' }, p.label),
+      h('div', { className: 'bs-metric-value' }, val),
+      (delta || p.hint) ? h('div', { className: 'bs-metric-foot' }, delta, p.hint ? h('span', null, p.hint) : null) : null,
+      p.spark ? h(Spark, { data: p.spark }) : null);
+  }
+
+  var OBJECTIVES = [
+    { id: 'visitas', title: 'Visitas no site', desc: 'Leve leitores dos blogs para o seu site.', track: 'Pixel BlogSim no seu site', d: 'M5 3l6.5 17 2.4-7.1L21 10.5z' },
+    { id: 'conversas', title: 'Conversas no WhatsApp', desc: 'Leitores iniciam uma conversa com você no WhatsApp.', track: 'Link redirecionador BlogSim', d: 'M21 11.5a8.5 8.5 0 0 1-12.4 7.6L3 21l1.9-5.4A8.5 8.5 0 1 1 21 11.5z' },
+    { id: 'vendas', title: 'Vendas', desc: 'Leve o leitor ao produto e conte cada venda no checkout.', track: 'Pixel no checkout', d: 'M2 3h3l2.6 12.4a1 1 0 0 0 1 .8h9.7a1 1 0 0 0 1-.8L21 7H6' }
+  ];
+
+  function ObjectivePicker(p) {
+    var st = React.useState(p.defaultValue || 'visitas');
+    var value = p.value !== undefined ? p.value : st[0];
+    var refs = React.useRef([]);
+    function set(v) { if (p.value === undefined) st[1](v); if (p.onChange) p.onChange(v); }
+    function onKey(e, i) {
+      var n = null;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') n = (i + 1) % 3;
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') n = (i + 2) % 3;
+      if (n !== null) { e.preventDefault(); set(OBJECTIVES[n].id); if (refs.current[n]) refs.current[n].focus(); }
+    }
+    return h('div', { className: cx('bs-obj-grid', p.className), role: 'radiogroup', 'aria-label': p.label || 'Objetivo da campanha' },
+      OBJECTIVES.map(function (o, i) {
+        var on = o.id === value;
+        var extra = o.id === 'vendas' ? [h('circle', { key: 'a', cx: 9, cy: 20, r: 1.4 }), h('circle', { key: 'b', cx: 18, cy: 20, r: 1.4 })] : null;
+        return h('button', {
+          key: o.id, ref: function (el) { refs.current[i] = el; }, type: 'button', role: 'radio', 'aria-checked': on, tabIndex: on ? 0 : -1,
+          className: 'bs-obj bs-obj-' + o.id, onClick: function () { set(o.id); }, onKeyDown: function (e) { onKey(e, i); }
+        },
+          h('span', { className: 'bs-obj-icon' }, icon(o.d, extra)),
+          h('span', { className: 'bs-obj-title' }, o.title),
+          h('span', { className: 'bs-obj-desc' }, o.desc),
+          h('span', { className: 'bs-obj-track' }, o.track));
+      }));
+  }
+
+  var PLACEMENTS = {
+    popup: { label: 'Pop-up', r: [14, 14, 38, 24] },
+    lateral: { label: 'Lateral', r: [46, 16, 14, 30] },
+    banner: { label: 'Banner topo', r: [6, 6, 54, 8] },
+    inline: { label: 'No meio do post', r: [6, 28, 36, 8] }
+  };
+
+  function SlotCard(p) {
+    var st = React.useState(!!p.defaultSelected);
+    var sel = p.selected !== undefined ? p.selected : st[0];
+    function toggle() { var n = !sel; if (p.selected === undefined) st[1](n); if (p.onToggle) p.onToggle(n); }
+    var pl = PLACEMENTS[p.placement] || PLACEMENTS.lateral, r = pl.r;
+    return h('article', { className: cx('bs-slot', sel && 'is-selected', p.className) },
+      h('svg', { className: 'bs-wf', viewBox: '0 0 66 52', role: 'img', 'aria-label': 'Posição: ' + pl.label },
+        h('rect', { className: 'bs-wf-page', x: 1, y: 1, width: 64, height: 50, rx: 6 }),
+        [18, 23, 40, 45].map(function (y, i) { return h('rect', { key: i, className: 'bs-wf-text', x: 6, y: y, width: i % 2 ? 28 : 36, height: 3, rx: 1.5 }); }),
+        p.placement !== 'lateral' ? h('rect', { className: 'bs-wf-text', x: 46, y: 16, width: 14, height: 30, rx: 2 }) : null,
+        h('rect', { className: 'bs-wf-slot', x: r[0], y: r[1], width: r[2], height: r[3], rx: 2 })),
+      h('div', { className: 'bs-slot-body' },
+        h('div', { className: 'bs-slot-head' }, h('h3', { className: 'bs-slot-blog' }, p.blog), p.niche ? h(Badge, null, p.niche) : null),
+        h('div', { className: 'bs-slot-meta' }, pl.label + (p.audience ? ' · ' + count(p.audience) + ' leitores/mês' : '')),
+        h('div', { className: 'bs-slot-price' }, h('strong', null, money(p.price)), ' / ' + (p.period || 'semana'))),
+      h(Button, { variant: sel ? 'secondary' : 'accent', size: 'sm', 'aria-pressed': sel, onClick: toggle }, sel ? 'Selecionado' : 'Alugar espaço'));
+  }
+
+  var OBJ_META = { visitas: ['brand', 'Visitas no site', 'visitas'], conversas: ['teal', 'Conversas no WhatsApp', 'conversas'], vendas: ['accent', 'Vendas', 'vendas'] };
+  var STATUS = { ativa: ['success', 'Ativa'], pausada: ['warning', 'Pausada'], revisao: ['neutral', 'Em revisão'], encerrada: ['neutral', 'Encerrada'] };
+
+  function CampaignTable(p) {
+    var rows = p.rows || [];
+    var head = ['Campanha', 'Objetivo', 'Status', 'Investido', 'Cliques', 'Resultados', 'Custo por resultado'];
+    return h('div', { className: cx('bs-table-wrap', p.className) },
+      h('table', { className: 'bs-table' },
+        h('thead', null, h('tr', null, head.map(function (t, i) { return h('th', { key: t, className: i > 2 ? 'num' : undefined, scope: 'col' }, t); }))),
+        h('tbody', null, rows.length ? rows.map(function (r, i) {
+          var o = OBJ_META[r.objective] || OBJ_META.visitas, s = STATUS[r.status] || STATUS.revisao;
+          return h('tr', { key: r.id || i },
+            h('td', null, h('div', { className: 'bs-table-name' }, r.name), r.blogNames && r.blogNames.length ? h('div', { className: 'bs-table-sub bs-table-blogs' }, r.blogNames.join(', ')) : r.blogs ? h('div', { className: 'bs-table-sub' }, r.blogs + (r.blogs === 1 ? ' blog' : ' blogs')) : null),
+            h('td', null, h(Badge, { tone: o[0] }, o[1])),
+            h('td', null, h(Badge, { tone: s[0], dot: true }, s[1])),
+            h('td', { className: 'num' }, money(r.invested)),
+            h('td', { className: 'num' }, count(r.clicks)),
+            h('td', { className: 'num' }, count(r.results) + ' ' + o[2]),
+            h('td', { className: 'num' }, r.results ? money(r.invested / r.results) : '—'));
+        }) : h('tr', null, h('td', { colSpan: 7, className: 'bs-table-empty' }, p.emptyText || 'Nenhuma campanha ainda. Crie a primeira para começar a anunciar.')))));
+  }
+
+  var ROLES = {
+    admin: { label: 'Admin master', tone: 'neutral', items: ['Visão geral', 'Blogs parceiros', 'Anunciantes', 'Campanhas', 'Repasses', 'Configurações'] },
+    anunciante: { label: 'Anunciante', tone: 'brand', items: ['Painel', 'Campanhas', 'Explorar blogs', 'Pixel e rastreamento', 'Faturamento'] },
+    blogueiro: { label: 'Dono do blog', tone: 'teal', items: ['Painel', 'Meus espaços', 'Receita', 'Insights', 'Instalar script'] }
+  };
+
+  function RoleSwitch(p) {
+    var st = React.useState(false), open = st[0], setOpen = st[1];
+    var ref = React.useRef(null);
+    var cur = ROLES[p.role] || ROLES.anunciante;
+    React.useEffect(function () {
+      if (!open) return;
+      function down(e) { if (ref.current && !ref.current.contains(e.target)) setOpen(false); }
+      function key(e) { if (e.key === 'Escape') setOpen(false); }
+      document.addEventListener('mousedown', down);
+      document.addEventListener('keydown', key);
+      return function () { document.removeEventListener('mousedown', down); document.removeEventListener('keydown', key); };
+    }, [open]);
+    return h('div', { className: 'bs-nav-role', ref: ref },
+      h('button', { type: 'button', className: 'bs-nav-role-btn', 'aria-haspopup': 'true', 'aria-expanded': open, 'aria-label': 'Perfil: ' + cur.label + '. Trocar perfil', onClick: function () { setOpen(!open); } },
+        h(Badge, { tone: cur.tone }, cur.label),
+        h('svg', { className: 'bs-nav-role-chev', width: 16, height: 16, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': true }, h('path', { d: 'm6 9 6 6 6-6' }))),
+      open ? h('ul', { className: 'bs-nav-role-menu' }, Object.keys(ROLES).map(function (k) {
+        var r = ROLES[k], on = k === p.role;
+        return h('li', { key: k }, h('button', {
+          type: 'button', className: 'bs-nav-role-opt', 'aria-current': on ? 'true' : undefined,
+          onClick: function () { setOpen(false); if (!on) p.onChange(k); }
+        }, h(Badge, { tone: r.tone }, r.label), on ? h('span', { className: 'bs-nav-role-now' }, 'Atual') : null));
+      })) : null);
+  }
+
+  function SideNav(p) {
+    var role = ROLES[p.role] || ROLES.anunciante, items = p.items || role.items;
+    var st = React.useState(items[0]);
+    var active = p.active !== undefined ? p.active : st[0];
+    return h('nav', { className: cx('bs-nav', p.className), 'aria-label': 'Navegação principal' },
+      h('span', { className: 'bs-wordmark' }, 'Blog', h('b', null, 'Sim')),
+      p.onRoleChange ? h(RoleSwitch, { role: p.role, onChange: p.onRoleChange }) : h(Badge, { tone: role.tone }, role.label),
+      h('ul', { className: 'bs-nav-list' }, items.map(function (it) {
+        return h('li', { key: it }, h('button', {
+          type: 'button', className: 'bs-nav-item', 'aria-current': it === active ? 'page' : undefined,
+          onClick: function () { if (p.active === undefined) st[1](it); if (p.onNavigate) p.onNavigate(it); }
+        }, it));
+      })),
+      p.user ? h('div', { className: 'bs-nav-user' }, h('span', { className: 'bs-nav-avatar', 'aria-hidden': true }, p.user.charAt(0)), h('span', { className: 'bs-nav-name' }, p.user), p.onLogout ? h('button', { type: 'button', className: 'bs-nav-logout', onClick: p.onLogout }, 'Sair') : null) : null);
+  }
+
+  window.BlogSim = Object.assign(window.BlogSim || {}, {
+    Button: Button, Badge: Badge, TextField: TextField, MetricCard: MetricCard,
+    ObjectivePicker: ObjectivePicker, SlotCard: SlotCard, CampaignTable: CampaignTable, SideNav: SideNav
+  });
+})();
+</script>
+<script>
+/* Protótipo navegável do BlogSim: três perfis, dados de exemplo, estado em memória. */
+(function () {
+  const { useState, useEffect } = React;
+  const B = window.BlogSim, h = React.createElement;
+
+  const BRL = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+  const NUM = new Intl.NumberFormat('pt-BR');
+  const COMPACT = new Intl.NumberFormat('pt-BR', { notation: 'compact', maximumFractionDigits: 1 });
+  const money = v => BRL.format(v);
+  const count = v => NUM.format(v);
+  const sum = (list, key) => list.reduce((t, x) => t + (x[key] || 0), 0);
+
+  const PLACE = { popup: 'Pop-up', lateral: 'Lateral', banner: 'Banner topo', inline: 'No meio do post' };
+  const OBJ_LABEL = { visitas: 'Visitas no site', conversas: 'Conversas no WhatsApp', vendas: 'Vendas' };
+  const OBJ_TONE = { visitas: 'brand', conversas: 'teal', vendas: 'accent' };
+  const ROLE_KEYS = ['anunciante', 'blogueiro', 'admin'];
+  const ME = 'Passo Certo Calçados';
+  const MY_BLOG = 'Viagem com Criança';
+  const USER = { anunciante: ME, blogueiro: 'Renata · ' + MY_BLOG, admin: 'Equipe BlogSim' };
+  const TODAY = '27/10/2026';
+
+  // ---------- Dados de exemplo ----------
+  const BLOGS = [
+    { id: 'b1', name: 'Viagem com Criança', niche: 'Viagem', owner: 'Renata Alves', audience: 42000, slots: [['lateral', 280], ['banner', 350]] },
+    { id: 'b2', name: 'Cozinha da Vó Nena', niche: 'Culinária', owner: 'Nena Prado', audience: 18500, slots: [['popup', 190], ['inline', 160]] },
+    { id: 'b3', name: 'Treino em Casa', niche: 'Fitness', owner: 'Diego Moura', audience: 61000, slots: [['inline', 420], ['lateral', 300]] },
+    { id: 'b4', name: 'Grana no Bolso', niche: 'Finanças', owner: 'Paula Reis', audience: 73000, slots: [['banner', 520], ['popup', 460]] },
+    { id: 'b5', name: 'Pet Feliz', niche: 'Pets', owner: 'Caio Lima', audience: 27500, slots: [['lateral', 210]] },
+    { id: 'b6', name: 'Código Simples', niche: 'Tecnologia', owner: 'Bruno Sato', audience: 39000, slots: [['inline', 330], ['banner', 380]] },
+    { id: 'b7', name: 'Mãe de Primeira', niche: 'Maternidade', owner: 'Júlia Campos', audience: 55000, slots: [['popup', 390], ['lateral', 260]] },
+    { id: 'b8', name: 'Bike Urbana', niche: 'Esportes', owner: 'Léo Martins', audience: 15800, slots: [['lateral', 150]], status: 'pendente' }
+  ];
+  const SLOTS = BLOGS.flatMap(b => b.slots.map(([p, price]) => ({ id: b.id + '-' + p, blogId: b.id, blog: b.name, niche: b.niche, audience: b.audience, placement: p, price })));
+  const NICHES = [...new Set(BLOGS.map(b => b.niche))];
+
+  const CAMPAIGN_BLOGS = {
+    c1: ['Treino em Casa', 'Grana no Bolso', 'Código Simples', 'Mãe de Primeira', 'Viagem com Criança', 'Pet Feliz'],
+    c2: ['Mãe de Primeira', 'Grana no Bolso', 'Viagem com Criança', 'Treino em Casa'],
+    c3: ['Viagem com Criança', 'Cozinha da Vó Nena', 'Treino em Casa', 'Grana no Bolso', 'Pet Feliz', 'Código Simples', 'Mãe de Primeira'],
+    c4: ['Viagem com Criança', 'Mãe de Primeira', 'Treino em Casa'],
+    c5: ['Mãe de Primeira', 'Viagem com Criança'],
+    c6: ['Pet Feliz', 'Cozinha da Vó Nena', 'Mãe de Primeira'],
+    c7: ['Grana no Bolso', 'Código Simples']
+  };
+  const INITIAL_CAMPAIGNS = [
+    { id: 'c1', name: 'Black Friday – Tênis', advertiser: ME, objective: 'vendas', status: 'ativa', invested: 2400, clicks: 5320, results: 86, blogs: 6 },
+    { id: 'c2', name: 'Consulta grátis', advertiser: 'Clínica Sorriso Leve', objective: 'conversas', status: 'ativa', invested: 980, clicks: 2140, results: 312, blogs: 4 },
+    { id: 'c3', name: 'Lançamento do site', advertiser: ME, objective: 'visitas', status: 'pausada', invested: 1440, clicks: 10970, results: 9870, blogs: 9 },
+    { id: 'c4', name: 'Cupom de inverno', advertiser: ME, objective: 'vendas', status: 'revisao', invested: 760, clicks: 0, results: 0, blogs: 3 },
+    { id: 'c5', name: 'Matrícula 2027', advertiser: 'Escola Pequeno Mundo', objective: 'conversas', status: 'revisao', invested: 520, clicks: 0, results: 0, blogs: 2 },
+    { id: 'c6', name: 'Ração premium', advertiser: 'PetShop Bom Pelo', objective: 'vendas', status: 'ativa', invested: 1760, clicks: 3980, results: 121, blogs: 3 },
+    { id: 'c7', name: 'Atendimento pelo WhatsApp', advertiser: ME, objective: 'conversas', status: 'ativa', invested: 640, clicks: 1890, results: 204, blogs: 2 }
+  ].map(c => ({ ...c, blogNames: CAMPAIGN_BLOGS[c.id], blogs: CAMPAIGN_BLOGS[c.id].length, views: Math.round(c.clicks * 34.5) }));
+  const INITIAL_TXNS = [
+    { date: '25/10/2026', desc: 'Recarga via Pix', value: 1000 },
+    { date: '21/10/2026', desc: 'Cupom de inverno · 3 espaços', value: -760 },
+    { date: '14/10/2026', desc: 'Atendimento pelo WhatsApp · 2 espaços', value: -640 },
+    { date: '02/10/2026', desc: 'Recarga via cartão', value: 2500 }
+  ];
+  const INITIAL_MY_SLOTS = [
+    { id: 'm1', placement: 'lateral', price: 280, active: true, rent: { adv: ME, until: '03/11/2026' } },
+    { id: 'm2', placement: 'banner', price: 350, active: true, rent: { adv: 'Clínica Sorriso Leve', until: '10/11/2026' } },
+    { id: 'm3', placement: 'inline', price: 220, active: false, rent: null }
+  ];
+  const INITIAL_PAYOUTS = [
+    { id: 'r1', blog: 'Treino em Casa', value: 1980, date: '25/10/2026', status: 'pendente' },
+    { id: 'r2', blog: 'Grana no Bolso', value: 2640, date: '24/10/2026', status: 'pendente' },
+    { id: 'r3', blog: MY_BLOG, value: 1210, date: '10/10/2026', status: 'pago' },
+    { id: 'r4', blog: 'Mãe de Primeira', value: 1730, date: '08/10/2026', status: 'pago' }
+  ];
+  const POSTS = [
+    ['Roteiro de 5 dias em Gramado com crianças', 18400, 612],
+    ['O que levar na mala do bebê', 15100, 498],
+    ['Disney com orçamento curto', 11200, 455],
+    ['Hotéis-fazenda perto de São Paulo', 12900, 377],
+    ['Praias calmas no Nordeste', 9600, 241]
+  ];
+
+  const DATES = Array.from({ length: 14 }, (_, i) => {
+    const d = new Date(2026, 9, 27 - 13 + i);
+    return String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0');
+  });
+  const series = (base, amp, seed, trend) => DATES.map((label, i) => ({
+    label, value: Math.max(0, Math.round(base * (1 + trend * i / 13) + amp * Math.sin(i * 1.7 + seed) + amp * 0.5 * Math.cos(i * 0.9 + seed * 2)))
+  }));
+  const DAILY = {
+    clicks: series(1150, 180, 1, 0.45),
+    revenue: series(130, 28, 2, 0.35),
+    volume: series(420, 90, 3, 0.4)
+  };
+  const spark = s => s.map(d => d.value);
+
+  // ---------- Peças de layout ----------
+  function Page({ title, subtitle, action, children }) {
+    return h(React.Fragment, null,
+      h('header', { className: 'app-head' },
+        h('div', null, h('h1', null, title), subtitle ? h('p', null, subtitle) : null),
+        action ? h('div', { className: 'app-head-actions' }, action) : null),
+      children);
+  }
+  function Card({ title, extra, children }) {
+    return h('section', { className: 'app-card' },
+      (title || extra) ? h('div', { className: 'app-card-head' }, title ? h('h2', null, title) : h('span'), extra) : null,
+      children);
+  }
+  function Section({ title, extra, children }) {
+    return h('section', { className: 'app-section' }, h('div', { className: 'app-section-head' }, h('h2', null, title), extra), children);
+  }
+  function Chips({ label, options, value, onChange }) {
+    return h('div', { className: 'app-chips', role: 'group', 'aria-label': label },
+      h('span', { className: 'app-chips-label' }, label),
+      h('div', { className: 'app-chips-row' }, options.map(([v, text]) =>
+        h('button', { key: v, type: 'button', className: 'app-chip', 'aria-pressed': v === value, onClick: () => onChange(v) }, text))));
+  }
+  function Code({ label, text, notify }) {
+    const id = 'code-' + label.replace(/\W+/g, '-').toLowerCase();
+    function copy() {
+      const fallback = () => {
+        const el = document.getElementById(id);
+        const r = document.createRange(); r.selectNodeContents(el);
+        const s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+        notify('Texto selecionado. Use Ctrl+C para copiar.');
+      };
+      try { navigator.clipboard.writeText(text).then(() => notify('Copiado'), fallback); } catch (e) { fallback(); }
+    }
+    return h('div', { className: 'app-section' },
+      h('span', { className: 'app-code-label' }, label),
+      h('div', { className: 'app-code' }, h('pre', { id }, text), h(B.Button, { variant: 'secondary', size: 'sm', onClick: copy }, 'Copiar')));
+  }
+  function Table({ cols, rows, empty }) {
+    return h('div', { className: 'bs-table-wrap' },
+      h('table', { className: 'bs-table' },
+        h('thead', null, h('tr', null, cols.map((c, i) => h('th', { key: i, scope: 'col', className: c.num ? 'num' : undefined }, c.label)))),
+        h('tbody', null, rows.length ? rows.map((r, i) => h('tr', { key: i }, r.map((cell, j) => h('td', { key: j, className: cols[j].num ? 'num' : undefined }, cell))))
+          : h('tr', null, h('td', { colSpan: cols.length, className: 'bs-table-empty' }, empty)))));
+  }
+  function niceMax(v) {
+    if (v <= 0) return 1;
+    const p = Math.pow(10, Math.floor(Math.log10(v)));
+    for (const m of [1, 1.2, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10]) if (m * p >= v) return m * p;
+    return 10 * p;
+  }
+  function BarChart({ data, isMoney, label }) {
+    const W = 640, H = 210, L = 56, R = 8, T = 24, Bm = 28;
+    const max = niceMax(Math.max(...data.map(d => d.value)));
+    const iw = W - L - R, ih = H - T - Bm, bw = iw / data.length;
+    const short = v => (isMoney ? 'R$ ' : '') + COMPACT.format(v);
+    const last = data.length - 1;
+    return h('svg', { className: 'app-chart', viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': label },
+      [0, 0.25, 0.5, 0.75, 1].map(t => {
+        const y = T + ih - t * ih;
+        return h('g', { key: t }, h('line', { className: 'grid', x1: L, x2: W - R, y1: y, y2: y }), h('text', { x: L - 8, y: y + 4, textAnchor: 'end' }, short(t * max)));
+      }),
+      data.map((d, i) => {
+        const bh = d.value / max * ih, x = L + i * bw + bw * 0.18, cx = x + bw * 0.32;
+        return h('g', { key: i },
+          h('rect', { className: i === last ? 'bar last' : 'bar', x, y: T + ih - bh, width: bw * 0.64, height: bh, rx: 3 }),
+          i === last ? h('text', { className: 'val', x: cx, y: T + ih - bh - 6, textAnchor: 'middle' }, isMoney ? money(d.value) : count(d.value)) : null,
+          (last - i) % 2 === 0 ? h('text', { x: cx, y: H - 8, textAnchor: 'middle' }, d.label) : null);
+      }));
+  }
+  // ---------- Anunciante ----------
+  function AdvPainel({ campaigns, go }) {
+    const mine = campaigns.filter(c => c.advertiser === ME);
+    const inv = sum(mine, 'invested'), clk = sum(mine, 'clicks'), res = sum(mine, 'results'), views = sum(mine, 'views');
+    return h(Page, { title: 'Painel', subtitle: 'Últimos 14 dias · ' + ME, action: h(B.Button, { onClick: () => go('Criar campanha') }, 'Criar campanha') },
+      h('div', { className: 'app-metrics' },
+        h(B.MetricCard, { label: 'Investido', value: inv, format: 'money', delta: 12.4, hint: 'vs. 14 dias anteriores', spark: [3100, 3300, 3250, 3600, 3900, 4400, inv] }),
+        h(B.MetricCard, { label: 'Cliques', value: clk, format: 'count', delta: 8.1, hint: 'vs. 14 dias anteriores', spark: spark(DAILY.clicks) }),
+        h(B.MetricCard, { label: 'Visualizações', value: views, format: 'count', delta: 9.8, hint: 'vezes que seus anúncios apareceram' }),
+        h(B.MetricCard, { label: 'Resultados', value: res, format: 'count', hint: (res ? money(inv / res) : 'R$ 0,00') + ' por resultado' })),
+      h(Card, { title: 'Cliques por dia' }, h(BarChart, { data: DAILY.clicks, label: 'Cliques por dia nos últimos 14 dias' })),
+      h(Section, { title: 'Campanhas ativas', extra: h(B.Button, { variant: 'ghost', size: 'sm', onClick: () => go('Campanhas') }, 'Ver todas') },
+        h(B.CampaignTable, { rows: mine.filter(c => c.status === 'ativa') })));
+  }
+
+  function AdvCampanhas({ campaigns, go }) {
+    const [f, setF] = useState('todas');
+    const mine = campaigns.filter(c => c.advertiser === ME);
+    const rows = f === 'todas' ? mine : mine.filter(c => c.status === f);
+    return h(Page, { title: 'Campanhas', subtitle: mine.length + ' campanhas', action: h(B.Button, { onClick: () => go('Criar campanha') }, 'Criar campanha') },
+      h(Chips, { label: 'Status', value: f, onChange: setF, options: [['todas', 'Todas'], ['ativa', 'Ativas'], ['pausada', 'Pausadas'], ['revisao', 'Em revisão'], ['encerrada', 'Encerradas']] }),
+      h(B.CampaignTable, { rows, emptyText: 'Nenhuma campanha com esse status.' }));
+  }
+
+  function activeSlots(blogs) {
+    const ok = new Set(blogs.filter(b => b.status === 'ativo').map(b => b.id));
+    return SLOTS.filter(s => ok.has(s.blogId));
+  }
+
+  function SlotGrid({ list, cart, setCart }) {
+    const toggle = (id, on) => setCart(c => on ? [...c, id] : c.filter(x => x !== id));
+    if (!list.length) return h('p', { className: 'app-empty' }, 'Nenhum blog encontrado. Tente outro nicho ou limpe a busca.');
+    return h('div', { className: 'app-slots' }, list.map(s => h(B.SlotCard, {
+      key: s.id, blog: s.blog, niche: s.niche, placement: s.placement, audience: s.audience, price: s.price,
+      selected: cart.includes(s.id), onToggle: on => toggle(s.id, on)
+    })));
+  }
+
+  function AdvExplorar({ cart, setCart, go, blogs }) {
+    const [q, setQ] = useState('');
+    const [n, setN] = useState('Todos');
+    const list = activeSlots(blogs).filter(s => (n === 'Todos' || s.niche === n) && s.blog.toLowerCase().includes(q.trim().toLowerCase()));
+    const sel = SLOTS.filter(s => cart.includes(s.id));
+    return h(Page, { title: 'Explorar blogs', subtitle: 'Escolha onde seu anúncio aparece. Preços por semana.' },
+      h('div', { className: 'app-filters' },
+        h(B.TextField, { id: 'busca-blog', label: 'Buscar blog', placeholder: 'Nome do blog', value: q, onChange: e => setQ(e.target.value) }),
+        h(Chips, { label: 'Nicho', value: n, onChange: setN, options: ['Todos', ...NICHES].map(x => [x, x]) })),
+      h(SlotGrid, { list, cart, setCart }),
+      sel.length ? h('div', { className: 'app-cartbar' },
+        h('span', null, h('b', null, sel.length + (sel.length > 1 ? ' espaços selecionados' : ' espaço selecionado')), ' · ', h('span', { className: 'app-money' }, money(sum(sel, 'price'))), ' por semana'),
+        h(B.Button, { onClick: () => go('Criar campanha') }, 'Criar campanha com esses espaços')) : null);
+  }
+
+  const TRACK = {
+    visitas: { label: 'Endereço do seu site', ph: 'https://www.seusite.com.br', hint: 'Instale o pixel em todas as páginas do site.', codeLabel: 'Seu Pixel BlogSim', code: '<script async src="https://px.blogsim.com.br/p.js" data-conta="BS-48213"></' + 'script>' },
+    conversas: { label: 'Número do WhatsApp', ph: '+55 11 90000-0000', hint: 'O leitor passa pelo nosso link antes de abrir o WhatsApp. É assim que contamos as conversas.', codeLabel: 'Seu link redirecionador', code: 'https://wa.blogsim.com.br/r/BS-48213' },
+    vendas: { label: 'Endereço da página de checkout', ph: 'https://www.seusite.com.br/checkout', hint: 'Instale o pixel na página de confirmação do pedido.', codeLabel: 'Seu pixel de checkout', code: '<script async src="https://px.blogsim.com.br/p.js" data-conta="BS-48213" data-evento="venda"></' + 'script>' }
+  };
+  const CTA = { visitas: 'Saiba mais', conversas: 'Chamar no WhatsApp', vendas: 'Comprar agora' };
+  const BLOG_POST = {
+    'Viagem com Criança': 'Roteiro de 5 dias em Gramado com crianças',
+    'Cozinha da Vó Nena': 'Bolo de fubá cremoso da vó',
+    'Treino em Casa': 'Treino de 20 minutos sem equipamento',
+    'Grana no Bolso': 'Como montar uma reserva de emergência',
+    'Pet Feliz': 'Quantas vezes por dia o cachorro deve comer',
+    'Código Simples': 'Git para quem está começando',
+    'Mãe de Primeira': 'O que ninguém conta sobre o primeiro mês',
+    'Bike Urbana': 'Rotas seguras para pedalar na cidade'
+  };
+  const domain = name => name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '') + '.com.br';
+
+  function AdCard({ ad, vertical }) {
+    return h('div', { className: 'pv-ad' + (vertical ? ' is-vertical' : '') + (ad.empty ? ' is-empty' : '') },
+      ad.img ? h('img', { className: 'pv-ad-img', src: ad.img, alt: '' }) : h('div', { className: 'pv-ad-img' }, ad.empty ? 'Livre' : (ad.imgLabel || 'Imagem')),
+      h('div', { className: 'pv-ad-body' },
+        h('span', { className: 'pv-ad-tag' }, ad.empty ? 'Espaço BlogSim' : 'Patrocinado'),
+        h('b', { className: 'pv-ad-title' }, ad.title || 'Título do anúncio'),
+        h('span', { className: 'pv-ad-text' }, ad.text || 'O texto do anúncio aparece aqui.'),
+        ad.cta ? h('span', { className: 'pv-ad-cta' }, ad.cta) : null));
+  }
+
+  // Página de blog fictícia, só para mostrar onde o anúncio aparece para o leitor.
+  function BlogPreview({ blog, placement, ad }) {
+    const slot = p => placement === p ? h(AdCard, { ad, vertical: p === 'lateral' || p === 'popup' }) : null;
+    const lines = n => Array.from({ length: n }, (_, i) => h('div', { key: i, className: 'pv-line' }));
+    return h('figure', { className: 'pv' },
+      h('div', { className: 'pv-chrome' }, domain(blog)),
+      h('div', { className: 'pv-page' },
+        h('div', { className: 'pv-head' }, h('b', null, blog), h('span', null, 'Início · Sobre · Contato')),
+        slot('banner'),
+        h('div', { className: 'pv-body' },
+          h('div', { className: 'pv-post' }, h('div', { className: 'pv-title' }, BLOG_POST[blog] || 'Post mais lido da semana'), lines(4), slot('inline'), lines(3)),
+          h('div', { className: 'pv-side' }, slot('lateral'), h('div', { className: 'pv-side-box' }), h('div', { className: 'pv-side-box' }))),
+        placement === 'popup' ? h('div', { className: 'pv-overlay' }, h('div', { className: 'pv-pop' }, h('span', { className: 'pv-close', 'aria-hidden': true }, '×'), slot('popup'))) : null),
+      h('figcaption', { className: 'pv-caption' }, 'Como o leitor vê o anúncio em ', h('b', null, PLACE[placement]), '. Página de exemplo.'));
+  }
+
+  const STEPS = ['Objetivo', 'Blogs e espaços', 'Anúncio', 'Duração e nome', 'Rastreamento', 'Revisar'];
+
+  function CreateCampaign({ cart, setCart, balance, onPublish, go, notify, blogs }) {
+    const [step, setStep] = useState(0);
+    const [obj, setObj] = useState('visitas');
+    const [niche, setNiche] = useState('Todos');
+    const [name, setName] = useState('');
+    const [weeks, setWeeks] = useState('2');
+    const [track, setTrack] = useState('');
+    const [adTitle, setAdTitle] = useState('');
+    const [adText, setAdText] = useState('');
+    const [adImg, setAdImg] = useState(null);
+    const [imgErr, setImgErr] = useState('');
+    const [pv, setPv] = useState(null);
+    const [tried, setTried] = useState(false);
+    const [err, setErr] = useState('');
+    const sel = SLOTS.filter(s => cart.includes(s.id));
+    const weekly = sum(sel, 'price'), w = parseInt(weeks, 10) || 0, total = weekly * w;
+    const reach = Math.round(sum(sel, 'audience') / 4.3 * w);
+    const weeksOk = w >= 1 && w <= 12;
+    const adOk = adTitle.trim().length > 0 && track.trim().length > 3;
+    const valid = [true, sel.length > 0, adOk, name.trim().length > 0 && weeksOk, true, true][step];
+    const t = TRACK[obj];
+    const ad = { img: adImg, title: adTitle.trim(), text: adText.trim(), cta: CTA[obj] };
+    const pvSlot = sel.find(s => s.id === pv) || sel[0];
+
+    function next() { if (!valid) { setTried(true); return; } setTried(false); setStep(step + 1); }
+    function back() { setTried(false); setErr(''); setStep(step - 1); }
+    function publish() {
+      if (total > balance) { setErr(`Seu saldo é ${money(balance)}. Adicione ${money(total - balance)} em Faturamento para publicar.`); return; }
+      onPublish({ name: name.trim(), objective: obj, total, blogs: new Set(sel.map(s => s.blogId)).size, blogNames: [...new Set(sel.map(s => s.blog))], slots: sel.length });
+      setCart([]);
+    }
+    function onFile(e) {
+      const f = e.target.files && e.target.files[0];
+      if (!f) return;
+      if (!f.type.startsWith('image/')) { setImgErr('Escolha um arquivo de imagem (JPG, PNG ou WebP).'); return; }
+      if (f.size > 2 * 1024 * 1024) { setImgErr('A imagem tem mais de 2 MB. Escolha uma menor.'); return; }
+      setImgErr('');
+      const r = new FileReader();
+      r.onload = () => setAdImg(r.result);
+      r.readAsDataURL(f);
+    }
+
+    let body;
+    if (step === 0) body = h(B.ObjectivePicker, { value: obj, onChange: v => { setObj(v); setTrack(''); } });
+    if (step === 1) body = h(React.Fragment, null,
+      h(Chips, { label: 'Nicho', value: niche, onChange: setNiche, options: ['Todos', ...NICHES].map(x => [x, x]) }),
+      h(SlotGrid, { list: activeSlots(blogs).filter(s => niche === 'Todos' || s.niche === niche), cart, setCart }),
+      h('p', { className: 'app-note' }, sel.length ? `${sel.length} ${sel.length > 1 ? 'espaços' : 'espaço'} · ${money(weekly)} por semana` : 'Nenhum espaço selecionado ainda.'),
+      tried && !sel.length ? h('p', { className: 'app-error', role: 'alert' }, 'Escolha pelo menos um espaço para continuar.') : null);
+    if (step === 2) body = h('div', { className: 'app-adstep' },
+      h('div', { className: 'app-adform' },
+        h('div', { className: 'bs-field' },
+          h('label', { className: 'bs-field-label', htmlFor: 'ad-img' }, 'Imagem'),
+          h('input', { id: 'ad-img', type: 'file', accept: 'image/*', className: 'app-file', onChange: onFile, 'aria-describedby': 'ad-img-hint' }),
+          h('div', { id: 'ad-img-hint', className: imgErr ? 'app-error' : 'bs-field-hint' }, imgErr || 'JPG, PNG ou WebP até 2 MB. Imagem horizontal funciona melhor.')),
+        h(B.TextField, { id: 'ad-titulo', label: 'Título', maxLength: 40, placeholder: 'Ex.: Tênis de corrida com 30% off', value: adTitle, onChange: e => setAdTitle(e.target.value), error: tried && !adTitle.trim() ? 'Escreva um título para o anúncio.' : undefined, hint: adTitle.length + '/40 caracteres' }),
+        h(B.TextField, { id: 'ad-texto', label: 'Texto', maxLength: 90, placeholder: 'Ex.: Frete grátis para todo o Brasil até domingo.', value: adText, onChange: e => setAdText(e.target.value), hint: adText.length + '/90 caracteres · opcional' }),
+        h(B.TextField, { id: 'camp-track-' + obj, label: t.label, placeholder: t.ph, value: track, onChange: e => setTrack(e.target.value), error: tried && track.trim().length <= 3 ? 'Diga para onde o leitor vai ao clicar no anúncio.' : undefined, hint: 'Para onde o leitor vai ao clicar em "' + CTA[obj] + '".' })),
+      h('div', { className: 'app-adpreview' },
+        sel.length > 1 ? h(Chips, { label: 'Ver prévia em', value: pvSlot.id, onChange: setPv, options: sel.map(s => [s.id, s.blog + ' · ' + PLACE[s.placement]]) }) : null,
+        h(BlogPreview, { blog: pvSlot.blog, placement: pvSlot.placement, ad })));
+    if (step === 3) body = h(React.Fragment, null,
+      h('div', { className: 'app-fields' },
+        h(B.TextField, { id: 'camp-nome', label: 'Nome da campanha', placeholder: 'Ex.: Black Friday – Tênis', value: name, onChange: e => setName(e.target.value), error: tried && !name.trim() ? 'Dê um nome à campanha para encontrá-la depois.' : undefined, hint: 'Só você e o admin veem esse nome.' }),
+        h(B.TextField, { id: 'camp-semanas', label: 'Duração', type: 'number', min: 1, max: 12, inputMode: 'numeric', suffix: 'semanas', value: weeks, onChange: e => setWeeks(e.target.value), error: tried && !weeksOk ? 'Escolha de 1 a 12 semanas.' : undefined, hint: 'Começa depois da aprovação.' })),
+      h('dl', { className: 'app-dl' },
+        h('dt', null, 'Espaços'), h('dd', null, sel.length),
+        h('dt', null, 'Custo por semana'), h('dd', { className: 'money' }, money(weekly)),
+        h('dt', null, 'Total da campanha'), h('dd', { className: 'money' }, money(total)),
+        h('dt', null, 'Alcance estimado'), h('dd', null, '~' + count(reach) + ' leitores')));
+    if (step === 4) body = h(React.Fragment, null,
+      h('p', null, 'Objetivo: ', h('b', null, OBJ_LABEL[obj]), '. ' + t.hint),
+      h('dl', { className: 'app-dl' }, h('dt', null, t.label), h('dd', null, track)),
+      h(Code, { label: t.codeLabel, text: t.code, notify }));
+    if (step === 5) body = h(React.Fragment, null,
+      h('dl', { className: 'app-dl' },
+        h('dt', null, 'Campanha'), h('dd', null, name),
+        h('dt', null, 'Objetivo'), h('dd', null, h(B.Badge, { tone: OBJ_TONE[obj] }, OBJ_LABEL[obj])),
+        h('dt', null, 'Anúncio'), h('dd', null, ad.title + (adImg ? ' · com imagem' : ' · sem imagem')),
+        h('dt', null, 'Espaços'), h('dd', null, sel.map(s => s.blog + ' (' + PLACE[s.placement] + ')').join(', ')),
+        h('dt', null, 'Duração'), h('dd', null, w + (w > 1 ? ' semanas' : ' semana')),
+        h('dt', null, t.label), h('dd', null, track),
+        h('dt', null, 'Total'), h('dd', { className: 'money' }, money(total)),
+        h('dt', null, 'Saldo atual'), h('dd', null, money(balance))),
+      h('p', { className: 'app-note' }, 'A campanha passa por revisão do BlogSim antes de entrar no ar. O valor sai do seu saldo agora e volta se ela for recusada.'),
+      err ? h('div', { className: 'app-actions' }, h('p', { className: 'app-error', role: 'alert' }, err), h(B.Button, { variant: 'secondary', size: 'sm', onClick: () => go('Faturamento') }, 'Ir para Faturamento')) : null);
+
+    return h(Page, { title: 'Criar campanha', subtitle: `Passo ${step + 1} de ${STEPS.length} · ${STEPS[step]}`, action: h(B.Button, { variant: 'ghost', onClick: () => go('Campanhas') }, 'Cancelar') },
+      h('ol', { className: 'app-steps', 'aria-label': 'Passos' }, STEPS.map((s, i) =>
+        h('li', { key: s, className: i < step ? 'is-done' : i === step ? 'is-current' : undefined, 'aria-current': i === step ? 'step' : undefined }, h('span', null, i + 1), s))),
+      h(Card, null, body,
+        h('div', { className: 'app-wizard-foot' },
+          step > 0 ? h(B.Button, { variant: 'secondary', onClick: back }, 'Voltar') : h('span'),
+          step < STEPS.length - 1 ? h(B.Button, { onClick: next }, 'Continuar') : h(B.Button, { variant: 'accent', onClick: publish }, `Pagar ${money(total)} e publicar`))));
+  }
+  function AdvPixel({ notify }) {
+    return h(Page, { title: 'Pixel e rastreamento', subtitle: 'Como o BlogSim mede os resultados das suas campanhas.' },
+      h('div', { className: 'app-cols' },
+        h(Card, { title: 'Pixel BlogSim', extra: h(B.Badge, { tone: 'success', dot: true }, 'Detectado') },
+          h('p', null, 'Mede as visitas no seu site. Instalado em passocerto.com.br, último sinal há 4 minutos.'),
+          h(Code, { label: 'Código do pixel', text: TRACK.visitas.code, notify })),
+        h(Card, { title: 'Link redirecionador', extra: h(B.Badge, { tone: 'success', dot: true }, 'Ativo') },
+          h('p', null, 'Conta cada conversa no WhatsApp iniciada a partir de um anúncio. 204 conversas nos últimos 14 dias.'),
+          h(Code, { label: 'Seu link', text: TRACK.conversas.code, notify })),
+        h(Card, { title: 'Pixel no checkout', extra: h(B.Badge, { tone: 'warning', dot: true }, 'Aguardando instalação') },
+          h('p', null, 'Mede as vendas. Instale na página de confirmação do pedido.'),
+          h(Code, { label: 'Código do checkout', text: TRACK.vendas.code, notify }),
+          h('div', null, h(B.Button, { variant: 'secondary', size: 'sm', onClick: () => notify('Ainda não encontramos o pixel no checkout. A verificação pode levar até 10 minutos.') }, 'Verificar instalação')))));
+  }
+
+  function AdvBilling({ balance, txns, onAdd, campaigns }) {
+    const [amt, setAmt] = useState('250');
+    const spent = sum(campaigns.filter(c => c.advertiser === ME), 'invested');
+    return h(Page, { title: 'Faturamento', subtitle: 'Saldo pré-pago usado para alugar espaços.' },
+      h('div', { className: 'app-metrics' },
+        h(B.MetricCard, { label: 'Saldo disponível', value: balance, format: 'money', hint: 'usado ao publicar campanhas' }),
+        h(B.MetricCard, { label: 'Investido em campanhas', value: spent, format: 'money', hint: 'desde o início' })),
+      h(Card, { title: 'Adicionar saldo' },
+        h(Chips, { label: 'Valor', value: amt, onChange: setAmt, options: [['100', 'R$ 100'], ['250', 'R$ 250'], ['500', 'R$ 500'], ['1000', 'R$ 1.000']] }),
+        h('div', null, h(B.Button, { variant: 'accent', onClick: () => onAdd(Number(amt)) }, 'Adicionar ' + money(Number(amt)))),
+        h('p', { className: 'app-note' }, 'Pix ou cartão. No protótipo o pagamento é simulado.')),
+      h(Section, { title: 'Movimentações' },
+        h(Table, { cols: [{ label: 'Data' }, { label: 'Descrição' }, { label: 'Valor', num: true }], empty: 'Nenhuma movimentação.',
+          rows: txns.map(t => [t.date, t.desc, (t.value > 0 ? '+' : '−') + money(Math.abs(t.value))]) })));
+  }
+  // ---------- Dono do blog ----------
+  function BlogPainel({ mySlots }) {
+    const rented = mySlots.filter(s => s.rent);
+    return h(Page, { title: 'Painel', subtitle: 'Últimos 14 dias · ' + MY_BLOG },
+      h('div', { className: 'app-metrics' },
+        h(B.MetricCard, { label: 'Receita', value: 2184, format: 'money', delta: 18, hint: 'vs. 14 dias anteriores', spark: spark(DAILY.revenue) }),
+        h(B.MetricCard, { label: 'Visualizações dos anúncios', value: 96400, format: 'count', delta: 9.5, hint: 'vs. 14 dias anteriores' }),
+        h(B.MetricCard, { label: 'Cliques', value: 2870, format: 'count', delta: 4.2, hint: 'vs. 14 dias anteriores' }),
+        h(B.MetricCard, { label: 'CTR', value: '2,98%', hint: 'cliques ÷ visualizações' })),
+      h(Card, { title: 'Receita por dia' }, h(BarChart, { data: DAILY.revenue, isMoney: true, label: 'Receita por dia nos últimos 14 dias' })),
+      h(Section, { title: 'Anúncios no seu blog agora' },
+        h(Table, { cols: [{ label: 'Anunciante' }, { label: 'Espaço' }, { label: 'Até' }, { label: 'Valor por semana', num: true }], empty: 'Nenhum espaço alugado agora.',
+          rows: rented.map(s => [s.rent.adv, PLACE[s.placement], s.rent.until, money(s.price)]) })));
+  }
+
+  function SlotEditor({ slot, onChange, notify }) {
+    const [price, setPrice] = useState(String(slot.price).replace('.', ','));
+    const value = Number(price.replace(/\./g, '').replace(',', '.'));
+    const bad = !(value >= 50);
+    const status = slot.rent ? h(B.Badge, { tone: 'accent', dot: true }, 'Alugado até ' + slot.rent.until)
+      : slot.active ? h(B.Badge, { tone: 'success', dot: true }, 'Disponível') : h(B.Badge, { dot: true }, 'Pausado');
+    return h(Card, { title: PLACE[slot.placement], extra: status },
+      slot.rent ? h('p', null, 'Anunciante: ' + slot.rent.adv + '.') : h('p', null, slot.active ? 'Aparece para anunciantes em Explorar blogs.' : 'Não aparece para anunciantes enquanto estiver pausado.'),
+      h(B.TextField, { id: 'preco-' + slot.id, label: 'Preço', prefix: 'R$', suffix: '/semana', inputMode: 'decimal', value: price, onChange: e => setPrice(e.target.value), error: bad ? 'O preço mínimo é R$ 50,00 por semana.' : undefined, hint: 'Vale para os próximos aluguéis.' }),
+      h('div', { className: 'app-actions' },
+        h(B.Button, { size: 'sm', disabled: bad || value === slot.price, onClick: () => { onChange({ ...slot, price: value }); notify('Preço atualizado'); } }, 'Salvar preço'),
+        h(B.Button, { size: 'sm', variant: 'secondary', disabled: !!slot.rent, onClick: () => { onChange({ ...slot, active: !slot.active }); notify(slot.active ? 'Espaço pausado' : 'Espaço ativado'); } }, slot.active ? 'Pausar espaço' : 'Ativar espaço')),
+      slot.rent ? h('p', { className: 'app-note' }, 'Espaços alugados só podem ser pausados depois do fim do aluguel.') : null);
+  }
+
+  const EXAMPLE_ADS = {
+    [ME]: { title: 'Tênis de corrida com 30% off', text: 'Frete grátis para todo o Brasil até domingo.', cta: 'Comprar agora' },
+    'Clínica Sorriso Leve': { title: 'Avaliação odontológica gratuita', text: 'Agende pelo WhatsApp no melhor horário para você.', cta: 'Chamar no WhatsApp' }
+  };
+
+  function SpacesPreview({ mySlots }) {
+    const [pv, setPv] = useState(mySlots[0] && mySlots[0].id);
+    const cur = mySlots.find(s => s.id === pv) || mySlots[0];
+    if (!cur) return null;
+    const ad = cur.rent ? (EXAMPLE_ADS[cur.rent.adv] || { title: cur.rent.adv, text: '', cta: 'Saiba mais' })
+      : { empty: true, title: 'Espaço disponível', text: 'Quando alguém alugar este espaço, o anúncio aparece aqui.' };
+    return h(Card, { title: 'Prévia no seu blog' },
+      h('p', null, 'É assim que seus leitores veem os anúncios. O script do BlogSim coloca cada anúncio no espaço alugado.'),
+      h(Chips, { label: 'Espaço', value: cur.id, onChange: setPv, options: mySlots.map(s => [s.id, PLACE[s.placement] + (s.rent ? ' · alugado' : s.active ? ' · livre' : ' · pausado')]) }),
+      h(BlogPreview, { blog: MY_BLOG, placement: cur.placement, ad }));
+  }
+
+  function BlogEspacos({ mySlots, setMySlots, notify }) {
+    const missing = Object.keys(PLACE).filter(p => !mySlots.some(s => s.placement === p));
+    const update = s => setMySlots(list => list.map(x => x.id === s.id ? s : x));
+    function add(p) { setMySlots(list => [...list, { id: 'm' + Date.now(), placement: p, price: 200, active: true, rent: null }]); notify('Espaço ' + PLACE[p] + ' criado'); }
+    return h(Page, { title: 'Meus espaços', subtitle: 'Onde os anúncios aparecem no ' + MY_BLOG + ' e quanto custam.' },
+      h('div', { className: 'app-cols' }, mySlots.map(s => h(SlotEditor, { key: s.id, slot: s, onChange: update, notify }))),
+      h(SpacesPreview, { mySlots }),
+      missing.length ? h(Card, { title: 'Adicionar espaço' },
+        h('p', null, 'Cada espaço novo aparece para os anunciantes assim que você o cria.'),
+        h('div', { className: 'app-actions' }, missing.map(p => h(B.Button, { key: p, variant: 'secondary', size: 'sm', onClick: () => add(p) }, 'Adicionar ' + PLACE[p])))) : null);
+  }
+
+  function BlogReceita({ bloggerBalance, onWithdraw, payouts, pct }) {
+    const mine = payouts.filter(p => p.blog === MY_BLOG);
+    return h(Page, { title: 'Receita', subtitle: 'O que seus espaços renderam e seus saques.' },
+      h('div', { className: 'app-metrics' },
+        h(B.MetricCard, { label: 'Saldo disponível', value: bloggerBalance, format: 'money', hint: 'pronto para saque' }),
+        h(B.MetricCard, { label: 'A liberar', value: 544, format: 'money', hint: 'aluguéis ainda em andamento' }),
+        h(B.MetricCard, { label: 'Recebido em 2026', value: 18920, format: 'money', delta: 32, hint: 'vs. 2025' })),
+      h(Card, { title: 'Sacar' },
+        h('p', null, `Você recebe o valor dos aluguéis menos a comissão de ${pct}% do BlogSim. O saque cai na sua conta em até 2 dias úteis.`),
+        h('div', null, h(B.Button, { variant: 'accent', disabled: bloggerBalance <= 0, onClick: onWithdraw }, bloggerBalance > 0 ? 'Solicitar saque de ' + money(bloggerBalance) : 'Sem saldo para sacar'))),
+      h(Section, { title: 'Saques' },
+        h(Table, { cols: [{ label: 'Solicitado em' }, { label: 'Status' }, { label: 'Valor', num: true }], empty: 'Nenhum saque ainda.',
+          rows: mine.map(p => [p.date, p.status === 'pago' ? h(B.Badge, { tone: 'success', dot: true }, 'Pago') : h(B.Badge, { tone: 'warning', dot: true }, 'Em processamento'), money(p.value)]) })));
+  }
+
+  function BlogInsights() {
+    return h(Page, { title: 'Insights', subtitle: 'Onde seus leitores mais clicam em anúncios.' },
+      h('div', { className: 'app-metrics' },
+        h(B.MetricCard, { label: 'Leitores por mês', value: 42000, format: 'count', delta: 6.3, hint: 'vs. mês anterior' }),
+        h(B.MetricCard, { label: 'Espaço mais alugado', value: 'Lateral', hint: '9 de 10 semanas alugado' }),
+        h(B.MetricCard, { label: 'Nicho', value: 'Viagem', hint: '14 anunciantes buscaram este mês' })),
+      h(Section, { title: 'Posts com mais cliques em anúncios' },
+        h(Table, { cols: [{ label: 'Post' }, { label: 'Visualizações', num: true }, { label: 'Cliques', num: true }, { label: 'CTR', num: true }], empty: '',
+          rows: POSTS.map(([t, v, c]) => [t, count(v), count(c), (c / v * 100).toFixed(2).replace('.', ',') + '%']) })));
+  }
+
+  function BlogScript({ notify }) {
+    return h(Page, { title: 'Instalar script', subtitle: 'Instale este código no seu blog para os anúncios aparecerem nos espaços alugados.' },
+      h(Card, { title: 'Script do BlogSim', extra: h(B.Badge, { tone: 'success', dot: true }, 'Detectado em viagemcomcrianca.com.br') },
+        h('ol', { className: 'app-ol' },
+          h('li', null, 'Copie o código abaixo.'),
+          h('li', null, 'Cole no cabeçalho do seu blog, antes do fechamento da tag head. No WordPress, use um plugin de cabeçalho.'),
+          h('li', null, 'Clique em Verificar instalação.')),
+        h(Code, { label: 'Código', text: '<script async src="https://cdn.blogsim.com.br/slots.js" data-blog="BL-1042"></' + 'script>', notify }),
+        h('div', null, h(B.Button, { variant: 'secondary', onClick: () => notify('Script encontrado. Seus espaços estão no ar.') }, 'Verificar instalação'))));
+  }
+
+  // ---------- Admin master ----------
+  function ReviewList({ campaigns, setCampaigns, notify }) {
+    const queue = campaigns.filter(c => c.status === 'revisao');
+    const decide = (id, status, msg) => { setCampaigns(list => list.map(c => c.id === id ? { ...c, status } : c)); notify(msg); };
+    if (!queue.length) return h('p', { className: 'app-empty' }, 'Nenhuma campanha aguardando revisão.');
+    return h('div', { className: 'app-review' }, queue.map(c => h('div', { key: c.id, className: 'app-review-row' },
+      h('div', { className: 'app-review-main' }, h('b', null, c.name), h('span', null, `${c.advertiser} · ${money(c.invested)}`), c.blogNames ? h('span', null, 'Blogs: ' + c.blogNames.join(', ')) : null),
+      h('div', { className: 'app-actions' },
+        h(B.Badge, { tone: OBJ_TONE[c.objective] }, OBJ_LABEL[c.objective]),
+        h(B.Button, { size: 'sm', onClick: () => decide(c.id, 'ativa', 'Campanha aprovada e no ar') }, 'Aprovar'),
+        h(B.Button, { size: 'sm', variant: 'secondary', onClick: () => decide(c.id, 'encerrada', 'Campanha recusada. O anunciante foi avisado.') }, 'Recusar')))));
+  }
+
+  function AdminVisao({ campaigns, setCampaigns, blogs, pct, notify }) {
+    const volume = sum(campaigns, 'invested');
+    const advertisers = new Set(campaigns.map(c => c.advertiser)).size;
+    const pending = blogs.filter(b => b.status === 'pendente').length;
+    return h(Page, { title: 'Visão geral', subtitle: 'Outubro de 2026 · comissão de ' + pct + '%' },
+      h('div', { className: 'app-metrics' },
+        h(B.MetricCard, { label: 'Comissão da plataforma', value: volume * pct / 100, format: 'money', delta: 21, hint: 'vs. setembro', spark: spark(DAILY.volume) }),
+        h(B.MetricCard, { label: 'Volume em aluguéis', value: volume, format: 'money', delta: 21, hint: 'vs. setembro' }),
+        h(B.MetricCard, { label: 'Blogs ativos', value: blogs.length - pending, format: 'count', hint: pending ? pending + ' aguardando aprovação' : 'nenhum pendente' }),
+        h(B.MetricCard, { label: 'Anunciantes', value: advertisers, format: 'count', hint: 'com pelo menos uma campanha' })),
+      h(Card, { title: 'Volume em aluguéis por dia' }, h(BarChart, { data: DAILY.volume, isMoney: true, label: 'Volume em aluguéis por dia nos últimos 14 dias' })),
+      h(Section, { title: 'Campanhas aguardando revisão' }, h(ReviewList, { campaigns, setCampaigns, notify })));
+  }
+
+  function AdminBlogs({ blogs, setBlogs, notify }) {
+    const approve = id => { setBlogs(list => list.map(b => b.id === id ? { ...b, status: 'ativo' } : b)); notify('Blog aprovado. Os espaços já aparecem para os anunciantes.'); };
+    return h(Page, { title: 'Blogs parceiros', subtitle: blogs.length + ' blogs cadastrados' },
+      h(Table, { cols: [{ label: 'Blog' }, { label: 'Nicho' }, { label: 'Dono' }, { label: 'Leitores/mês', num: true }, { label: 'Espaços', num: true }, { label: 'Status' }], empty: '',
+        rows: blogs.map(b => [h('b', null, b.name), h(B.Badge, null, b.niche), b.owner, count(b.audience), b.slots,
+          b.status === 'ativo' ? h(B.Badge, { tone: 'success', dot: true }, 'Ativo')
+            : h('div', { className: 'app-actions' }, h(B.Badge, { tone: 'warning', dot: true }, 'Pendente'), h(B.Button, { size: 'sm', onClick: () => approve(b.id) }, 'Aprovar'))]) }));
+  }
+
+  function AdminAnunciantes({ campaigns }) {
+    const by = {};
+    campaigns.forEach(c => { const a = by[c.advertiser] || (by[c.advertiser] = { n: 0, live: 0, inv: 0 }); a.n++; a.inv += c.invested; if (c.status === 'ativa') a.live++; });
+    return h(Page, { title: 'Anunciantes', subtitle: Object.keys(by).length + ' anunciantes' },
+      h(Table, { cols: [{ label: 'Empresa' }, { label: 'Campanhas', num: true }, { label: 'Ativas', num: true }, { label: 'Investido', num: true }], empty: '',
+        rows: Object.entries(by).sort((a, b) => b[1].inv - a[1].inv).map(([name, a]) => [h('b', null, name), a.n, a.live, money(a.inv)]) }));
+  }
+
+  function AdminCampanhas({ campaigns, setCampaigns, notify }) {
+    return h(Page, { title: 'Campanhas', subtitle: campaigns.length + ' campanhas na plataforma' },
+      h(Section, { title: 'Aguardando revisão' }, h(ReviewList, { campaigns, setCampaigns, notify })),
+      h(Section, { title: 'Todas' }, h(B.CampaignTable, { rows: campaigns.map(c => ({ ...c, name: c.name + ' · ' + c.advertiser })) })));
+  }
+
+  function AdminRepasses({ payouts, setPayouts, notify }) {
+    const pay = id => { setPayouts(list => list.map(p => p.id === id ? { ...p, status: 'pago' } : p)); notify('Repasse marcado como pago'); };
+    const pending = payouts.filter(p => p.status === 'pendente');
+    return h(Page, { title: 'Repasses', subtitle: pending.length + ' saques pendentes · ' + money(sum(pending, 'value')) },
+      h(Table, { cols: [{ label: 'Blog' }, { label: 'Solicitado em' }, { label: 'Valor', num: true }, { label: 'Status' }], empty: 'Nenhum saque solicitado.',
+        rows: payouts.map(p => [h('b', null, p.blog), p.date, money(p.value),
+          p.status === 'pago' ? h(B.Badge, { tone: 'success', dot: true }, 'Pago')
+            : h('div', { className: 'app-actions' }, h(B.Badge, { tone: 'warning', dot: true }, 'Pendente'), h(B.Button, { size: 'sm', onClick: () => pay(p.id) }, 'Marcar como pago'))]) }));
+  }
+
+  function AdminConfig({ pct, setPct, notify }) {
+    const [draft, setDraft] = useState(String(pct));
+    const [min, setMin] = useState('50,00');
+    const n = Number(draft.replace(',', '.'));
+    const bad = !(draft.trim() !== '' && n >= 0 && n <= 50);
+    return h(Page, { title: 'Configurações', subtitle: 'Regras que valem para toda a plataforma.' },
+      h(Card, { title: 'Comissão e limites' },
+        h('div', { className: 'app-fields' },
+          h(B.TextField, { id: 'cfg-comissao', label: 'Comissão do BlogSim', suffix: '%', inputMode: 'decimal', value: draft, onChange: e => setDraft(e.target.value), error: bad ? 'Use um valor entre 0 e 50%.' : undefined, hint: 'Descontada de cada aluguel antes do repasse ao blog.' }),
+          h(B.TextField, { id: 'cfg-minimo', label: 'Preço mínimo por espaço', prefix: 'R$', suffix: '/semana', inputMode: 'decimal', value: min, onChange: e => setMin(e.target.value) })),
+        h('div', null, h(B.Button, { disabled: bad, onClick: () => { setPct(n); notify('Configurações salvas'); } }, 'Salvar configurações'))));
+  }
+  // ---------- Site e login ----------
+  const ICON = d => h('svg', { width: 22, height: 22, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round', 'aria-hidden': true }, h('path', { d }));
+  const ROLE_LABEL = { anunciante: 'Anunciante', blogueiro: 'Dono do blog', admin: 'Admin master' };
+  const ROLE_TONE = { anunciante: 'brand', blogueiro: 'teal', admin: 'neutral' };
+  const START_PAGE = { anunciante: 'Painel', blogueiro: 'Painel', admin: 'Visão geral' };
+  // Contas de teste do protótipo (não há cadastro nem servidor).
+  const ACCOUNTS = [
+    { email: 'anunciante@blogsim.com.br', password: 'demo123', role: 'anunciante' },
+    { email: 'blog@blogsim.com.br', password: 'demo123', role: 'blogueiro' },
+    { email: 'admin@blogsim.com.br', password: 'demo123', role: 'admin' }
+  ];
+  const Wordmark = () => h('span', { className: 'bs-wordmark' }, 'Blog', h('b', null, 'Sim'));
+
+  // Animação da landing: o anunciante cria a campanha e o anúncio aparece no blog.
+  const DEMO_MS = [1300, 1300, 2600, 1800, 800, 1700, 2400];
+  const DEMO_TOTAL = DEMO_MS.reduce((a, b) => a + b, 0);
+  const DEMO_STEPS = ['Escolha o blog', 'Monte o anúncio', 'Publique', 'O anúncio aparece no blog'];
+  const DEMO_AD = { title: 'Tênis de corrida com 30% off', text: 'Frete grátis até domingo.', cta: 'Comprar agora', imgLabel: '30% OFF' };
+
+  function HeroDemo() {
+    const reduce = (() => { try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } })();
+    const [ms, setMs] = useState(reduce ? DEMO_TOTAL - 1 : 0);
+    const [paused, setPaused] = useState(reduce);
+    useEffect(() => {
+      if (paused) return;
+      const id = setInterval(() => setMs(m => (m + 80) % DEMO_TOTAL), 80);
+      return () => clearInterval(id);
+    }, [paused]);
+
+    let phase = 0, local = ms, acc = 0;
+    for (let i = 0; i < DEMO_MS.length; i++) { if (ms < acc + DEMO_MS[i]) { phase = i; local = ms - acc; break; } acc += DEMO_MS[i]; }
+    const step = phase <= 1 ? 0 : phase === 2 ? 1 : phase === 3 ? 2 : 3;
+    const onBlog = phase >= 4;
+    const typed = DEMO_AD.title.slice(0, phase > 2 ? 99 : phase === 2 ? Math.floor(Math.min(1, local / 1800) * DEMO_AD.title.length) : 0);
+
+    const row = (name, meta, price, sel, pressed) => h('div', { className: 'hd-row' + (sel ? ' is-sel' : '') },
+      h('div', { className: 'hd-row-main' }, h('b', null, name), h('span', null, meta), h('span', { className: 'app-money' }, price)),
+      h('span', { className: 'hd-btn ' + (sel ? 'is-secondary' : 'is-accent') + (pressed ? ' is-pressed' : '') }, sel ? 'Selecionado' : 'Alugar espaço'));
+
+    let panel;
+    if (phase <= 1) panel = h(React.Fragment, null,
+      h('div', { className: 'hd-title' }, 'Onde seu anúncio vai aparecer?'),
+      h('div', { className: 'hd-chips' }, h('span', { className: 'hd-chip is-on' }, 'Fitness'), h('span', { className: 'hd-chip' }, 'Finanças'), h('span', { className: 'hd-chip' }, 'Viagem')),
+      row('Treino em Casa', 'Lateral · 61 mil leitores por mês', 'R$ 300,00 por semana', phase === 1, phase === 1 && local < 350),
+      row('Grana no Bolso', 'Banner topo · 73 mil leitores por mês', 'R$ 520,00 por semana', false, false));
+    else if (phase === 2) panel = h(React.Fragment, null,
+      h('div', { className: 'hd-title' }, 'Monte o anúncio'),
+      h('div', { className: 'hd-field' }, h('span', null, 'Título'), h('div', { className: 'hd-input' }, typed, h('i', { className: 'hd-caret' }))),
+      h(AdCard, { ad: { ...DEMO_AD, title: typed || ' ', text: local > 1900 ? DEMO_AD.text : '\u00a0' } }));
+    else panel = h(React.Fragment, null,
+      h('div', { className: 'hd-title' }, 'Revise e publique'),
+      h('dl', { className: 'app-dl' },
+        h('dt', null, 'Espaço'), h('dd', null, 'Treino em Casa · Lateral'),
+        h('dt', null, 'Objetivo'), h('dd', null, 'Vendas'),
+        h('dt', null, 'Total'), h('dd', { className: 'money' }, 'R$ 600,00')),
+      h('span', { className: 'hd-btn is-accent is-wide' + (local > 300 && local < 650 ? ' is-pressed' : '') }, 'Pagar R$ 600,00 e publicar'),
+      local >= 650 ? h('div', { className: 'hd-toast' }, 'Campanha no ar') : null);
+
+    const blog = h('div', { className: 'pv-page hd-blog' },
+      h('div', { className: 'pv-head' }, h('b', null, 'Treino em Casa'), h('span', null, 'Início · Treinos')),
+      h('div', { className: 'pv-body' },
+        h('div', { className: 'pv-post' }, h('div', { className: 'pv-title' }, BLOG_POST['Treino em Casa']), ...[0, 1, 2, 3, 4, 5].map(i => h('div', { key: i, className: 'pv-line' }))),
+        h('div', { className: 'pv-side' },
+          phase >= 5 ? h('div', { className: 'hd-ad-in' + (phase === 6 && local < 350 ? ' is-clicked' : '') }, h(AdCard, { ad: DEMO_AD, vertical: true })) : h('div', { className: 'pv-side-box hd-slot' }))),
+      phase === 6 && local >= 350 ? h('div', { className: 'hd-sale' }, '+1 venda contada') : null);
+
+    return h('div', { className: 'hd' },
+      h('div', { className: 'hd-frame', role: 'img', 'aria-label': 'Animação: o anunciante escolhe o blog Treino em Casa, escreve o anúncio, publica, e o anúncio aparece na lateral do blog. Um clique no anúncio conta uma venda.' },
+        h('div', { className: 'hd-chrome', 'aria-hidden': true }, onBlog ? 'treinoemcasa.com.br' : 'BlogSim · Criar campanha'),
+        h('div', { className: 'hd-stage', 'aria-hidden': true },
+          h('div', { className: 'hd-scene hd-panel' + (onBlog ? '' : ' is-on') }, panel),
+          h('div', { className: 'hd-scene' + (onBlog ? ' is-on' : '') }, blog))),
+      h('div', { className: 'hd-foot' },
+        h('ol', { className: 'hd-steps' }, DEMO_STEPS.map((s, i) => h('li', { key: s, className: i === step ? 'is-on' : i < step ? 'is-done' : undefined }, s))),
+        h('button', { type: 'button', className: 'hd-pause', onClick: () => setPaused(p => !p) }, paused ? 'Reproduzir' : 'Pausar')));
+  }
+
+  const nicheOf = name => (BLOGS.find(b => b.name === name) || {}).niche;
+
+  // Ilustração: uma página de blog em miniatura com os espaços de anúncio marcados.
+  function MiniPage({ blog, slots = [], tags = {}, delay = 0, large }) {
+    const has = p => slots.includes(p);
+    const slot = p => h('div', { className: 'mp-slot mp-' + p, style: { '--d': (delay + slots.indexOf(p) * 0.3) + 's' } },
+      h('span', null, 'Anúncio'), tags[p] ? h('em', null, tags[p]) : null);
+    return h('div', { className: 'mp' + (large ? ' is-large' : '') },
+      h('div', { className: 'mp-top' }, h('b', null, blog), h('i'), h('i'), h('i')),
+      has('banner') ? slot('banner') : null,
+      h('div', { className: 'mp-body' },
+        h('div', { className: 'mp-post' },
+          h('div', { className: 'mp-h' }, BLOG_POST[blog] || 'Post da semana'),
+          h('i'), h('i'), h('i', { className: 's' }),
+          has('inline') ? slot('inline') : null,
+          h('i'), h('i', { className: 's' })),
+        h('div', { className: 'mp-side' }, has('lateral') ? slot('lateral') : h('i', { className: 'box' }), h('i', { className: 'box' }))),
+      has('popup') ? h('div', { className: 'mp-pop' }, slot('popup')) : null);
+  }
+
+  const ILL = {
+    visitas: h('svg', { className: 'lp-ill', viewBox: '0 0 72 56', 'aria-hidden': true },
+      h('rect', { className: 'ill-page', x: 2, y: 4, width: 60, height: 46, rx: 6 }),
+      h('rect', { className: 'ill-line', x: 2, y: 4, width: 60, height: 10, rx: 6 }),
+      h('rect', { className: 'ill-line', x: 9, y: 21, width: 34, height: 4, rx: 2 }),
+      h('rect', { className: 'ill-line', x: 9, y: 29, width: 26, height: 4, rx: 2 }),
+      h('rect', { className: 'ill-line', x: 9, y: 37, width: 30, height: 4, rx: 2 }),
+      h('path', { className: 'ill-brand ill-edge', d: 'M44 26l20 8-8.5 2.6L52 45z' })),
+    conversas: h('svg', { className: 'lp-ill', viewBox: '0 0 72 56', 'aria-hidden': true },
+      h('path', { className: 'ill-teal-soft', d: 'M4 10a6 6 0 0 1 6-6h30a6 6 0 0 1 6 6v12a6 6 0 0 1-6 6H16l-8 6v-6.6A6 6 0 0 1 4 22z' }),
+      h('path', { className: 'ill-teal', d: 'M26 30a6 6 0 0 1 6-6h30a6 6 0 0 1 6 6v12a6 6 0 0 1-6 6v6l-8-6H32a6 6 0 0 1-6-6z' }),
+      h('circle', { className: 'ill-on', cx: 38, cy: 36, r: 2.4 }), h('circle', { className: 'ill-on', cx: 47, cy: 36, r: 2.4 }), h('circle', { className: 'ill-on', cx: 56, cy: 36, r: 2.4 })),
+    vendas: h('svg', { className: 'lp-ill', viewBox: '0 0 72 56', 'aria-hidden': true },
+      h('path', { className: 'ill-page', d: 'M14 4h36v48l-6-4-6 4-6-4-6 4-6-4-6 4z' }),
+      h('rect', { className: 'ill-line', x: 20, y: 12, width: 24, height: 4, rx: 2 }),
+      h('rect', { className: 'ill-line', x: 20, y: 20, width: 18, height: 4, rx: 2 }),
+      h('rect', { className: 'ill-accent', x: 20, y: 32, width: 24, height: 6, rx: 3 }),
+      h('circle', { className: 'ill-accent', cx: 56, cy: 14, r: 10 }),
+      h('path', { className: 'ill-check', d: 'M51 14l3.5 3.5L61 11' }))
+  };
+
+
+  function Landing({ onLogin, blogs }) {
+    const active = blogs.filter(b => b.status === 'ativo');
+    const partners = active.map(b => {
+      const own = SLOTS.filter(s => s.blogId === b.id);
+      return { ...b, from: Math.min(...own.map(s => s.price)), place: own[0].placement };
+    });
+    const readers = COMPACT.format(sum(active, 'audience'));
+    const ctas = h('div', { className: 'app-actions' },
+      h(B.Button, { onClick: () => onLogin('anunciante') }, 'Quero anunciar'),
+      h(B.Button, { variant: 'secondary', onClick: () => onLogin('blogueiro') }, 'Tenho um blog'));
+    const measures = [
+      ['visitas', 'Visitas no site', 'O pixel do BlogSim no seu site conta cada leitor que chegou pelo anúncio.', '9.870 visitas'],
+      ['conversas', 'Conversas no WhatsApp', 'O link redirecionador abre o seu WhatsApp e registra a conversa antes.', '204 conversas'],
+      ['vendas', 'Vendas', 'O pixel na página de confirmação registra cada compra que começou num blog.', '86 vendas']
+    ];
+    return h(React.Fragment, null,
+      h('header', { className: 'lp-nav' }, h('div', { className: 'lp-wrap lp-nav-in' },
+        Wordmark(),
+        h('nav', { className: 'lp-links', 'aria-label': 'Seções' },
+          h('a', { href: '#como-funciona' }, 'Como funciona'),
+          h('a', { href: '#para-blogs' }, 'Para blogs'),
+          h('a', { href: '#blogs-parceiros' }, 'Blogs parceiros')),
+        h(B.Button, { variant: 'secondary', size: 'sm', onClick: () => onLogin() }, 'Entrar'))),
+      h('main', null,
+        h('section', { className: 'lp-hero lp-wrap' },
+          h('div', { className: 'lp-hero-text' },
+            h('h1', null, 'Seu anúncio ', h('span', { className: 'lp-slotword' }, 'no meio do post'), ' que o seu cliente está lendo.'),
+            h('p', null, 'O BlogSim junta blogs de vários nichos num lugar só. Você escolhe o blog e o espaço, paga por semana e vê quantas visitas, conversas e vendas cada anúncio trouxe.'),
+            ctas,
+            h('span', { className: 'lp-proof' }, `${active.length} blogs parceiros · ${readers} leitores por mês`)),
+          h(HeroDemo)),
+        h('section', { id: 'como-funciona', className: 'lp-section lp-wrap' },
+          h('h2', null, 'Você escolhe o que conta como resultado.'),
+          h('div', { className: 'lp-measures' }, measures.map(([k, title, text, eg]) => h('div', { key: k, className: 'lp-measure lp-m-' + k },
+            ILL[k], h('b', null, title), h('p', null, text), h('span', { className: 'lp-eg' }, 'Exemplo: ' + eg))))),
+
+        h('section', { id: 'para-blogs', className: 'lp-band' }, h('div', { className: 'lp-wrap lp-blogger' },
+          h('div', null,
+            h('h2', null, 'Tem um blog? Alugue os espaços dele.'),
+            h('p', null, 'Você marca onde os anúncios podem aparecer e quanto custa cada espaço por semana. O BlogSim traz os anunciantes e repassa o valor, já descontada a comissão.'),
+            h('ul', { className: 'lp-checks' }, ['Instale um script no blog uma vez.', 'Pause um espaço quando quiser.', 'Peça o saque pelo painel.'].map(x => h('li', { key: x }, x))),
+            h(B.Button, { variant: 'secondary', onClick: () => onLogin('blogueiro') }, 'Cadastrar meu blog')),
+          h('div', { role: 'img', 'aria-label': 'Página do blog Viagem com Criança com três espaços à venda: banner no topo por R$ 350 por semana, lateral por R$ 280 e no meio do post por R$ 160.' },
+            h(MiniPage, { blog: 'Viagem com Criança', large: true, slots: ['banner', 'lateral', 'inline'], tags: { banner: 'R$ 350/semana', lateral: 'R$ 280/semana', inline: 'R$ 160/semana' } })))),
+
+        h('section', { id: 'blogs-parceiros', className: 'lp-section lp-wrap' },
+          h('h2', null, 'Blogs parceiros'),
+          h('p', { className: 'lp-sub' }, 'Onde dá para anunciar hoje. Preço do espaço mais barato de cada blog.'),
+          h('div', { className: 'lp-blogs' }, partners.map(b => h('div', { key: b.id, className: 'lp-blog' },
+            h('div', { 'aria-hidden': true }, h(MiniPage, { blog: b.name, slots: [b.place] })),
+            h('div', { className: 'lp-blog-head' }, h('b', null, b.name), h(B.Badge, null, b.niche)),
+            h('span', null, count(b.audience) + ' leitores por mês'),
+            h('span', { className: 'app-money' }, 'a partir de ' + money(b.from) + ' por semana'))))),
+
+        h('section', { className: 'lp-wrap lp-close-wrap' }, h('div', { className: 'lp-close' },
+          h('span', { className: 'lp-close-tag' }, 'Espaço disponível'),
+          h('h2', null, 'Este espaço pode ser do seu anúncio.'),
+          h('p', null, 'Ou, se você tem um blog, do anúncio de alguém que quer falar com os seus leitores.'),
+          ctas))),
+      h('footer', { className: 'lp-foot lp-wrap' }, 'BlogSim · protótipo para validação · outubro de 2026'));
+  }
+
+  function Login({ suggest, onLogin, onBack }) {
+    const [email, setEmail] = useState('');
+    const [pw, setPw] = useState('');
+    const [err, setErr] = useState('');
+    function submit(e) {
+      e.preventDefault();
+      const acc = ACCOUNTS.find(a => a.email === email.trim().toLowerCase() && a.password === pw);
+      if (!acc) { setErr('E-mail ou senha incorretos. Confira os dados ou use uma das contas de teste abaixo.'); return; }
+      onLogin(acc.role);
+    }
+    function fill(a) { setEmail(a.email); setPw(a.password); setErr(''); }
+    return h('main', { className: 'lg' },
+      h('div', { className: 'lg-card' },
+        h('button', { type: 'button', className: 'lg-back', onClick: onBack }, '← Voltar para o site'),
+        Wordmark(),
+        h('h1', null, 'Entrar'),
+        h('form', { className: 'lg-form', onSubmit: submit, noValidate: true },
+          h(B.TextField, { id: 'login-email', label: 'E-mail', type: 'email', autoComplete: 'username', value: email, onChange: e => setEmail(e.target.value) }),
+          h(B.TextField, { id: 'login-senha', label: 'Senha', type: 'password', autoComplete: 'current-password', value: pw, onChange: e => setPw(e.target.value) }),
+          err ? h('p', { className: 'app-error', role: 'alert' }, err) : null,
+          h(B.Button, { type: 'submit', className: 'lg-submit' }, 'Entrar')),
+        h('div', { className: 'lg-demo' },
+          h('b', null, 'Contas de teste'),
+          h('p', null, 'O cadastro ainda não faz parte do protótipo. Clique numa conta para preencher e depois em Entrar. A senha de todas é demo123.'),
+          ACCOUNTS.map(a => h('button', { key: a.email, type: 'button', className: 'lg-acc' + (suggest === a.role ? ' is-suggested' : ''), onClick: () => fill(a) },
+            h(B.Badge, { tone: ROLE_TONE[a.role] }, ROLE_LABEL[a.role]), h('span', null, a.email))))),
+      h('div', { className: 'lg-art', 'aria-hidden': true },
+        h(MiniPage, { blog: 'Grana no Bolso', slots: ['banner'], delay: 0.3 }),
+        h(MiniPage, { blog: 'Treino em Casa', slots: ['lateral'], delay: 0.7 }),
+        h('p', null, 'Do outro lado do login: os seus blogs, campanhas e resultados.')));
+  }
+  // ---------- App ----------
+  function App() {
+    const [screen, setScreen] = useState(() => { try { return location.hash === '#entrar' ? 'login' : 'site'; } catch (e) { return 'site'; } });
+    const [suggest, setSuggest] = useState(null);
+    const [role, setRole] = useState('anunciante');
+    const [page, setPage] = useState('Painel');
+    const [campaigns, setCampaigns] = useState(INITIAL_CAMPAIGNS);
+    const [cart, setCart] = useState([]);
+    const [balance, setBalance] = useState(3000);
+    const [txns, setTxns] = useState(INITIAL_TXNS);
+    const [mySlots, setMySlots] = useState(INITIAL_MY_SLOTS);
+    const [payouts, setPayouts] = useState(INITIAL_PAYOUTS);
+    const [blogs, setBlogs] = useState(BLOGS.map(b => ({ id: b.id, name: b.name, niche: b.niche, owner: b.owner, audience: b.audience, slots: b.slots.length, status: b.status || 'ativo' })));
+    const [pct, setPct] = useState(20);
+    const [bloggerBalance, setBloggerBalance] = useState(1640);
+    const [toast, setToast] = useState(null);
+    const [menuOpen, setMenuOpen] = useState(false);
+
+    const notify = msg => setToast({ msg, k: Date.now() });
+    useEffect(() => { if (!toast) return; const t = setTimeout(() => setToast(null), 3200); return () => clearTimeout(t); }, [toast]);
+    useEffect(() => { if (!menuOpen) return; const f = e => { if (e.key === 'Escape') setMenuOpen(false); }; document.addEventListener('keydown', f); return () => document.removeEventListener('keydown', f); }, [menuOpen]);
+
+    const top = () => { try { window.scrollTo(0, 0); } catch (e) {} };
+    const go = p => { setMenuOpen(false); setPage(p); top(); };
+    function openLogin(r) { setSuggest(r || null); setScreen('login'); top(); }
+    function login(r) { setRole(r); setPage(START_PAGE[r]); setMenuOpen(false); setScreen('app'); top(); }
+    function logout() { setMenuOpen(false); setScreen('site'); top(); notify('Você saiu da sua conta.'); }
+
+    function publishCampaign(c) {
+      setCampaigns(list => [{ id: 'c' + Date.now(), name: c.name, advertiser: ME, objective: c.objective, status: 'revisao', invested: c.total, clicks: 0, results: 0, blogs: c.blogs, blogNames: c.blogNames }, ...list]);
+      setBalance(b => b - c.total);
+      setTxns(t => [{ date: TODAY, desc: `${c.name} · ${c.slots} ${c.slots > 1 ? 'espaços' : 'espaço'}`, value: -c.total }, ...t]);
+      setPage('Campanhas');
+      notify('Campanha enviada para revisão. Entre como admin para aprovar.');
+    }
+    function addBalance(v) {
+      setBalance(b => b + v);
+      setTxns(t => [{ date: TODAY, desc: 'Recarga via Pix (simulada)', value: v }, ...t]);
+      notify('Saldo adicionado: ' + money(v));
+    }
+    function withdraw() {
+      setPayouts(list => [{ id: 'r' + Date.now(), blog: MY_BLOG, value: bloggerBalance, date: TODAY, status: 'pendente' }, ...list]);
+      setBloggerBalance(0);
+      notify('Saque solicitado. O valor cai em até 2 dias úteis.');
+    }
+
+    const bar = h('div', { className: 'app-bar' }, h('span', null, h('b', null, 'Protótipo BlogSim'), ' · dados de exemplo, nada é salvo'));
+    const toastEl = h('div', { className: 'app-toast', role: 'status', 'aria-live': 'polite', hidden: !toast }, toast ? toast.msg : '');
+    if (screen === 'site') return h('div', { className: 'lp-root' }, bar, h(Landing, { onLogin: openLogin, blogs }), toastEl);
+    if (screen === 'login') return h('div', { className: 'lp-root' }, bar, h(Login, { suggest, onLogin: login, onBack: () => { setScreen('site'); top(); } }), toastEl);
+
+    const ctx = { go, notify, campaigns, setCampaigns, cart, setCart, balance, blogs };
+    const screens = {
+      anunciante: {
+        'Painel': () => h(AdvPainel, ctx),
+        'Campanhas': () => h(AdvCampanhas, ctx),
+        'Criar campanha': () => h(CreateCampaign, { ...ctx, onPublish: publishCampaign }),
+        'Explorar blogs': () => h(AdvExplorar, ctx),
+        'Pixel e rastreamento': () => h(AdvPixel, ctx),
+        'Faturamento': () => h(AdvBilling, { balance, txns, onAdd: addBalance, campaigns })
+      },
+      blogueiro: {
+        'Painel': () => h(BlogPainel, { mySlots }),
+        'Meus espaços': () => h(BlogEspacos, { mySlots, setMySlots, notify }),
+        'Receita': () => h(BlogReceita, { bloggerBalance, onWithdraw: withdraw, payouts, pct }),
+        'Insights': () => h(BlogInsights),
+        'Instalar script': () => h(BlogScript, { notify })
+      },
+      admin: {
+        'Visão geral': () => h(AdminVisao, { campaigns, setCampaigns, blogs, pct, notify }),
+        'Blogs parceiros': () => h(AdminBlogs, { blogs, setBlogs, notify }),
+        'Anunciantes': () => h(AdminAnunciantes, { campaigns }),
+        'Campanhas': () => h(AdminCampanhas, { campaigns, setCampaigns, notify }),
+        'Repasses': () => h(AdminRepasses, { payouts, setPayouts, notify }),
+        'Configurações': () => h(AdminConfig, { pct, setPct, notify })
+      }
+    };
+    const screenFn = screens[role][page];
+
+    return h('div', { className: 'app-root' },
+      bar,
+      h('div', { className: 'app-shell' },
+        h('header', { className: 'app-mobilebar' },
+          Wordmark(),
+          h('button', { type: 'button', className: 'app-burger', 'aria-expanded': menuOpen, 'aria-controls': 'app-nav', 'aria-label': 'Abrir menu', onClick: () => setMenuOpen(true) }, ICON('M4 6h16M4 12h16M4 18h16'))),
+        menuOpen ? h('div', { className: 'app-backdrop', onClick: () => setMenuOpen(false) }) : null,
+        h('aside', { id: 'app-nav', className: 'app-side' + (menuOpen ? ' is-open' : '') },
+          h('button', { type: 'button', className: 'app-drawer-close', 'aria-label': 'Fechar menu', onClick: () => setMenuOpen(false) }, ICON('M6 6l12 12M18 6L6 18')),
+          h(B.SideNav, { key: role, role, active: page === 'Criar campanha' ? 'Campanhas' : page, onNavigate: go, onLogout: logout, user: USER[role] })),
+        h('main', { className: 'app-main', key: role + page }, h('div', { className: 'app-content' }, screenFn ? screenFn() : null))),
+      toastEl);
+  }
+
+  ReactDOM.createRoot(document.getElementById('app')).render(h(App));
+})();
+</script>
