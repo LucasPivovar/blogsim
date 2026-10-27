@@ -112,7 +112,8 @@
         p.placement !== 'lateral' ? h('rect', { className: 'bs-wf-text', x: 46, y: 16, width: 14, height: 30, rx: 2 }) : null,
         h('rect', { className: 'bs-wf-slot', x: r[0], y: r[1], width: r[2], height: r[3], rx: 2 })),
       h('div', { className: 'bs-slot-body' },
-        h('div', { className: 'bs-slot-head' }, h('h3', { className: 'bs-slot-blog' }, p.blog), p.niche ? h(Badge, null, p.niche) : null),
+        h('div', { className: 'bs-slot-head' }, p.logo ? (typeof p.logo === 'string' ? h('img', { className: 'bs-slot-logo', src: p.logo, alt: '' }) : h('span', { className: 'bs-slot-logo', style: { background: p.logo.color }, 'aria-hidden': true }, p.logo.text)) : null, h('h3', { className: 'bs-slot-blog' }, p.blog), p.niche ? h(Badge, null, p.niche) : null),
+        p.location ? h('div', { className: 'bs-slot-loc' }, h('svg', { width: 12, height: 12, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2.2, 'aria-hidden': true }, h('path', { d: 'M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z' }), h('circle', { cx: 12, cy: 9.5, r: 2.5 })), p.location) : null,
         h('div', { className: 'bs-slot-meta' }, pl.label + (p.audience ? ' · ' + count(p.audience) + ' leitores/mês' : '')),
         h('div', { className: 'bs-slot-price' }, h('strong', null, money(p.price)), ' / ' + (p.period || 'semana'))),
       h(Button, { variant: sel ? 'secondary' : 'accent', size: 'sm', 'aria-pressed': sel, onClick: toggle }, sel ? 'Selecionado' : 'Alugar espaço'));
@@ -141,9 +142,9 @@
   }
 
   var ROLES = {
-    admin: { label: 'Admin master', tone: 'neutral', items: ['Visão geral', 'Blogs parceiros', 'Anunciantes', 'Campanhas', 'Repasses', 'Configurações'] },
+    admin: { label: 'Admin master', tone: 'neutral', items: ['Visão geral', 'Blogs parceiros', 'Anunciantes', 'Campanhas', 'Saques', 'Configurações'] },
     anunciante: { label: 'Anunciante', tone: 'brand', items: ['Painel', 'Campanhas', 'Explorar blogs', 'Pixel e rastreamento', 'Faturamento'] },
-    blogueiro: { label: 'Dono do blog', tone: 'teal', items: ['Painel', 'Meus espaços', 'Receita', 'Insights', 'Instalar script'] }
+    blogueiro: { label: 'Blogueiro', tone: 'teal', items: ['Painel', 'Meus espaços', 'Receita', 'Insights', 'Instalar script'] }
   };
 
   function RoleSwitch(p) {

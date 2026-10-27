@@ -172,6 +172,9 @@ body { margin: 0; background: var(--surface-0); color: var(--ink); font-family: 
 .bs-nav-logout:hover { background: var(--surface-200); color: var(--ink); }
 .bs-nav-user:has(.bs-nav-logout) { flex-wrap: wrap; row-gap: var(--space-2); padding-top: var(--space-3); border-top: 1px solid var(--line); }
 .bs-nav-logout:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.bs-slot-logo { display: inline-grid; place-items: center; flex: none; width: 24px; height: 24px; border-radius: var(--radius-sm); object-fit: cover; color: #ffffff; font: 800 10px/1 var(--font-sans); letter-spacing: .02em; }
+.bs-slot-loc { display: flex; align-items: center; gap: 4px; font: 500 12px/16px var(--font-sans); color: var(--ink-muted); }
+
 /* Layout do protótipo BlogSim. Cores, tipos e componentes vêm do design system (design-system/). */
 /* Visual claro e branco: fundo da página igual ao dos cards, separação só por bordas. */
 :root { --surface-0: #ffffff; }
@@ -256,6 +259,7 @@ h1, h2, h3 { text-wrap: balance; }
 .app-review-main span { color: var(--ink-muted); font-size: 13px; }
 
 /* Gráfico */
+.app-chart-box { min-width: 0; }
 .app-chart { display: block; width: 100%; height: auto; }
 .app-chart text { fill: var(--ink-muted); font: 400 11px var(--font-sans); font-variant-numeric: tabular-nums; }
 .app-chart text.val { fill: var(--ink); font-weight: 600; }
@@ -400,7 +404,20 @@ h1, h2, h3 { text-wrap: balance; }
 /* Blogs parceiros */
 .lp-blogs { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); gap: 20px; }
 .lp-blog { display: grid; gap: 4px; align-content: start; font-size: 14px; line-height: 20px; color: var(--ink-muted); }
-.lp-blog .mp { min-height: 190px; margin-bottom: 10px; box-shadow: none; }
+.lp-facets { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; margin-bottom: 32px; }
+.lp-facet { display: grid; gap: 10px; align-content: start; }
+.lp-facet > b { font: 700 13px/18px var(--font-sans); letter-spacing: .04em; text-transform: uppercase; color: var(--ink-muted); }
+.lp-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.lp-tag { padding: 5px 10px; border: 1px solid var(--line-strong); border-radius: var(--radius-pill); font: 500 13px/18px var(--font-sans); color: var(--ink); }
+.lp-blog { padding: 16px; border: 1px solid var(--line); border-radius: var(--radius-lg); }
+.lp-blog-brand { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; min-width: 0; }
+.lp-blog-brand > div { display: grid; min-width: 0; }
+.lp-blog-brand > div > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; line-height: 16px; color: var(--ink-muted); }
+.lp-blog-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 4px; }
+.lp-loc { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; color: var(--ink); }
+.blog-logo { display: inline-grid; place-items: center; flex: none; width: 32px; height: 32px; border-radius: 8px; object-fit: cover; color: #ffffff; font: 800 12px/1 var(--font-sans); letter-spacing: .02em; }
+.blog-logo.is-lg { width: 44px; height: 44px; border-radius: 12px; font-size: 15px; }
+@media (max-width: 860px) { .lp-facets { grid-template-columns: 1fr; gap: 18px; } }
 .lp-blog-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2); }
 .lp-blog b { font-size: 15px; color: var(--ink); }
 
@@ -476,6 +493,22 @@ h1, h2, h3 { text-wrap: balance; }
   .hd-toast, .hd-sale, .hd-ad-in { animation: none; }
   .hd-caret { animation: none; }
 }
+/* Campos e blocos do painel */
+.app-select-field { min-width: 0; }
+.app-select { height: 40px; padding: 0 36px 0 12px; border: 1px solid var(--line-strong); border-radius: var(--radius-md); background: var(--surface-100); color: var(--ink); font: 400 15px/22px var(--font-sans); appearance: none; -webkit-appearance: none; background-image: linear-gradient(45deg, transparent 50%, #585e7e 50%), linear-gradient(135deg, #585e7e 50%, transparent 50%); background-position: calc(100% - 18px) 50%, calc(100% - 13px) 50%; background-size: 5px 5px; background-repeat: no-repeat; cursor: pointer; }
+.app-select:focus-visible, .app-textarea:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.bs-field-error .app-select { border-color: var(--danger); }
+.app-textarea { box-sizing: border-box; width: 100%; padding: 10px 12px; border: 1px solid var(--line-strong); border-radius: var(--radius-md); background: var(--surface-100); color: var(--ink); font: 400 15px/22px var(--font-sans); resize: vertical; }
+.app-split { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: var(--space-4); align-items: start; }
+.app-logo-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4); }
+.app-gate { display: grid; gap: 4px; padding: var(--space-4); border: 1px solid var(--warning); border-radius: var(--radius-lg); background: var(--warning-soft); }
+.app-gate b { font: 700 15px/22px var(--font-sans); color: var(--ink); }
+.app-gate p { margin: 0; font-size: 14px; line-height: 20px; color: var(--ink); max-width: 70ch; }
+.app-blogcell { display: flex; align-items: center; gap: 10px; }
+.app-blogcell > div { display: grid; }
+.app-blogcell span { font-size: 12px; line-height: 16px; color: var(--ink-muted); }
+.app-filters .app-select-field { flex: 0 1 200px; }
+@media (max-width: 960px) { .app-split { grid-template-columns: 1fr; } }
 /* Login */
 .lg { overflow-x: clip; display: grid; grid-template-columns: minmax(0, 420px) minmax(0, 400px); justify-content: center; align-content: center; align-items: center; gap: 72px; box-sizing: border-box; min-height: 100vh; min-height: 100dvh; padding-block: 32px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); background: var(--surface-200); }
 .lg-card { box-sizing: border-box; display: grid; gap: var(--space-4); width: 100%; padding: var(--space-8) var(--space-6); background: var(--surface-100); border: 1px solid var(--line); border-radius: var(--radius-lg); }
@@ -503,7 +536,12 @@ h1, h2, h3 { text-wrap: balance; }
 .lg-scene { position: relative; margin-top: 24px; }
 .lg-result { position: absolute; top: -26px; left: -20px; display: grid; gap: 2px; padding: 10px 14px; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface-100); box-shadow: var(--shadow-pop); font: 500 12px/16px var(--font-sans); color: var(--ink-muted); }
 .lg-result b { font: 800 20px/24px var(--font-sans); color: var(--success); }
-@media (max-width: 860px) { .lg { grid-template-columns: minmax(0, 420px); } .lg-art { display: none; } }
+.lg.is-signup { grid-template-columns: minmax(0, 560px) minmax(0, 360px); gap: 56px; }
+.lg-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
+.lg-alt { margin: 0; font-size: 14px; line-height: 20px; color: var(--ink-muted); }
+.lg-alt .lg-link { font-size: 14px; }
+@media (max-width: 860px) { .lg, .lg.is-signup { grid-template-columns: minmax(0, 560px); } .lg-art { display: none; } }
+@media (max-width: 520px) { .lg-grid { grid-template-columns: 1fr; } }
 @media (max-width: 860px) {
   .app-root { height: auto; }
   .app-shell { flex-direction: column; }
@@ -638,7 +676,8 @@ h1, h2, h3 { text-wrap: balance; }
         p.placement !== 'lateral' ? h('rect', { className: 'bs-wf-text', x: 46, y: 16, width: 14, height: 30, rx: 2 }) : null,
         h('rect', { className: 'bs-wf-slot', x: r[0], y: r[1], width: r[2], height: r[3], rx: 2 })),
       h('div', { className: 'bs-slot-body' },
-        h('div', { className: 'bs-slot-head' }, h('h3', { className: 'bs-slot-blog' }, p.blog), p.niche ? h(Badge, null, p.niche) : null),
+        h('div', { className: 'bs-slot-head' }, p.logo ? (typeof p.logo === 'string' ? h('img', { className: 'bs-slot-logo', src: p.logo, alt: '' }) : h('span', { className: 'bs-slot-logo', style: { background: p.logo.color }, 'aria-hidden': true }, p.logo.text)) : null, h('h3', { className: 'bs-slot-blog' }, p.blog), p.niche ? h(Badge, null, p.niche) : null),
+        p.location ? h('div', { className: 'bs-slot-loc' }, h('svg', { width: 12, height: 12, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2.2, 'aria-hidden': true }, h('path', { d: 'M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z' }), h('circle', { cx: 12, cy: 9.5, r: 2.5 })), p.location) : null,
         h('div', { className: 'bs-slot-meta' }, pl.label + (p.audience ? ' · ' + count(p.audience) + ' leitores/mês' : '')),
         h('div', { className: 'bs-slot-price' }, h('strong', null, money(p.price)), ' / ' + (p.period || 'semana'))),
       h(Button, { variant: sel ? 'secondary' : 'accent', size: 'sm', 'aria-pressed': sel, onClick: toggle }, sel ? 'Selecionado' : 'Alugar espaço'));
@@ -667,9 +706,9 @@ h1, h2, h3 { text-wrap: balance; }
   }
 
   var ROLES = {
-    admin: { label: 'Admin master', tone: 'neutral', items: ['Visão geral', 'Blogs parceiros', 'Anunciantes', 'Campanhas', 'Repasses', 'Configurações'] },
+    admin: { label: 'Admin master', tone: 'neutral', items: ['Visão geral', 'Blogs parceiros', 'Anunciantes', 'Campanhas', 'Saques', 'Configurações'] },
     anunciante: { label: 'Anunciante', tone: 'brand', items: ['Painel', 'Campanhas', 'Explorar blogs', 'Pixel e rastreamento', 'Faturamento'] },
-    blogueiro: { label: 'Dono do blog', tone: 'teal', items: ['Painel', 'Meus espaços', 'Receita', 'Insights', 'Instalar script'] }
+    blogueiro: { label: 'Blogueiro', tone: 'teal', items: ['Painel', 'Meus espaços', 'Receita', 'Insights', 'Instalar script'] }
   };
 
   function RoleSwitch(p) {
@@ -772,16 +811,26 @@ h1, h2, h3 { text-wrap: balance; }
 
   // ---------- Dados de exemplo ----------
   const BLOGS = [
-    { id: 'b1', name: 'Viagem com Criança', niche: 'Viagem', owner: 'Renata Alves', audience: 42000, slots: [['lateral', 280], ['banner', 350]] },
-    { id: 'b2', name: 'Cozinha da Vó Nena', niche: 'Culinária', owner: 'Nena Prado', audience: 18500, slots: [['popup', 190], ['inline', 160]] },
-    { id: 'b3', name: 'Treino em Casa', niche: 'Fitness', owner: 'Diego Moura', audience: 61000, slots: [['inline', 420], ['lateral', 300]] },
-    { id: 'b4', name: 'Grana no Bolso', niche: 'Finanças', owner: 'Paula Reis', audience: 73000, slots: [['banner', 520], ['popup', 460]] },
-    { id: 'b5', name: 'Pet Feliz', niche: 'Pets', owner: 'Caio Lima', audience: 27500, slots: [['lateral', 210]] },
-    { id: 'b6', name: 'Código Simples', niche: 'Tecnologia', owner: 'Bruno Sato', audience: 39000, slots: [['inline', 330], ['banner', 380]] },
-    { id: 'b7', name: 'Mãe de Primeira', niche: 'Maternidade', owner: 'Júlia Campos', audience: 55000, slots: [['popup', 390], ['lateral', 260]] },
-    { id: 'b8', name: 'Bike Urbana', niche: 'Esportes', owner: 'Léo Martins', audience: 15800, slots: [['lateral', 150]], status: 'pendente' }
+    { id: 'b1', name: 'Viagem com Criança', niche: 'Viagem', owner: 'Renata Alves', audience: 42000, city: 'Curitiba', uf: 'PR', color: '#0e7490', site: 'viagemcomcrianca.com.br', slots: [['lateral', 280], ['banner', 350]] },
+    { id: 'b2', name: 'Cozinha da Vó Nena', niche: 'Culinária', owner: 'Nena Prado', audience: 18500, city: 'Belo Horizonte', uf: 'MG', color: '#b45309', site: 'cozinhadavonena.com.br', slots: [['popup', 190], ['inline', 160]] },
+    { id: 'b3', name: 'Treino em Casa', niche: 'Fitness', owner: 'Diego Moura', audience: 61000, city: 'São Paulo', uf: 'SP', color: '#be123c', site: 'treinoemcasa.com.br', slots: [['inline', 420], ['lateral', 300]] },
+    { id: 'b4', name: 'Grana no Bolso', niche: 'Finanças', owner: 'Paula Reis', audience: 73000, city: 'Rio de Janeiro', uf: 'RJ', color: '#15803d', site: 'granonobolso.com.br', slots: [['banner', 520], ['popup', 460]] },
+    { id: 'b5', name: 'Pet Feliz', niche: 'Pets', owner: 'Caio Lima', audience: 27500, city: 'Porto Alegre', uf: 'RS', color: '#6d28d9', site: 'petfeliz.com.br', slots: [['lateral', 210]] },
+    { id: 'b6', name: 'Código Simples', niche: 'Tecnologia', owner: 'Bruno Sato', audience: 39000, city: 'Florianópolis', uf: 'SC', color: '#1e293b', site: 'codigosimples.com.br', slots: [['inline', 330], ['banner', 380]] },
+    { id: 'b7', name: 'Mãe de Primeira', niche: 'Maternidade', owner: 'Júlia Campos', audience: 55000, city: 'São Paulo', uf: 'SP', color: '#be185d', site: 'maedeprimeira.com.br', slots: [['popup', 390], ['lateral', 260]] },
+    { id: 'b8', name: 'Bike Urbana', niche: 'Esportes', owner: 'Léo Martins', audience: 15800, city: 'Recife', uf: 'PE', color: '#0369a1', site: 'bikeurbana.com.br', slots: [['lateral', 150]], status: 'pendente' }
   ];
-  const SLOTS = BLOGS.flatMap(b => b.slots.map(([p, price]) => ({ id: b.id + '-' + p, blogId: b.id, blog: b.name, niche: b.niche, audience: b.audience, placement: p, price })));
+  const UFS = ['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'];
+  const initials = name => name.split(/\s+/).filter(w => w.length > 2 || /^[A-ZÁ-Ú]/.test(w)).slice(0, 2).map(w => w[0]).join('').toUpperCase();
+  const place = b => b.city ? b.city + ', ' + b.uf : b.uf || '';
+  // Marca do blog: a logo enviada pelo blogueiro ou, sem logo, as iniciais na cor do blog.
+  const logoOf = b => b.logo || { text: initials(b.name), color: b.color || '#585e7e' };
+  function BlogLogo({ blog, size }) {
+    const l = logoOf(blog);
+    return typeof l === 'string'
+      ? h('img', { className: 'blog-logo' + (size === 'lg' ? ' is-lg' : ''), src: l, alt: 'Logo do ' + blog.name })
+      : h('span', { className: 'blog-logo' + (size === 'lg' ? ' is-lg' : ''), style: { background: l.color }, 'aria-hidden': true }, l.text);
+  }  const SLOTS = BLOGS.flatMap(b => b.slots.map(([p, price]) => ({ id: b.id + '-' + p, blogId: b.id, blog: b.name, niche: b.niche, audience: b.audience, city: b.city, uf: b.uf, color: b.color, name: b.name, placement: p, price })));
   const NICHES = [...new Set(BLOGS.map(b => b.niche))];
 
   const CAMPAIGN_BLOGS = {
@@ -892,12 +941,22 @@ h1, h2, h3 { text-wrap: balance; }
     return 10 * p;
   }
   function BarChart({ data, isMoney, label }) {
-    const W = 640, H = 210, L = 56, R = 8, T = 24, Bm = 28;
+    const ref = React.useRef(null);
+    const [W, setW] = useState(640);
+    React.useLayoutEffect(() => {
+      const el = ref.current; if (!el) return;
+      const measure = () => setW(Math.max(280, Math.round(el.getBoundingClientRect().width)));
+      measure();
+      if (!window.ResizeObserver) return;
+      const ro = new ResizeObserver(measure); ro.observe(el);
+      return () => ro.disconnect();
+    }, []);
+    const H = 190, L = 56, R = 8, T = 24, Bm = 28;
     const max = niceMax(Math.max(...data.map(d => d.value)));
     const iw = W - L - R, ih = H - T - Bm, bw = iw / data.length;
     const short = v => (isMoney ? 'R$ ' : '') + COMPACT.format(v);
     const last = data.length - 1;
-    return h('svg', { className: 'app-chart', viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': label },
+    return h('div', { ref, className: 'app-chart-box' }, h('svg', { className: 'app-chart', width: W, height: H, viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': label },
       [0, 0.25, 0.5, 0.75, 1].map(t => {
         const y = T + ih - t * ih;
         return h('g', { key: t }, h('line', { className: 'grid', x1: L, x2: W - R, y1: y, y2: y }), h('text', { x: L - 8, y: y + 4, textAnchor: 'end' }, short(t * max)));
@@ -908,7 +967,7 @@ h1, h2, h3 { text-wrap: balance; }
           h('rect', { className: i === last ? 'bar last' : 'bar', x, y: T + ih - bh, width: bw * 0.64, height: bh, rx: 3 }),
           i === last ? h('text', { className: 'val', x: cx, y: T + ih - bh - 6, textAnchor: 'middle' }, isMoney ? money(d.value) : count(d.value)) : null,
           (last - i) % 2 === 0 ? h('text', { x: cx, y: H - 8, textAnchor: 'middle' }, d.label) : null);
-      }));
+      })));
   }
   // ---------- Anunciante ----------
   function AdvPainel({ campaigns, go }) {
@@ -939,11 +998,13 @@ h1, h2, h3 { text-wrap: balance; }
     return SLOTS.filter(s => ok.has(s.blogId));
   }
 
-  function SlotGrid({ list, cart, setCart }) {
+  function SlotGrid({ list, cart, setCart, blogs }) {
+    const byId = Object.fromEntries((blogs || BLOGS).map(b => [b.id, b]));
     const toggle = (id, on) => setCart(c => on ? [...c, id] : c.filter(x => x !== id));
     if (!list.length) return h('p', { className: 'app-empty' }, 'Nenhum blog encontrado. Tente outro nicho ou limpe a busca.');
     return h('div', { className: 'app-slots' }, list.map(s => h(B.SlotCard, {
       key: s.id, blog: s.blog, niche: s.niche, placement: s.placement, audience: s.audience, price: s.price,
+      logo: logoOf(byId[s.blogId] || s), location: place(byId[s.blogId] || s),
       selected: cart.includes(s.id), onToggle: on => toggle(s.id, on)
     })));
   }
@@ -951,13 +1012,29 @@ h1, h2, h3 { text-wrap: balance; }
   function AdvExplorar({ cart, setCart, go, blogs }) {
     const [q, setQ] = useState('');
     const [n, setN] = useState('Todos');
-    const list = activeSlots(blogs).filter(s => (n === 'Todos' || s.niche === n) && s.blog.toLowerCase().includes(q.trim().toLowerCase()));
+    const [uf, setUf] = useState('');
+    const [city, setCity] = useState('');
+    const byId = Object.fromEntries(blogs.map(b => [b.id, b]));
+    const ufs = [...new Set(blogs.filter(b => b.status === 'ativo').map(b => b.uf))].sort();
+    const cities = [...new Set(blogs.filter(b => b.status === 'ativo' && (!uf || b.uf === uf)).map(b => b.city))].sort();
+    const list = activeSlots(blogs).filter(s => {
+      const b = byId[s.blogId] || s;
+      return (n === 'Todos' || b.niche === n) && (!uf || b.uf === uf) && (!city || b.city === city) && b.name.toLowerCase().includes(q.trim().toLowerCase());
+    });
     const sel = SLOTS.filter(s => cart.includes(s.id));
-    return h(Page, { title: 'Explorar blogs', subtitle: 'Escolha onde seu anúncio aparece. Preços por semana.' },
+    return h(Page, { title: 'Explorar blogs', subtitle: 'Escolha por nicho e por região onde seu anúncio aparece. Preços por semana.' },
       h('div', { className: 'app-filters' },
         h(B.TextField, { id: 'busca-blog', label: 'Buscar blog', placeholder: 'Nome do blog', value: q, onChange: e => setQ(e.target.value) }),
-        h(Chips, { label: 'Nicho', value: n, onChange: setN, options: ['Todos', ...NICHES].map(x => [x, x]) })),
-      h(SlotGrid, { list, cart, setCart }),
+        h('div', { className: 'bs-field app-select-field' },
+          h('label', { className: 'bs-field-label', htmlFor: 'filtro-estado' }, 'Estado'),
+          h('select', { id: 'filtro-estado', className: 'app-select', value: uf, onChange: e => { setUf(e.target.value); setCity(''); } },
+            h('option', { value: '' }, 'Todos os estados'), ufs.map(x => h('option', { key: x, value: x }, x)))),
+        h('div', { className: 'bs-field app-select-field' },
+          h('label', { className: 'bs-field-label', htmlFor: 'filtro-cidade' }, 'Cidade'),
+          h('select', { id: 'filtro-cidade', className: 'app-select', value: city, onChange: e => setCity(e.target.value) },
+            h('option', { value: '' }, 'Todas as cidades'), cities.map(x => h('option', { key: x, value: x }, x))))),
+      h(Chips, { label: 'Nicho', value: n, onChange: setN, options: ['Todos', ...NICHES].map(x => [x, x]) }),
+      h(SlotGrid, { list, cart, setCart, blogs }),
       sel.length ? h('div', { className: 'app-cartbar' },
         h('span', null, h('b', null, sel.length + (sel.length > 1 ? ' espaços selecionados' : ' espaço selecionado')), ' · ', h('span', { className: 'app-money' }, money(sum(sel, 'price'))), ' por semana'),
         h(B.Button, { onClick: () => go('Criar campanha') }, 'Criar campanha com esses espaços')) : null);
@@ -1064,7 +1141,7 @@ h1, h2, h3 { text-wrap: balance; }
     if (step === 0) body = h(B.ObjectivePicker, { value: obj, onChange: v => { setObj(v); setTrack(''); } });
     if (step === 1) body = h(React.Fragment, null,
       h(Chips, { label: 'Nicho', value: niche, onChange: setNiche, options: ['Todos', ...NICHES].map(x => [x, x]) }),
-      h(SlotGrid, { list: activeSlots(blogs).filter(s => niche === 'Todos' || s.niche === niche), cart, setCart }),
+      h(SlotGrid, { list: activeSlots(blogs).filter(s => niche === 'Todos' || s.niche === niche), cart, setCart, blogs }),
       h('p', { className: 'app-note' }, sel.length ? `${sel.length} ${sel.length > 1 ? 'espaços' : 'espaço'} · ${money(weekly)} por semana` : 'Nenhum espaço selecionado ainda.'),
       tried && !sel.length ? h('p', { className: 'app-error', role: 'alert' }, 'Escolha pelo menos um espaço para continuar.') : null);
     if (step === 2) body = h('div', { className: 'app-adstep' },
@@ -1128,36 +1205,108 @@ h1, h2, h3 { text-wrap: balance; }
           h('div', null, h(B.Button, { variant: 'secondary', size: 'sm', onClick: () => notify('Ainda não encontramos o pixel no checkout. A verificação pode levar até 10 minutos.') }, 'Verificar instalação')))));
   }
 
-  function AdvBilling({ balance, txns, onAdd, campaigns }) {
+  function AdvBilling({ balance, txns, onAdd, campaigns, billing }) {
     const [amt, setAmt] = useState('250');
+    const [method, setMethod] = useState('pix');
+    const [parcelas, setParcelas] = useState('1');
     const spent = sum(campaigns.filter(c => c.advertiser === ME), 'invested');
+    const value = Number(String(amt).replace(/\./g, '').replace(',', '.')) || 0;
+    const tooLow = value < billing.min;
+    const canSplit = method === 'cartao' && value >= billing.installFrom;
+    const n = canSplit ? parseInt(parcelas, 10) || 1 : 1;
+    const presets = [100, 250, 500, 1000].filter(v => v >= billing.min);
     return h(Page, { title: 'Faturamento', subtitle: 'Saldo pré-pago usado para alugar espaços.' },
       h('div', { className: 'app-metrics' },
         h(B.MetricCard, { label: 'Saldo disponível', value: balance, format: 'money', hint: 'usado ao publicar campanhas' }),
         h(B.MetricCard, { label: 'Investido em campanhas', value: spent, format: 'money', hint: 'desde o início' })),
       h(Card, { title: 'Adicionar saldo' },
-        h(Chips, { label: 'Valor', value: amt, onChange: setAmt, options: [['100', 'R$ 100'], ['250', 'R$ 250'], ['500', 'R$ 500'], ['1000', 'R$ 1.000']] }),
-        h('div', null, h(B.Button, { variant: 'accent', onClick: () => onAdd(Number(amt)) }, 'Adicionar ' + money(Number(amt)))),
-        h('p', { className: 'app-note' }, 'Pix ou cartão. No protótipo o pagamento é simulado.')),
+        h(Chips, { label: 'Valor', value: presets.includes(value) ? String(value) : '', onChange: setAmt, options: presets.map(v => [String(v), money(v).replace(',00', '')]) }),
+        h('div', { className: 'app-fields' },
+          h(B.TextField, { id: 'recarga-valor', label: 'Ou digite o valor', prefix: 'R$', inputMode: 'decimal', value: amt, onChange: e => setAmt(e.target.value), error: tooLow ? `A recarga mínima é de ${money(billing.min)}.` : undefined, hint: `Mínimo de ${money(billing.min)}.` })),
+        h(Chips, { label: 'Forma de pagamento', value: method, onChange: setMethod, options: [['pix', 'Pix'], ['cartao', 'Cartão de crédito']] }),
+        method === 'cartao' ? (canSplit
+          ? h('div', { className: 'bs-field app-select-field' },
+              h('label', { className: 'bs-field-label', htmlFor: 'recarga-parcelas' }, 'Parcelas'),
+              h('select', { id: 'recarga-parcelas', className: 'app-select', value: String(n), onChange: e => setParcelas(e.target.value) },
+                Array.from({ length: billing.maxInstallments }, (_, i) => i + 1).map(k => h('option', { key: k, value: String(k) }, k === 1 ? `À vista · ${money(value)}` : `${k}x de ${money(value / k)}`))))
+          : h('p', { className: 'app-note' }, `Parcelamento no cartão a partir de ${money(billing.installFrom)}.`)) : null,
+        h('div', null, h(B.Button, { variant: 'accent', disabled: tooLow, onClick: () => onAdd(value, method, n) }, `Adicionar ${money(value)}` + (n > 1 ? ` em ${n}x` : '')))),
       h(Section, { title: 'Movimentações' },
         h(Table, { cols: [{ label: 'Data' }, { label: 'Descrição' }, { label: 'Valor', num: true }], empty: 'Nenhuma movimentação.',
           rows: txns.map(t => [t.date, t.desc, (t.value > 0 ? '+' : '−') + money(Math.abs(t.value))]) })));
   }
-  // ---------- Dono do blog ----------
-  function BlogPainel({ mySlots }) {
+  // ---------- Blogueiro ----------
+  // Lê a logo enviada pelo blogueiro como data URL.
+  function readLogo(e, ok, fail) {
+    const f = e.target.files && e.target.files[0];
+    if (!f) return;
+    if (!f.type.startsWith('image/')) { fail('Escolha um arquivo de imagem (PNG, JPG, WebP ou SVG).'); return; }
+    if (f.size > 1024 * 1024) { fail('A logo tem mais de 1 MB. Escolha uma menor.'); return; }
+    fail('');
+    const r = new FileReader();
+    r.onload = () => ok(r.result);
+    r.readAsDataURL(f);
+  }
+
+  function BlogPainel({ mySlots, blog, fresh }) {
     const rented = mySlots.filter(s => s.rent);
-    return h(Page, { title: 'Painel', subtitle: 'Últimos 14 dias · ' + MY_BLOG },
+    return h(Page, { title: 'Painel', subtitle: 'Últimos 14 dias · ' + blog.name },
       h('div', { className: 'app-metrics' },
-        h(B.MetricCard, { label: 'Receita', value: 2184, format: 'money', delta: 18, hint: 'vs. 14 dias anteriores', spark: spark(DAILY.revenue) }),
-        h(B.MetricCard, { label: 'Visualizações dos anúncios', value: 96400, format: 'count', delta: 9.5, hint: 'vs. 14 dias anteriores' }),
-        h(B.MetricCard, { label: 'Cliques', value: 2870, format: 'count', delta: 4.2, hint: 'vs. 14 dias anteriores' }),
-        h(B.MetricCard, { label: 'CTR', value: '2,98%', hint: 'cliques ÷ visualizações' })),
-      h(Card, { title: 'Receita por dia' }, h(BarChart, { data: DAILY.revenue, isMoney: true, label: 'Receita por dia nos últimos 14 dias' })),
+        h(B.MetricCard, { label: 'Receita', value: fresh ? 0 : 2184, format: 'money', delta: fresh ? undefined : 18, hint: fresh ? 'nenhum aluguel ainda' : 'vs. 14 dias anteriores', spark: fresh ? undefined : spark(DAILY.revenue) }),
+        h(B.MetricCard, { label: 'Visualizações dos anúncios', value: fresh ? 0 : 96400, format: 'count', delta: fresh ? undefined : 9.5, hint: fresh ? 'medidas pelo script' : 'vs. 14 dias anteriores' }),
+        h(B.MetricCard, { label: 'Cliques', value: fresh ? 0 : 2870, format: 'count', delta: fresh ? undefined : 4.2, hint: fresh ? 'medidos pelo script' : 'vs. 14 dias anteriores' }),
+        h(B.MetricCard, { label: 'CTR', value: fresh ? '0%' : '2,98%', hint: 'cliques ÷ visualizações' })),
+      fresh ? h('p', { className: 'app-empty' }, 'A receita por dia aparece aqui quando o primeiro anúncio entrar no seu blog. Crie seus espaços em Meus espaços para começar.')
+        : h(Card, { title: 'Receita por dia' }, h(BarChart, { data: DAILY.revenue, isMoney: true, label: 'Receita por dia nos últimos 14 dias' })),
       h(Section, { title: 'Anúncios no seu blog agora' },
         h(Table, { cols: [{ label: 'Anunciante' }, { label: 'Espaço' }, { label: 'Até' }, { label: 'Valor por semana', num: true }], empty: 'Nenhum espaço alugado agora.',
           rows: rented.map(s => [s.rent.adv, PLACE[s.placement], s.rent.until, money(s.price)]) })));
   }
 
+  function BlogMeuBlog({ blog, onSave }) {
+    const [logo, setLogo] = useState(blog.logo || null);
+    const [logoErr, setLogoErr] = useState('');
+    const [name, setName] = useState(blog.name);
+    const [site, setSite] = useState(blog.site || '');
+    const [niche, setNiche] = useState(blog.niche);
+    const [uf, setUf] = useState(blog.uf || '');
+    const [city, setCity] = useState(blog.city || '');
+    const [desc, setDesc] = useState(blog.desc || '');
+    const [tried, setTried] = useState(false);
+    const errs = { name: name.trim() ? '' : 'Informe o nome do blog.', site: /\S+\.\S+/.test(site) ? '' : 'Informe o endereço do blog, como seublog.com.br.', city: city.trim() ? '' : 'Informe a cidade.', uf: uf ? '' : 'Escolha o estado.' };
+    const draft = { ...blog, logo, name: name.trim() || blog.name, site, niche, uf, city: city.trim() };
+    function save() { setTried(true); if (Object.values(errs).some(Boolean)) return; onSave({ logo, name: name.trim(), site: site.trim(), niche, uf, city: city.trim(), desc: desc.trim() }); }
+    const sel = (id, label, value, set, opts, err) => h('div', { className: 'bs-field app-select-field' + (err ? ' bs-field-error' : '') },
+      h('label', { className: 'bs-field-label', htmlFor: id }, label),
+      h('select', { id, className: 'app-select', value, onChange: e => set(e.target.value) }, opts),
+      err ? h('div', { className: 'bs-field-hint' }, err) : null);
+    return h(Page, { title: 'Meu blog', subtitle: 'A marca e as informações que os anunciantes veem em Explorar blogs.' },
+      h('div', { className: 'app-split' },
+        h(Card, { title: 'Marca e informações' },
+          h('div', { className: 'app-logo-row' },
+            h(BlogLogo, { blog: draft, size: 'lg' }),
+            h('div', { className: 'bs-field' },
+              h('label', { className: 'bs-field-label', htmlFor: 'blog-logo' }, 'Logo do blog'),
+              h('input', { id: 'blog-logo', type: 'file', accept: 'image/*', className: 'app-file', onChange: e => readLogo(e, setLogo, setLogoErr) }),
+              h('div', { className: logoErr ? 'app-error' : 'bs-field-hint' }, logoErr || 'Quadrada, até 1 MB. Sem logo, usamos as iniciais do blog.'))),
+          h('div', { className: 'app-fields' },
+            h(B.TextField, { id: 'blog-nome', label: 'Nome do blog', value: name, onChange: e => setName(e.target.value), error: tried && errs.name || undefined }),
+            h(B.TextField, { id: 'blog-site', label: 'Endereço', placeholder: 'seublog.com.br', value: site, onChange: e => setSite(e.target.value), error: tried && errs.site || undefined }),
+            sel('blog-nicho', 'Nicho', niche, setNiche, NICHES.map(x => h('option', { key: x, value: x }, x))),
+            sel('blog-uf', 'Estado', uf, setUf, [h('option', { key: '', value: '' }, 'Escolha'), ...UFS.map(x => h('option', { key: x, value: x }, x))], tried && errs.uf),
+            h(B.TextField, { id: 'blog-cidade', label: 'Cidade', value: city, onChange: e => setCity(e.target.value), error: tried && errs.city || undefined })),
+          h('div', { className: 'bs-field' },
+            h('label', { className: 'bs-field-label', htmlFor: 'blog-desc' }, 'Sobre o blog'),
+            h('textarea', { id: 'blog-desc', className: 'app-textarea', rows: 3, maxLength: 240, placeholder: 'Sobre o que você escreve e para quem.', value: desc, onChange: e => setDesc(e.target.value) }),
+            h('div', { className: 'bs-field-hint' }, desc.length + '/240 caracteres')),
+          h('div', null, h(B.Button, { onClick: save }, 'Salvar alterações'))),
+        h(Card, { title: 'Como os anunciantes veem' },
+          h('div', { className: 'lp-blog' },
+            h('div', { className: 'lp-blog-brand' }, h(BlogLogo, { blog: draft, size: 'lg' }), h('div', null, h('b', null, draft.name), h('span', null, site || 'seublog.com.br'))),
+            h('div', { className: 'lp-blog-meta' }, h(B.Badge, null, niche), city || uf ? h('span', { className: 'lp-loc' }, place(draft)) : null),
+            desc ? h('p', null, desc) : null,
+            h('span', null, (blog.audience ? count(blog.audience) : '—') + ' leitores por mês')))));
+  }
   function SlotEditor({ slot, onChange, notify }) {
     const [price, setPrice] = useState(String(slot.price).replace('.', ','));
     const value = Number(price.replace(/\./g, '').replace(',', '.'));
@@ -1178,7 +1327,7 @@ h1, h2, h3 { text-wrap: balance; }
     'Clínica Sorriso Leve': { title: 'Avaliação odontológica gratuita', text: 'Agende pelo WhatsApp no melhor horário para você.', cta: 'Chamar no WhatsApp' }
   };
 
-  function SpacesPreview({ mySlots }) {
+  function SpacesPreview({ mySlots, blog }) {
     const [pv, setPv] = useState(mySlots[0] && mySlots[0].id);
     const cur = mySlots.find(s => s.id === pv) || mySlots[0];
     if (!cur) return null;
@@ -1187,28 +1336,28 @@ h1, h2, h3 { text-wrap: balance; }
     return h(Card, { title: 'Prévia no seu blog' },
       h('p', null, 'É assim que seus leitores veem os anúncios. O script do BlogSim coloca cada anúncio no espaço alugado.'),
       h(Chips, { label: 'Espaço', value: cur.id, onChange: setPv, options: mySlots.map(s => [s.id, PLACE[s.placement] + (s.rent ? ' · alugado' : s.active ? ' · livre' : ' · pausado')]) }),
-      h(BlogPreview, { blog: MY_BLOG, placement: cur.placement, ad }));
+      h(BlogPreview, { blog: blog.name, placement: cur.placement, ad }));
   }
 
-  function BlogEspacos({ mySlots, setMySlots, notify }) {
+  function BlogEspacos({ mySlots, setMySlots, notify, blog }) {
     const missing = Object.keys(PLACE).filter(p => !mySlots.some(s => s.placement === p));
     const update = s => setMySlots(list => list.map(x => x.id === s.id ? s : x));
     function add(p) { setMySlots(list => [...list, { id: 'm' + Date.now(), placement: p, price: 200, active: true, rent: null }]); notify('Espaço ' + PLACE[p] + ' criado'); }
-    return h(Page, { title: 'Meus espaços', subtitle: 'Onde os anúncios aparecem no ' + MY_BLOG + ' e quanto custam.' },
-      h('div', { className: 'app-cols' }, mySlots.map(s => h(SlotEditor, { key: s.id, slot: s, onChange: update, notify }))),
-      h(SpacesPreview, { mySlots }),
+    return h(Page, { title: 'Meus espaços', subtitle: 'Onde os anúncios aparecem no ' + blog.name + ' e quanto custam.' },
+      mySlots.length ? h('div', { className: 'app-cols' }, mySlots.map(s => h(SlotEditor, { key: s.id, slot: s, onChange: update, notify })))
+        : h('p', { className: 'app-empty' }, 'Você ainda não tem espaços. Escolha abaixo onde os anúncios podem aparecer no seu blog.'),
+      h(SpacesPreview, { mySlots, blog }),
       missing.length ? h(Card, { title: 'Adicionar espaço' },
         h('p', null, 'Cada espaço novo aparece para os anunciantes assim que você o cria.'),
         h('div', { className: 'app-actions' }, missing.map(p => h(B.Button, { key: p, variant: 'secondary', size: 'sm', onClick: () => add(p) }, 'Adicionar ' + PLACE[p])))) : null);
   }
-
-  function BlogReceita({ bloggerBalance, onWithdraw, payouts, pct }) {
-    const mine = payouts.filter(p => p.blog === MY_BLOG);
+  function BlogReceita({ bloggerBalance, onWithdraw, payouts, pct, blog, fresh }) {
+    const mine = payouts.filter(p => p.blog === blog.name);
     return h(Page, { title: 'Receita', subtitle: 'O que seus espaços renderam e seus saques.' },
       h('div', { className: 'app-metrics' },
         h(B.MetricCard, { label: 'Saldo disponível', value: bloggerBalance, format: 'money', hint: 'pronto para saque' }),
-        h(B.MetricCard, { label: 'A liberar', value: 544, format: 'money', hint: 'aluguéis ainda em andamento' }),
-        h(B.MetricCard, { label: 'Recebido em 2026', value: 18920, format: 'money', delta: 32, hint: 'vs. 2025' })),
+        h(B.MetricCard, { label: 'A liberar', value: fresh ? 0 : 544, format: 'money', hint: 'aluguéis ainda em andamento' }),
+        h(B.MetricCard, { label: 'Recebido em 2026', value: fresh ? 0 : 18920, format: 'money', delta: fresh ? undefined : 32, hint: fresh ? 'desde o cadastro' : 'vs. 2025' })),
       h(Card, { title: 'Sacar' },
         h('p', null, `Você recebe o valor dos aluguéis menos a comissão de ${pct}% do BlogSim. O saque cai na sua conta em até 2 dias úteis.`),
         h('div', null, h(B.Button, { variant: 'accent', disabled: bloggerBalance <= 0, onClick: onWithdraw }, bloggerBalance > 0 ? 'Solicitar saque de ' + money(bloggerBalance) : 'Sem saldo para sacar'))),
@@ -1217,28 +1366,38 @@ h1, h2, h3 { text-wrap: balance; }
           rows: mine.map(p => [p.date, p.status === 'pago' ? h(B.Badge, { tone: 'success', dot: true }, 'Pago') : h(B.Badge, { tone: 'warning', dot: true }, 'Em processamento'), money(p.value)]) })));
   }
 
-  function BlogInsights() {
+  function BlogInsights({ blog, fresh }) {
+    if (fresh) return h(Page, { title: 'Insights', subtitle: 'Onde seus leitores mais clicam em anúncios.' },
+      h('p', { className: 'app-empty' }, 'Os insights aparecem depois das primeiras visitas medidas pelo script: posts mais lidos, cliques em anúncios e CTR.'));
     return h(Page, { title: 'Insights', subtitle: 'Onde seus leitores mais clicam em anúncios.' },
       h('div', { className: 'app-metrics' },
-        h(B.MetricCard, { label: 'Leitores por mês', value: 42000, format: 'count', delta: 6.3, hint: 'vs. mês anterior' }),
+        h(B.MetricCard, { label: 'Leitores por mês', value: blog.audience, format: 'count', delta: 6.3, hint: 'vs. mês anterior' }),
         h(B.MetricCard, { label: 'Espaço mais alugado', value: 'Lateral', hint: '9 de 10 semanas alugado' }),
-        h(B.MetricCard, { label: 'Nicho', value: 'Viagem', hint: '14 anunciantes buscaram este mês' })),
+        h(B.MetricCard, { label: 'Nicho', value: blog.niche, hint: '14 anunciantes buscaram este mês' })),
       h(Section, { title: 'Posts com mais cliques em anúncios' },
         h(Table, { cols: [{ label: 'Post' }, { label: 'Visualizações', num: true }, { label: 'Cliques', num: true }, { label: 'CTR', num: true }], empty: '',
           rows: POSTS.map(([t, v, c]) => [t, count(v), count(c), (c / v * 100).toFixed(2).replace('.', ',') + '%']) })));
   }
 
-  function BlogScript({ notify }) {
+  function BlogScript({ notify, blog, verified, onVerify }) {
+    const [checking, setChecking] = useState(false);
+    function verify() {
+      if (verified) { notify('Script encontrado. Seus espaços estão no ar.'); return; }
+      setChecking(true);
+      setTimeout(() => { setChecking(false); onVerify(); }, 900);
+    }
     return h(Page, { title: 'Instalar script', subtitle: 'Instale este código no seu blog para os anúncios aparecerem nos espaços alugados.' },
-      h(Card, { title: 'Script do BlogSim', extra: h(B.Badge, { tone: 'success', dot: true }, 'Detectado em viagemcomcrianca.com.br') },
+      verified ? null : h('div', { className: 'app-gate' },
+        h('b', null, 'Falta um passo para liberar seu painel'),
+        h('p', null, 'Instale o script no ' + (blog.site || 'seu blog') + ' e clique em Verificar instalação. Depois disso você cria seus espaços, acompanha a receita e pede saques.')),
+      h(Card, { title: 'Script do BlogSim', extra: verified ? h(B.Badge, { tone: 'success', dot: true }, 'Detectado em ' + (blog.site || 'seu blog')) : h(B.Badge, { tone: 'warning', dot: true }, 'Ainda não instalado') },
         h('ol', { className: 'app-ol' },
           h('li', null, 'Copie o código abaixo.'),
           h('li', null, 'Cole no cabeçalho do seu blog, antes do fechamento da tag head. No WordPress, use um plugin de cabeçalho.'),
           h('li', null, 'Clique em Verificar instalação.')),
-        h(Code, { label: 'Código', text: '<script async src="https://cdn.blogsim.com.br/slots.js" data-blog="BL-1042"></' + 'script>', notify }),
-        h('div', null, h(B.Button, { variant: 'secondary', onClick: () => notify('Script encontrado. Seus espaços estão no ar.') }, 'Verificar instalação'))));
+        h(Code, { label: 'Código', text: '<script async src="https://cdn.blogsim.com.br/slots.js" data-blog="' + blog.id.toUpperCase() + '"></' + 'script>', notify }),
+        h('div', null, h(B.Button, { variant: verified ? 'secondary' : 'primary', loading: checking, onClick: verify }, checking ? 'Verificando' : 'Verificar instalação'))));
   }
-
   // ---------- Admin master ----------
   function ReviewList({ campaigns, setCampaigns, notify }) {
     const queue = campaigns.filter(c => c.status === 'revisao');
@@ -1268,13 +1427,14 @@ h1, h2, h3 { text-wrap: balance; }
 
   function AdminBlogs({ blogs, setBlogs, notify }) {
     const approve = id => { setBlogs(list => list.map(b => b.id === id ? { ...b, status: 'ativo' } : b)); notify('Blog aprovado. Os espaços já aparecem para os anunciantes.'); };
+    const status = b => b.status === 'ativo' ? h(B.Badge, { tone: 'success', dot: true }, 'Ativo')
+      : b.status === 'script' ? h(B.Badge, { dot: true }, 'Aguardando script')
+      : h('div', { className: 'app-actions' }, h(B.Badge, { tone: 'warning', dot: true }, 'Pendente'), h(B.Button, { size: 'sm', onClick: () => approve(b.id) }, 'Aprovar'));
     return h(Page, { title: 'Blogs parceiros', subtitle: blogs.length + ' blogs cadastrados' },
-      h(Table, { cols: [{ label: 'Blog' }, { label: 'Nicho' }, { label: 'Dono' }, { label: 'Leitores/mês', num: true }, { label: 'Espaços', num: true }, { label: 'Status' }], empty: '',
-        rows: blogs.map(b => [h('b', null, b.name), h(B.Badge, null, b.niche), b.owner, count(b.audience), b.slots,
-          b.status === 'ativo' ? h(B.Badge, { tone: 'success', dot: true }, 'Ativo')
-            : h('div', { className: 'app-actions' }, h(B.Badge, { tone: 'warning', dot: true }, 'Pendente'), h(B.Button, { size: 'sm', onClick: () => approve(b.id) }, 'Aprovar'))]) }));
+      h(Table, { cols: [{ label: 'Blog' }, { label: 'Nicho' }, { label: 'Local' }, { label: 'Blogueiro' }, { label: 'Leitores/mês', num: true }, { label: 'Espaços', num: true }, { label: 'Status' }], empty: '',
+        rows: blogs.map(b => [h('div', { className: 'app-blogcell' }, h(BlogLogo, { blog: b }), h('div', null, h('b', null, b.name), h('span', null, b.site || ''))),
+          h(B.Badge, null, b.niche), place(b), b.owner, count(b.audience), b.slots, status(b)]) }));
   }
-
   function AdminAnunciantes({ campaigns }) {
     const by = {};
     campaigns.forEach(c => { const a = by[c.advertiser] || (by[c.advertiser] = { n: 0, live: 0, inv: 0 }); a.n++; a.inv += c.invested; if (c.status === 'ativa') a.live++; });
@@ -1289,31 +1449,45 @@ h1, h2, h3 { text-wrap: balance; }
       h(Section, { title: 'Todas' }, h(B.CampaignTable, { rows: campaigns.map(c => ({ ...c, name: c.name + ' · ' + c.advertiser })) })));
   }
 
-  function AdminRepasses({ payouts, setPayouts, notify }) {
-    const pay = id => { setPayouts(list => list.map(p => p.id === id ? { ...p, status: 'pago' } : p)); notify('Repasse marcado como pago'); };
+  function AdminSaques({ payouts, setPayouts, notify }) {
+    const pay = id => { setPayouts(list => list.map(p => p.id === id ? { ...p, status: 'pago' } : p)); notify('Saque marcado como pago'); };
     const pending = payouts.filter(p => p.status === 'pendente');
-    return h(Page, { title: 'Repasses', subtitle: pending.length + ' saques pendentes · ' + money(sum(pending, 'value')) },
+    return h(Page, { title: 'Saques', subtitle: `Pedidos de saque dos blogueiros · ${pending.length} pendentes · ${money(sum(pending, 'value'))}` },
       h(Table, { cols: [{ label: 'Blog' }, { label: 'Solicitado em' }, { label: 'Valor', num: true }, { label: 'Status' }], empty: 'Nenhum saque solicitado.',
         rows: payouts.map(p => [h('b', null, p.blog), p.date, money(p.value),
           p.status === 'pago' ? h(B.Badge, { tone: 'success', dot: true }, 'Pago')
             : h('div', { className: 'app-actions' }, h(B.Badge, { tone: 'warning', dot: true }, 'Pendente'), h(B.Button, { size: 'sm', onClick: () => pay(p.id) }, 'Marcar como pago'))]) }));
   }
 
-  function AdminConfig({ pct, setPct, notify }) {
+  function AdminConfig({ pct, setPct, billing, setBilling, notify }) {
+    const num = s => Number(String(s).replace(/\./g, '').replace(',', '.'));
     const [draft, setDraft] = useState(String(pct));
     const [min, setMin] = useState('50,00');
-    const n = Number(draft.replace(',', '.'));
+    const [rMin, setRMin] = useState(String(billing.min));
+    const [rFrom, setRFrom] = useState(String(billing.installFrom));
+    const [rMax, setRMax] = useState(String(billing.maxInstallments));
+    const n = num(draft);
     const bad = !(draft.trim() !== '' && n >= 0 && n <= 50);
+    const a = num(rMin), f = num(rFrom), m = parseInt(rMax, 10);
+    const errMin = a >= 1 ? '' : 'Informe um valor maior que zero.';
+    const errFrom = f >= a ? '' : 'Precisa ser igual ou maior que a recarga mínima.';
+    const errMax = m >= 2 && m <= 12 ? '' : 'Use de 2 a 12 parcelas.';
     return h(Page, { title: 'Configurações', subtitle: 'Regras que valem para toda a plataforma.' },
       h(Card, { title: 'Comissão e limites' },
         h('div', { className: 'app-fields' },
-          h(B.TextField, { id: 'cfg-comissao', label: 'Comissão do BlogSim', suffix: '%', inputMode: 'decimal', value: draft, onChange: e => setDraft(e.target.value), error: bad ? 'Use um valor entre 0 e 50%.' : undefined, hint: 'Descontada de cada aluguel antes do repasse ao blog.' }),
+          h(B.TextField, { id: 'cfg-comissao', label: 'Comissão do BlogSim', suffix: '%', inputMode: 'decimal', value: draft, onChange: e => setDraft(e.target.value), error: bad ? 'Use um valor entre 0 e 50%.' : undefined, hint: 'Descontada de cada aluguel antes do saque do blogueiro.' }),
           h(B.TextField, { id: 'cfg-minimo', label: 'Preço mínimo por espaço', prefix: 'R$', suffix: '/semana', inputMode: 'decimal', value: min, onChange: e => setMin(e.target.value) })),
-        h('div', null, h(B.Button, { disabled: bad, onClick: () => { setPct(n); notify('Configurações salvas'); } }, 'Salvar configurações'))));
-  }
-  // ---------- Site e login ----------
+        h('div', null, h(B.Button, { disabled: bad, onClick: () => { setPct(n); notify('Configurações salvas'); } }, 'Salvar configurações'))),
+      h(Card, { title: 'Recarga de saldo do anunciante' },
+        h('p', null, 'Valem para a tela Faturamento do anunciante. Pix e cartão de crédito aceitam qualquer valor a partir da recarga mínima; o parcelamento só aparece no cartão.'),
+        h('div', { className: 'app-fields' },
+          h(B.TextField, { id: 'cfg-recarga-min', label: 'Recarga mínima', prefix: 'R$', inputMode: 'decimal', value: rMin, onChange: e => setRMin(e.target.value), error: errMin || undefined }),
+          h(B.TextField, { id: 'cfg-parcelar', label: 'Parcelar no cartão a partir de', prefix: 'R$', inputMode: 'decimal', value: rFrom, onChange: e => setRFrom(e.target.value), error: errFrom || undefined }),
+          h(B.TextField, { id: 'cfg-parcelas', label: 'Máximo de parcelas', suffix: 'x', inputMode: 'numeric', value: rMax, onChange: e => setRMax(e.target.value), error: errMax || undefined })),
+        h('div', null, h(B.Button, { disabled: !!(errMin || errFrom || errMax), onClick: () => { setBilling({ min: a, installFrom: f, maxInstallments: m }); notify('Regras de recarga salvas'); } }, 'Salvar regras de recarga'))));
+  }  // ---------- Site e login ----------
   const ICON = d => h('svg', { width: 22, height: 22, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round', 'aria-hidden': true }, h('path', { d }));
-  const ROLE_LABEL = { anunciante: 'Anunciante', blogueiro: 'Dono do blog', admin: 'Admin master' };
+  const ROLE_LABEL = { anunciante: 'Anunciante', blogueiro: 'Blogueiro', admin: 'Admin master' };
   const ROLE_TONE = { anunciante: 'brand', blogueiro: 'teal', admin: 'neutral' };
   const START_PAGE = { anunciante: 'Painel', blogueiro: 'Painel', admin: 'Visão geral' };
   // Contas de teste do protótipo (não há cadastro nem servidor).
@@ -1492,6 +1666,7 @@ h1, h2, h3 { text-wrap: balance; }
         from(t, big.querySelectorAll('.mp-slot'), { ...RENT_FROM, stagger: .35, duration: .5, ease: 'power1.inOut' }, '-=.2');
         from(t, big.querySelectorAll('.mp-slot em'), { y: 8, opacity: 0, stagger: .35, duration: .4, ease: 'back.out(2)' }, '<.25');
       }
+      q('.lp-facet').forEach((f, i) => g.from(f.querySelectorAll('.lp-tag'), { y: 8, opacity: 0, stagger: .04, duration: .4, delay: i * .1, ease: 'power3.out', scrollTrigger: { trigger: f, start: 'top 90%' } }));
       q('.lp-checks').forEach(list => g.from(list.children, { x: -12, opacity: 0, stagger: .08, duration: .5, ease: 'power3.out', scrollTrigger: { trigger: list, start: 'top 88%' } }));
 
       const cards = q('.lp-blog');
@@ -1501,7 +1676,7 @@ h1, h2, h3 { text-wrap: balance; }
           start: 'top 90%',
           onEnter: els => {
             g.to(els, { y: 0, opacity: 1, stagger: .08, duration: .8, ease: 'power3.out', overwrite: true });
-            g.from(els.map(e => e.querySelector('.mp-slot')).filter(Boolean), { ...RENT_FROM, stagger: .08, delay: .35, duration: .5 });
+            g.from(els.map(e => e.querySelector('.blog-logo')).filter(Boolean), { scale: .6, opacity: 0, stagger: .08, delay: .3, duration: .5, ease: 'back.out(2)' });
           }
         });
       }
@@ -1518,18 +1693,17 @@ h1, h2, h3 { text-wrap: balance; }
     }, []);
   }
 
-  function Landing({ onLogin, blogs }) {
+  function Landing({ onLogin, onSignup, blogs }) {
     const ref = React.useRef(null);
     useLandingMotion(ref);
     const active = blogs.filter(b => b.status === 'ativo');
-    const partners = active.map(b => {
-      const own = SLOTS.filter(s => s.blogId === b.id);
-      return { ...b, from: Math.min(...own.map(s => s.price)), place: own[0].placement };
-    });
+    const partners = active.map(b => ({ ...b, places: SLOTS.filter(s => s.blogId === b.id).map(s => s.placement) }));
+    const facet = (label, items) => h('div', { className: 'lp-facet' }, h('b', null, label), h('div', { className: 'lp-tags' }, items.map(x => h('span', { key: x, className: 'lp-tag' }, x))));
+    const pin = h('svg', { width: 13, height: 13, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2.2, 'aria-hidden': true }, h('path', { d: 'M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z' }), h('circle', { cx: 12, cy: 9.5, r: 2.5 }));
     const readers = COMPACT.format(sum(active, 'audience'));
     const ctas = h('div', { className: 'app-actions' },
       h(B.Button, { onClick: () => onLogin('anunciante') }, 'Quero anunciar'),
-      h(B.Button, { variant: 'secondary', onClick: () => onLogin('blogueiro') }, 'Tenho um blog'));
+      h(B.Button, { variant: 'secondary', onClick: () => onSignup() }, 'Tenho um blog'));
     const measures = [
       ['visitas', 'Visitas no site', 'O pixel do BlogSim no seu site conta cada leitor que chegou pelo anúncio.', '9.870 visitas'],
       ['conversas', 'Conversas no WhatsApp', 'O link redirecionador abre o seu WhatsApp e registra a conversa antes.', '204 conversas'],
@@ -1561,19 +1735,22 @@ h1, h2, h3 { text-wrap: balance; }
             h('h2', null, Words('Tem um blog? Alugue os espaços dele.')),
             h('p', null, 'Você marca onde os anúncios podem aparecer e quanto custa cada espaço por semana. O BlogSim traz os anunciantes e repassa o valor, já descontada a comissão.'),
             h('ul', { className: 'lp-checks' }, ['Instale um script no blog uma vez.', 'Pause um espaço quando quiser.', 'Peça o saque pelo painel.'].map(x => h('li', { key: x }, x))),
-            h(B.Button, { variant: 'secondary', onClick: () => onLogin('blogueiro') }, 'Cadastrar meu blog')),
-          h('div', { role: 'img', 'aria-label': 'Página do blog Viagem com Criança com três espaços à venda: banner no topo por R$ 350 por semana, lateral por R$ 280 e no meio do post por R$ 160.' },
-            h(MiniPage, { blog: 'Viagem com Criança', large: true, slots: ['banner', 'lateral', 'inline'], tags: { banner: 'R$ 350/semana', lateral: 'R$ 280/semana', inline: 'R$ 160/semana' } })))),
+            h(B.Button, { variant: 'secondary', onClick: () => onSignup() }, 'Cadastrar meu blog')),
+          h('div', { role: 'img', 'aria-label': 'Página do blog Viagem com Criança com três espaços de anúncio: banner no topo, lateral e no meio do post.' },
+            h(MiniPage, { blog: 'Viagem com Criança', large: true, slots: ['banner', 'lateral', 'inline'], tags: { banner: 'Banner topo', lateral: 'Lateral', inline: 'No meio do post' } })))),
 
         h('section', { id: 'blogs-parceiros', className: 'lp-section lp-wrap' },
-          h('h2', null, Words('Blogs parceiros')),
-          h('p', { className: 'lp-sub' }, 'Onde dá para anunciar hoje. Preço do espaço mais barato de cada blog.'),
+          h('h2', null, Words('Blogs por nicho e por região.')),
+          h('p', { className: 'lp-sub' }, 'Escolha pelo assunto do blog e pelo lugar onde ele é lido, por estado e cidade. Depois escolha a posição do anúncio na página.'),
+          h('div', { className: 'lp-facets' },
+            facet('Nichos', [...new Set(active.map(b => b.niche))]),
+            facet('Regiões', [...new Set(active.map(place))]),
+            facet('Posições', Object.values(PLACE))),
           h('div', { className: 'lp-blogs' }, partners.map(b => h('div', { key: b.id, className: 'lp-blog' },
-            h('div', { 'aria-hidden': true }, h(MiniPage, { blog: b.name, slots: [b.place] })),
-            h('div', { className: 'lp-blog-head' }, h('b', null, b.name), h(B.Badge, null, b.niche)),
+            h('div', { className: 'lp-blog-brand' }, h(BlogLogo, { blog: b, size: 'lg' }), h('div', null, h('b', null, b.name), h('span', null, b.site))),
+            h('div', { className: 'lp-blog-meta' }, h(B.Badge, null, b.niche), h('span', { className: 'lp-loc' }, pin, place(b))),
             h('span', null, count(b.audience) + ' leitores por mês'),
-            h('span', { className: 'app-money' }, 'a partir de ' + money(b.from) + ' por semana'))))),
-
+            h('span', null, 'Espaços: ' + b.places.map(p => PLACE[p]).join(', ')))))),
         h('section', { className: 'lp-wrap lp-close-wrap' }, h('div', { className: 'lp-close' },
           h('span', { className: 'lp-close-tag' }, 'Espaço disponível'),
           h('h2', null, Words('Este espaço pode ser do seu anúncio.')),
@@ -1585,7 +1762,7 @@ h1, h2, h3 { text-wrap: balance; }
   const REMEMBER_KEY = 'blogsim-email';
   const readSaved = () => { try { return localStorage.getItem(REMEMBER_KEY) || ''; } catch (e) { return ''; } };
 
-  function Login({ suggest, onLogin, onBack }) {
+  function Login({ suggest, onLogin, onBack, onSignup }) {
     const [email, setEmail] = useState(readSaved);
     const [pw, setPw] = useState('');
     const [remember, setRemember] = useState(() => !!readSaved());
@@ -1652,7 +1829,8 @@ h1, h2, h3 { text-wrap: balance; }
         h(B.Button, { type: 'submit', className: 'lg-submit' }, 'Entrar')),
       h('div', { className: 'lg-demo' },
         ACCOUNTS.map(a => h('button', { key: a.email, type: 'button', className: 'lg-acc' + (suggest === a.role ? ' is-suggested' : ''), onClick: () => fill(a) },
-          h(B.Badge, { tone: ROLE_TONE[a.role] }, ROLE_LABEL[a.role]), h('span', null, a.email)))));
+          h(B.Badge, { tone: ROLE_TONE[a.role] }, ROLE_LABEL[a.role]), h('span', null, a.email)))),
+      h('p', { className: 'lg-alt' }, 'Tem um blog? ', h('button', { type: 'button', className: 'lg-link', onClick: onSignup }, 'Cadastre-se')));
     if (view === 'forgot') body = h(React.Fragment, null,
       h('h1', null, 'Recuperar senha'),
       h('p', { className: 'lg-text' }, 'Informe o e-mail da sua conta. Enviamos um link para você criar uma senha nova.'),
@@ -1674,6 +1852,69 @@ h1, h2, h3 { text-wrap: balance; }
           h(MiniPage, { blog: 'Treino em Casa', slots: ['lateral'], large: true }),
           h('div', { className: 'lg-result' }, h('span', null, 'Tênis de corrida · Treino em Casa'), h('b', null, '+1 venda')))));
   }
+  function SelectField({ id, label, value, onChange, options, error }) {
+    return h('div', { className: 'bs-field app-select-field' + (error ? ' bs-field-error' : '') },
+      h('label', { className: 'bs-field-label', htmlFor: id }, label),
+      h('select', { id, className: 'app-select', value, onChange: e => onChange(e.target.value), 'aria-invalid': error ? true : undefined }, options),
+      error ? h('div', { className: 'bs-field-hint' }, error) : null);
+  }
+
+  function Signup({ onSignup, onLogin, onBack }) {
+    const [f, setF] = useState({ name: '', email: '', pw: '', blog: '', site: '', niche: NICHES[0], uf: '', city: '' });
+    const [logo, setLogo] = useState(null);
+    const [logoErr, setLogoErr] = useState('');
+    const [tried, setTried] = useState(false);
+    const set = k => v => setF(s => ({ ...s, [k]: v }));
+    const errs = {
+      name: f.name.trim() ? '' : 'Informe seu nome.',
+      email: /^\S+@\S+\.\S+$/.test(f.email.trim()) ? '' : 'Informe um e-mail válido, como nome@seublog.com.br.',
+      pw: f.pw.length >= 6 ? '' : 'Use pelo menos 6 caracteres.',
+      blog: f.blog.trim() ? '' : 'Informe o nome do blog.',
+      site: /\S+\.\S+/.test(f.site) ? '' : 'Informe o endereço do blog, como seublog.com.br.',
+      uf: f.uf ? '' : 'Escolha o estado.',
+      city: f.city.trim() ? '' : 'Informe a cidade.'
+    };
+    const err = k => (tried && errs[k]) || undefined;
+    function submit(e) {
+      e.preventDefault(); setTried(true);
+      if (Object.values(errs).some(Boolean)) return;
+      onSignup({ ...f, logo });
+    }
+    const ref = React.useRef(null);
+    useMotion(ref, (g, root) => {
+      const tl = g.timeline({ defaults: { ease: 'power3.out' } });
+      from(tl, root.querySelectorAll('.lg-card'), { y: 24, opacity: 0, duration: .7 });
+      from(tl, root.querySelectorAll('.lg-art .mp'), { y: 30, opacity: 0, duration: 1, ease: 'expo.out' }, .15);
+    }, []);
+    const field = (k, id, label, extra) => h(B.TextField, { id, label, value: f[k], onChange: e => set(k)(e.target.value), error: err(k), ...extra });
+    return h('main', { className: 'lg is-signup', ref },
+      h('div', { className: 'lg-card' },
+        h('button', { type: 'button', className: 'lg-home', onClick: onBack, 'aria-label': 'Ir para o site do BlogSim' }, Wordmark()),
+        h('div', { className: 'lg-body' },
+          h('h1', null, 'Cadastre seu blog'),
+          h('p', { className: 'lg-text' }, 'Depois do cadastro, você instala um script no blog. Assim que ele for verificado, o painel é liberado.'),
+          h('form', { className: 'lg-form', onSubmit: submit, noValidate: true },
+            h('div', { className: 'lg-grid' },
+              field('name', 'su-nome', 'Seu nome', { autoComplete: 'name' }),
+              field('email', 'su-email', 'E-mail', { type: 'email', autoComplete: 'email' }),
+              field('pw', 'su-senha', 'Senha', { type: 'password', autoComplete: 'new-password', hint: 'Pelo menos 6 caracteres.' }),
+              field('blog', 'su-blog', 'Nome do blog', {}),
+              field('site', 'su-site', 'Endereço do blog', { placeholder: 'seublog.com.br' }),
+              h(SelectField, { id: 'su-nicho', label: 'Nicho', value: f.niche, onChange: set('niche'), options: NICHES.map(x => h('option', { key: x, value: x }, x)) }),
+              h(SelectField, { id: 'su-uf', label: 'Estado', value: f.uf, onChange: set('uf'), error: err('uf'), options: [h('option', { key: '', value: '' }, 'Escolha'), ...UFS.map(x => h('option', { key: x, value: x }, x))] }),
+              field('city', 'su-cidade', 'Cidade', {})),
+            h('div', { className: 'app-logo-row' },
+              h(BlogLogo, { blog: { name: f.blog.trim() || 'Seu Blog', color: '#2a49de', logo }, size: 'lg' }),
+              h('div', { className: 'bs-field' },
+                h('label', { className: 'bs-field-label', htmlFor: 'su-logo' }, 'Logo do blog (opcional)'),
+                h('input', { id: 'su-logo', type: 'file', accept: 'image/*', className: 'app-file', onChange: e => readLogo(e, setLogo, setLogoErr) }),
+                h('div', { className: logoErr ? 'app-error' : 'bs-field-hint' }, logoErr || 'Quadrada, até 1 MB. Dá para trocar depois em Meu blog.'))),
+            h(B.Button, { type: 'submit', className: 'lg-submit' }, 'Criar conta e continuar'))),
+        h('p', { className: 'lg-alt' }, 'Já tem conta? ', h('button', { type: 'button', className: 'lg-link', onClick: onLogin }, 'Entrar'))),
+      h('div', { className: 'lg-art', 'aria-hidden': true },
+        h('div', { className: 'lg-scene' }, h(MiniPage, { blog: 'Viagem com Criança', slots: ['banner', 'lateral'], tags: { banner: 'Banner topo', lateral: 'Lateral' }, large: true }))));
+  }
+
   // ---------- App ----------
   function App() {
     const [screen, setScreen] = useState(() => { try { return location.hash === '#entrar' ? 'login' : 'site'; } catch (e) { return 'site'; } });
@@ -1684,17 +1925,25 @@ h1, h2, h3 { text-wrap: balance; }
     const [cart, setCart] = useState([]);
     const [balance, setBalance] = useState(3000);
     const [txns, setTxns] = useState(INITIAL_TXNS);
-    const [mySlots, setMySlots] = useState(INITIAL_MY_SLOTS);
     const [payouts, setPayouts] = useState(INITIAL_PAYOUTS);
-    const [blogs, setBlogs] = useState(BLOGS.map(b => ({ id: b.id, name: b.name, niche: b.niche, owner: b.owner, audience: b.audience, slots: b.slots.length, status: b.status || 'ativo' })));
+    const [blogs, setBlogs] = useState(BLOGS.map(b => ({ ...b, slots: b.slots.length, status: b.status || 'ativo' })));
     const [pct, setPct] = useState(20);
-    const [bloggerBalance, setBloggerBalance] = useState(1640);
+    // Regras de recarga definidas pelo admin: mínimo, valor a partir do qual o cartão parcela e máximo de parcelas.
+    const [billing, setBilling] = useState({ min: 100, installFrom: 500, maxInstallments: 6 });
+    // Blogueiro logado: o de exemplo ou um recém-cadastrado, que só vê o painel completo depois de verificar o script.
+    const [blogger, setBlogger] = useState({ blogId: 'b1', fresh: false, verified: true });
+    const [slotsByBlog, setSlotsByBlog] = useState({ b1: INITIAL_MY_SLOTS });
+    const [balByBlog, setBalByBlog] = useState({ b1: 1640 });
+    const myBlog = blogs.find(b => b.id === blogger.blogId) || blogs[0];
+    const mySlots = slotsByBlog[blogger.blogId] || [];
+    const setMySlots = fn => setSlotsByBlog(m => ({ ...m, [blogger.blogId]: typeof fn === 'function' ? fn(m[blogger.blogId] || []) : fn }));
+    const bloggerBalance = balByBlog[blogger.blogId] || 0;
     const [toast, setToast] = useState(null);
     const [menuOpen, setMenuOpen] = useState(false);
     const sideRef = React.useRef(null);
     useMotion(sideRef, (g, root) => {
       g.from(root.querySelectorAll('.bs-wordmark, .bs-nav > .bs-badge, .bs-nav-item, .bs-nav-user'), { x: -12, opacity: 0, stagger: .035, duration: .45, ease: 'power3.out' });
-    }, [screen, role]);
+    }, [screen, role, blogger.verified]);
 
     const notify = msg => setToast({ msg, k: Date.now() });
     useEffect(() => { if (!toast) return; const t = setTimeout(() => setToast(null), 3200); return () => clearTimeout(t); }, [toast]);
@@ -1703,7 +1952,30 @@ h1, h2, h3 { text-wrap: balance; }
     const top = () => { try { window.scrollTo(0, 0); } catch (e) {} };
     const go = p => { setMenuOpen(false); setPage(p); top(); };
     function openLogin(r) { setSuggest(r || null); setScreen('login'); top(); }
-    function login(r) { setRole(r); setPage(START_PAGE[r]); setMenuOpen(false); setScreen('app'); top(); }
+    function openSignup() { setScreen('cadastro'); top(); }
+    function login(r) {
+      if (r === 'blogueiro') setBlogger({ blogId: 'b1', fresh: false, verified: true });
+      setRole(r); setPage(START_PAGE[r]); setMenuOpen(false); setScreen('app'); top();
+    }
+    function signup(d) {
+      const id = 'b' + Date.now();
+      setBlogs(list => [...list, { id, name: d.blog.trim(), niche: d.niche, owner: d.name.trim(), audience: 0, city: d.city.trim(), uf: d.uf, color: '#2a49de', site: d.site.trim(), logo: d.logo, desc: '', slots: 0, status: 'script' }]);
+      setBlogger({ blogId: id, fresh: true, verified: false });
+      setRole('blogueiro'); setPage('Instalar script'); setMenuOpen(false); setScreen('app'); top();
+      notify('Conta criada. Instale o script no seu blog para liberar o painel.');
+    }
+    function verifyScript() {
+      setBlogger(b => ({ ...b, verified: true }));
+      setBlogs(list => list.map(b => b.id === blogger.blogId && b.status === 'script' ? { ...b, status: 'ativo' } : b));
+      setPage('Meus espaços'); top();
+      notify('Script encontrado. Seu painel está liberado.');
+    }
+    function saveBlog(patch) {
+      const old = myBlog.name;
+      setBlogs(list => list.map(b => b.id === blogger.blogId ? { ...b, ...patch } : b));
+      if (patch.name && patch.name !== old) setPayouts(list => list.map(p => p.blog === old ? { ...p, blog: patch.name } : p));
+      notify('Blog atualizado');
+    }
     function logout() { setMenuOpen(false); setScreen('site'); top(); notify('Você saiu da sua conta.'); }
 
     function publishCampaign(c) {
@@ -1713,20 +1985,23 @@ h1, h2, h3 { text-wrap: balance; }
       setPage('Campanhas');
       notify('Campanha enviada para revisão. Entre como admin para aprovar.');
     }
-    function addBalance(v) {
+    function addBalance(v, method, n) {
+      const how = method === 'cartao' ? 'cartão de crédito' + (n > 1 ? ` em ${n}x` : '') : 'Pix';
       setBalance(b => b + v);
-      setTxns(t => [{ date: TODAY, desc: 'Recarga via Pix (simulada)', value: v }, ...t]);
+      setTxns(t => [{ date: TODAY, desc: 'Recarga via ' + how, value: v }, ...t]);
       notify('Saldo adicionado: ' + money(v));
     }
     function withdraw() {
-      setPayouts(list => [{ id: 'r' + Date.now(), blog: MY_BLOG, value: bloggerBalance, date: TODAY, status: 'pendente' }, ...list]);
-      setBloggerBalance(0);
+      setPayouts(list => [{ id: 'r' + Date.now(), blog: myBlog.name, value: bloggerBalance, date: TODAY, status: 'pendente' }, ...list]);
+      setBalByBlog(m => ({ ...m, [blogger.blogId]: 0 }));
       notify('Saque solicitado. O valor cai em até 2 dias úteis.');
     }
 
     const toastEl = h('div', { className: 'app-toast', role: 'status', 'aria-live': 'polite', hidden: !toast }, toast ? toast.msg : '');
-    if (screen === 'site') return h('div', { className: 'lp-root' }, h(Landing, { onLogin: openLogin, blogs }), toastEl);
-    if (screen === 'login') return h('div', { className: 'lp-root' }, h(Login, { suggest, onLogin: login, onBack: () => { setScreen('site'); top(); } }), toastEl);
+    const toSite = () => { setScreen('site'); top(); };
+    if (screen === 'site') return h('div', { className: 'lp-root' }, h(Landing, { onLogin: openLogin, onSignup: openSignup, blogs }), toastEl);
+    if (screen === 'login') return h('div', { className: 'lp-root' }, h(Login, { suggest, onLogin: login, onBack: toSite, onSignup: openSignup }), toastEl);
+    if (screen === 'cadastro') return h('div', { className: 'lp-root' }, h(Signup, { onSignup: signup, onLogin: () => openLogin('blogueiro'), onBack: toSite }), toastEl);
 
     const ctx = { go, notify, campaigns, setCampaigns, cart, setCart, balance, blogs };
     const screens = {
@@ -1736,22 +2011,23 @@ h1, h2, h3 { text-wrap: balance; }
         'Criar campanha': () => h(CreateCampaign, { ...ctx, onPublish: publishCampaign }),
         'Explorar blogs': () => h(AdvExplorar, ctx),
         'Pixel e rastreamento': () => h(AdvPixel, ctx),
-        'Faturamento': () => h(AdvBilling, { balance, txns, onAdd: addBalance, campaigns })
+        'Faturamento': () => h(AdvBilling, { balance, txns, onAdd: addBalance, campaigns, billing })
       },
       blogueiro: {
-        'Painel': () => h(BlogPainel, { mySlots }),
-        'Meus espaços': () => h(BlogEspacos, { mySlots, setMySlots, notify }),
-        'Receita': () => h(BlogReceita, { bloggerBalance, onWithdraw: withdraw, payouts, pct }),
-        'Insights': () => h(BlogInsights),
-        'Instalar script': () => h(BlogScript, { notify })
+        'Painel': () => h(BlogPainel, { mySlots, blog: myBlog, fresh: blogger.fresh }),
+        'Meu blog': () => h(BlogMeuBlog, { key: myBlog.id, blog: myBlog, onSave: saveBlog }),
+        'Meus espaços': () => h(BlogEspacos, { mySlots, setMySlots, notify, blog: myBlog }),
+        'Receita': () => h(BlogReceita, { bloggerBalance, onWithdraw: withdraw, payouts, pct, blog: myBlog, fresh: blogger.fresh }),
+        'Insights': () => h(BlogInsights, { blog: myBlog, fresh: blogger.fresh }),
+        'Instalar script': () => h(BlogScript, { notify, blog: myBlog, verified: blogger.verified, onVerify: verifyScript })
       },
       admin: {
         'Visão geral': () => h(AdminVisao, { campaigns, setCampaigns, blogs, pct, notify }),
-        'Blogs parceiros': () => h(AdminBlogs, { blogs, setBlogs, notify }),
+        'Blogs parceiros': () => h(AdminBlogs, { blogs: blogs.map(b => slotsByBlog[b.id] ? { ...b, slots: slotsByBlog[b.id].length } : b), setBlogs, notify }),
         'Anunciantes': () => h(AdminAnunciantes, { campaigns }),
         'Campanhas': () => h(AdminCampanhas, { campaigns, setCampaigns, notify }),
-        'Repasses': () => h(AdminRepasses, { payouts, setPayouts, notify }),
-        'Configurações': () => h(AdminConfig, { pct, setPct, notify })
+        'Saques': () => h(AdminSaques, { payouts, setPayouts, notify }),
+        'Configurações': () => h(AdminConfig, { pct, setPct, billing, setBilling, notify })
       }
     };
     const screenFn = screens[role][page];
@@ -1764,7 +2040,11 @@ h1, h2, h3 { text-wrap: balance; }
         menuOpen ? h('div', { className: 'app-backdrop', onClick: () => setMenuOpen(false) }) : null,
         h('aside', { id: 'app-nav', ref: sideRef, className: 'app-side' + (menuOpen ? ' is-open' : '') },
           h('button', { type: 'button', className: 'app-drawer-close', 'aria-label': 'Fechar menu', onClick: () => setMenuOpen(false) }, ICON('M6 6l12 12M18 6L6 18')),
-          h(B.SideNav, { key: role, role, active: page === 'Criar campanha' ? 'Campanhas' : page, onNavigate: go, onLogout: logout, user: USER[role] })),
+          h(B.SideNav, {
+            key: role + blogger.verified, role, active: page === 'Criar campanha' ? 'Campanhas' : page, onNavigate: go, onLogout: logout,
+            items: role === 'blogueiro' ? (blogger.verified ? ['Painel', 'Meu blog', 'Meus espaços', 'Receita', 'Insights', 'Instalar script'] : ['Instalar script', 'Meu blog']) : undefined,
+            user: role === 'blogueiro' ? myBlog.owner.split(' ')[0] + ' · ' + myBlog.name : USER[role]
+          })),
         h('main', { className: 'app-main', key: role + page }, h(Reveal, null, screenFn ? screenFn() : null))),
       toastEl);
   }

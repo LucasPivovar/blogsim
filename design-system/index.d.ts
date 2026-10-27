@@ -55,6 +55,10 @@ export interface SlotCardProps {
   blog: string;
   niche?: string;
   placement: 'popup' | 'lateral' | 'banner' | 'inline';
+  /** Marca do blog: URL da logo ou iniciais com a cor do blog. */
+  logo?: string | { text: string; color: string };
+  /** Cidade e estado, ex.: "Curitiba, PR". */
+  location?: string;
   /** Leitores por mês. */
   audience?: number;
   /** Preço em reais por período. */

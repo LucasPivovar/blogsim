@@ -12,7 +12,9 @@ As animações usam GSAP com ScrollTrigger e respeitam a opção "reduzir movime
 
 ## Contas de teste
 
-Não há cadastro. A tela de login mostra três contas, uma por perfil (Anunciante, Dono do blog e Admin master). Clique numa conta para preencher e-mail e senha e depois em Entrar. As contas ficam em `src/app.js`, na constante `ACCOUNTS`.
+A tela de login mostra três contas, uma por perfil (Anunciante, Blogueiro e Admin master). Clique numa conta para preencher e-mail e senha e depois em Entrar.
+
+Blogueiros também podem se cadastrar ("Tenho um blog" na landing ou "Cadastre-se" no login). Depois do cadastro, o painel mostra só Instalar script e Meu blog; o resto é liberado quando ele clica em Verificar instalação. As contas ficam em `src/app.js`, na constante `ACCOUNTS`.
 
 ## Estrutura
 

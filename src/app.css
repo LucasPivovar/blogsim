@@ -82,6 +82,7 @@ h1, h2, h3 { text-wrap: balance; }
 .app-review-main span { color: var(--ink-muted); font-size: 13px; }
 
 /* Gráfico */
+.app-chart-box { min-width: 0; }
 .app-chart { display: block; width: 100%; height: auto; }
 .app-chart text { fill: var(--ink-muted); font: 400 11px var(--font-sans); font-variant-numeric: tabular-nums; }
 .app-chart text.val { fill: var(--ink); font-weight: 600; }
@@ -226,7 +227,20 @@ h1, h2, h3 { text-wrap: balance; }
 /* Blogs parceiros */
 .lp-blogs { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr)); gap: 20px; }
 .lp-blog { display: grid; gap: 4px; align-content: start; font-size: 14px; line-height: 20px; color: var(--ink-muted); }
-.lp-blog .mp { min-height: 190px; margin-bottom: 10px; box-shadow: none; }
+.lp-facets { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; margin-bottom: 32px; }
+.lp-facet { display: grid; gap: 10px; align-content: start; }
+.lp-facet > b { font: 700 13px/18px var(--font-sans); letter-spacing: .04em; text-transform: uppercase; color: var(--ink-muted); }
+.lp-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.lp-tag { padding: 5px 10px; border: 1px solid var(--line-strong); border-radius: var(--radius-pill); font: 500 13px/18px var(--font-sans); color: var(--ink); }
+.lp-blog { padding: 16px; border: 1px solid var(--line); border-radius: var(--radius-lg); }
+.lp-blog-brand { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; min-width: 0; }
+.lp-blog-brand > div { display: grid; min-width: 0; }
+.lp-blog-brand > div > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; line-height: 16px; color: var(--ink-muted); }
+.lp-blog-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 4px; }
+.lp-loc { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; color: var(--ink); }
+.blog-logo { display: inline-grid; place-items: center; flex: none; width: 32px; height: 32px; border-radius: 8px; object-fit: cover; color: #ffffff; font: 800 12px/1 var(--font-sans); letter-spacing: .02em; }
+.blog-logo.is-lg { width: 44px; height: 44px; border-radius: 12px; font-size: 15px; }
+@media (max-width: 860px) { .lp-facets { grid-template-columns: 1fr; gap: 18px; } }
 .lp-blog-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2); }
 .lp-blog b { font-size: 15px; color: var(--ink); }
 
@@ -302,6 +316,22 @@ h1, h2, h3 { text-wrap: balance; }
   .hd-toast, .hd-sale, .hd-ad-in { animation: none; }
   .hd-caret { animation: none; }
 }
+/* Campos e blocos do painel */
+.app-select-field { min-width: 0; }
+.app-select { height: 40px; padding: 0 36px 0 12px; border: 1px solid var(--line-strong); border-radius: var(--radius-md); background: var(--surface-100); color: var(--ink); font: 400 15px/22px var(--font-sans); appearance: none; -webkit-appearance: none; background-image: linear-gradient(45deg, transparent 50%, #585e7e 50%), linear-gradient(135deg, #585e7e 50%, transparent 50%); background-position: calc(100% - 18px) 50%, calc(100% - 13px) 50%; background-size: 5px 5px; background-repeat: no-repeat; cursor: pointer; }
+.app-select:focus-visible, .app-textarea:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.bs-field-error .app-select { border-color: var(--danger); }
+.app-textarea { box-sizing: border-box; width: 100%; padding: 10px 12px; border: 1px solid var(--line-strong); border-radius: var(--radius-md); background: var(--surface-100); color: var(--ink); font: 400 15px/22px var(--font-sans); resize: vertical; }
+.app-split { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: var(--space-4); align-items: start; }
+.app-logo-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4); }
+.app-gate { display: grid; gap: 4px; padding: var(--space-4); border: 1px solid var(--warning); border-radius: var(--radius-lg); background: var(--warning-soft); }
+.app-gate b { font: 700 15px/22px var(--font-sans); color: var(--ink); }
+.app-gate p { margin: 0; font-size: 14px; line-height: 20px; color: var(--ink); max-width: 70ch; }
+.app-blogcell { display: flex; align-items: center; gap: 10px; }
+.app-blogcell > div { display: grid; }
+.app-blogcell span { font-size: 12px; line-height: 16px; color: var(--ink-muted); }
+.app-filters .app-select-field { flex: 0 1 200px; }
+@media (max-width: 960px) { .app-split { grid-template-columns: 1fr; } }
 /* Login */
 .lg { overflow-x: clip; display: grid; grid-template-columns: minmax(0, 420px) minmax(0, 400px); justify-content: center; align-content: center; align-items: center; gap: 72px; box-sizing: border-box; min-height: 100vh; min-height: 100dvh; padding-block: 32px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); background: var(--surface-200); }
 .lg-card { box-sizing: border-box; display: grid; gap: var(--space-4); width: 100%; padding: var(--space-8) var(--space-6); background: var(--surface-100); border: 1px solid var(--line); border-radius: var(--radius-lg); }
@@ -329,7 +359,12 @@ h1, h2, h3 { text-wrap: balance; }
 .lg-scene { position: relative; margin-top: 24px; }
 .lg-result { position: absolute; top: -26px; left: -20px; display: grid; gap: 2px; padding: 10px 14px; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface-100); box-shadow: var(--shadow-pop); font: 500 12px/16px var(--font-sans); color: var(--ink-muted); }
 .lg-result b { font: 800 20px/24px var(--font-sans); color: var(--success); }
-@media (max-width: 860px) { .lg { grid-template-columns: minmax(0, 420px); } .lg-art { display: none; } }
+.lg.is-signup { grid-template-columns: minmax(0, 560px) minmax(0, 360px); gap: 56px; }
+.lg-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
+.lg-alt { margin: 0; font-size: 14px; line-height: 20px; color: var(--ink-muted); }
+.lg-alt .lg-link { font-size: 14px; }
+@media (max-width: 860px) { .lg, .lg.is-signup { grid-template-columns: minmax(0, 560px); } .lg-art { display: none; } }
+@media (max-width: 520px) { .lg-grid { grid-template-columns: 1fr; } }
 @media (max-width: 860px) {
   .app-root { height: auto; }
   .app-shell { flex-direction: column; }
