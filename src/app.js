@@ -1092,7 +1092,7 @@
           h('a', { href: '#como-funciona' }, 'Como funciona'),
           h('a', { href: '#para-blogs' }, 'Para blogs'),
           h('a', { href: '#blogs-parceiros' }, 'Blogs parceiros')),
-        h(B.Button, { variant: 'secondary', size: 'sm', onClick: () => onLogin() }, 'Entrar'))),
+        h(B.Button, { variant: 'secondary', size: 'sm', className: 'lp-nav-cta', onClick: () => onLogin() }, 'Entrar'))),
       h('main', null,
         h('section', { className: 'lp-hero lp-wrap' },
           h('div', { className: 'lp-hero-text' },

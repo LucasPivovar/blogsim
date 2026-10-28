@@ -323,6 +323,8 @@ h1, h2, h3 { text-wrap: balance; }
 .app-step-body { display: grid; gap: var(--space-3); min-width: 0; }
 .lp-nav-in { display: flex; align-items: center; gap: var(--space-6); padding-block: 12px; }
 .lp-nav-in .bs-wordmark { margin-right: auto; }
+.lp-nav-cta { box-shadow: var(--shadow-card); }
+.lp-nav-cta:hover { box-shadow: var(--shadow-pop); }
 .lp-links { display: flex; gap: var(--space-6); }
 .lp-links a { color: var(--ink-muted); text-decoration: none; font: 500 14px/20px var(--font-sans); border-radius: var(--radius-sm); }
 .lp-links a:hover { color: var(--ink); }
@@ -1868,7 +1870,7 @@ h1, h2, h3 { text-wrap: balance; }
           h('a', { href: '#como-funciona' }, 'Como funciona'),
           h('a', { href: '#para-blogs' }, 'Para blogs'),
           h('a', { href: '#blogs-parceiros' }, 'Blogs parceiros')),
-        h(B.Button, { variant: 'secondary', size: 'sm', onClick: () => onLogin() }, 'Entrar'))),
+        h(B.Button, { variant: 'secondary', size: 'sm', className: 'lp-nav-cta', onClick: () => onLogin() }, 'Entrar'))),
       h('main', null,
         h('section', { className: 'lp-hero lp-wrap' },
           h('div', { className: 'lp-hero-text' },
