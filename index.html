@@ -326,7 +326,7 @@ h1, h2, h3 { text-wrap: balance; }
 .lp-links { display: flex; gap: var(--space-6); }
 .lp-links a { color: var(--ink-muted); text-decoration: none; font: 500 14px/20px var(--font-sans); border-radius: var(--radius-sm); }
 .lp-links a:hover { color: var(--ink); }
-.lp-links a:focus-visible, .lg-acc:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.lp-links a:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
 .lp-section h2, .lp-band h2, .lp-close h2 { margin: 0 0 12px; max-width: 22ch; font: 800 34px/1.1 var(--font-display); letter-spacing: -.03em; color: var(--ink); text-wrap: balance; }
 .lp-section { padding-block: 88px 0; }
 .lp-sub { margin: 0 0 28px; max-width: 60ch; font-size: 16px; line-height: 24px; color: var(--ink-muted); }
@@ -508,6 +508,14 @@ h1, h2, h3 { text-wrap: balance; }
 .app-blogcell > div { display: grid; }
 .app-blogcell span { font-size: 12px; line-height: 16px; color: var(--ink-muted); }
 .app-filters .app-select-field { flex: 0 1 200px; }
+.app-gate-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3); }
+.app-signups { display: grid; gap: var(--space-3); }
+.app-signup { display: grid; gap: var(--space-3); padding: var(--space-4); border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface-100); }
+.app-signup-head { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }
+.app-signup-who { display: grid; flex: 1 1 200px; min-width: 0; }
+.app-signup-who b { font: 700 16px/22px var(--font-sans); color: var(--ink); }
+.app-signup-who span { font-size: 13px; line-height: 18px; color: var(--ink-muted); overflow-wrap: anywhere; }
+.app-deny { display: grid; gap: var(--space-2); max-width: 560px; }
 @media (max-width: 960px) { .app-split { grid-template-columns: 1fr; } }
 /* Login */
 .lg { overflow-x: clip; display: grid; grid-template-columns: minmax(0, 420px) minmax(0, 400px); justify-content: center; align-content: center; align-items: center; gap: 72px; box-sizing: border-box; min-height: 100vh; min-height: 100dvh; padding-block: 32px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); background: var(--surface-200); }
@@ -525,13 +533,6 @@ h1, h2, h3 { text-wrap: balance; }
 .lg-home:focus-visible, .lg-link:focus-visible, .lg-check input:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
 .lg-form { display: grid; gap: var(--space-4); }
 .lg-submit { width: 100%; }
-.lg-demo { display: grid; gap: var(--space-2); }
-.lg-demo b { font: 600 14px/20px var(--font-sans); color: var(--ink); }
-.lg-demo p { margin: 0 0 4px; font-size: 13px; line-height: 18px; color: var(--ink-muted); }
-.lg-acc { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface-100); color: var(--ink); font: 500 13px/18px var(--font-sans); text-align: left; cursor: pointer; }
-.lg-acc span:last-child { min-width: 0; overflow-wrap: anywhere; }
-.lg-acc:hover { border-color: var(--line-strong); background: var(--surface-200); }
-.lg-acc.is-suggested { border-color: var(--brand); box-shadow: inset 0 0 0 1px var(--brand); }
 .lg-art { display: grid; gap: 32px; }
 .lg-scene { position: relative; margin-top: 24px; }
 .lg-result { position: absolute; top: -26px; left: -20px; display: grid; gap: 2px; padding: 10px 14px; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface-100); box-shadow: var(--shadow-pop); font: 500 12px/16px var(--font-sans); color: var(--ink-muted); }
@@ -540,6 +541,17 @@ h1, h2, h3 { text-wrap: balance; }
 .lg-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
 .lg-alt { margin: 0; font-size: 14px; line-height: 20px; color: var(--ink-muted); }
 .lg-alt .lg-link { font-size: 14px; }
+.lg-msg { margin: 0; padding: 10px 12px; border-radius: var(--radius-md); font: 500 14px/20px var(--font-sans); }
+.lg-msg.is-danger { background: var(--danger-soft); color: var(--danger); }
+.lg-msg.is-warning { background: var(--warning-soft); color: var(--ink); }
+.su-roles { display: grid; gap: var(--space-3); }
+.su-role { display: grid; gap: 4px; padding: var(--space-4); border: 1px solid var(--line-strong); border-radius: var(--radius-lg); background: var(--surface-100); text-align: left; cursor: pointer; transition: border-color .15s, background-color .15s; }
+.su-role b { font: 700 17px/24px var(--font-sans); color: var(--ink); }
+.su-role span { font: 400 14px/20px var(--font-sans); color: var(--ink-muted); }
+.su-role:hover { border-color: var(--brand); background: var(--brand-soft); }
+.su-role:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.su-h { margin: 4px 0 0; font: 700 13px/18px var(--font-sans); letter-spacing: .04em; text-transform: uppercase; color: var(--ink-muted); }
+@media (prefers-reduced-motion: reduce) { .su-role { transition: none; } }
 @media (max-width: 860px) { .lg, .lg.is-signup { grid-template-columns: minmax(0, 560px); } .lg-art { display: none; } }
 @media (max-width: 520px) { .lg-grid { grid-template-columns: 1fr; } }
 @media (max-width: 860px) {
@@ -806,7 +818,6 @@ h1, h2, h3 { text-wrap: balance; }
   const ROLE_KEYS = ['anunciante', 'blogueiro', 'admin'];
   const ME = 'Passo Certo Calçados';
   const MY_BLOG = 'Viagem com Criança';
-  const USER = { anunciante: ME, blogueiro: 'Renata · ' + MY_BLOG, admin: 'Equipe BlogSim' };
   const TODAY = '27/10/2026';
 
   // ---------- Dados de exemplo ----------
@@ -970,23 +981,25 @@ h1, h2, h3 { text-wrap: balance; }
       })));
   }
   // ---------- Anunciante ----------
-  function AdvPainel({ campaigns, go }) {
-    const mine = campaigns.filter(c => c.advertiser === ME);
+  function AdvPainel({ campaigns, go, advertiser }) {
+    const mine = campaigns.filter(c => c.advertiser === advertiser);
+    const fresh = !mine.length;
     const inv = sum(mine, 'invested'), clk = sum(mine, 'clicks'), res = sum(mine, 'results'), views = sum(mine, 'views');
-    return h(Page, { title: 'Painel', subtitle: 'Últimos 14 dias · ' + ME, action: h(B.Button, { onClick: () => go('Criar campanha') }, 'Criar campanha') },
+    return h(Page, { title: 'Painel', subtitle: 'Últimos 14 dias · ' + advertiser, action: h(B.Button, { onClick: () => go('Criar campanha') }, 'Criar campanha') },
       h('div', { className: 'app-metrics' },
-        h(B.MetricCard, { label: 'Investido', value: inv, format: 'money', delta: 12.4, hint: 'vs. 14 dias anteriores', spark: [3100, 3300, 3250, 3600, 3900, 4400, inv] }),
-        h(B.MetricCard, { label: 'Cliques', value: clk, format: 'count', delta: 8.1, hint: 'vs. 14 dias anteriores', spark: spark(DAILY.clicks) }),
-        h(B.MetricCard, { label: 'Visualizações', value: views, format: 'count', delta: 9.8, hint: 'vezes que seus anúncios apareceram' }),
+        h(B.MetricCard, { label: 'Investido', value: inv, format: 'money', delta: fresh ? undefined : 12.4, hint: fresh ? 'nenhuma campanha ainda' : 'vs. 14 dias anteriores', spark: fresh ? undefined : [3100, 3300, 3250, 3600, 3900, 4400, inv] }),
+        h(B.MetricCard, { label: 'Cliques', value: clk, format: 'count', delta: fresh ? undefined : 8.1, hint: fresh ? 'medidos pelos blogs' : 'vs. 14 dias anteriores', spark: fresh ? undefined : spark(DAILY.clicks) }),
+        h(B.MetricCard, { label: 'Visualizações', value: views, format: 'count', delta: fresh ? undefined : 9.8, hint: 'vezes que seus anúncios apareceram' }),
         h(B.MetricCard, { label: 'Resultados', value: res, format: 'count', hint: (res ? money(inv / res) : 'R$ 0,00') + ' por resultado' })),
-      h(Card, { title: 'Cliques por dia' }, h(BarChart, { data: DAILY.clicks, label: 'Cliques por dia nos últimos 14 dias' })),
+      fresh ? h('p', { className: 'app-empty' }, 'Os cliques por dia aparecem aqui quando a sua primeira campanha entrar no ar. Comece em Explorar blogs ou em Criar campanha.')
+        : h(Card, { title: 'Cliques por dia' }, h(BarChart, { data: DAILY.clicks, label: 'Cliques por dia nos últimos 14 dias' })),
       h(Section, { title: 'Campanhas ativas', extra: h(B.Button, { variant: 'ghost', size: 'sm', onClick: () => go('Campanhas') }, 'Ver todas') },
-        h(B.CampaignTable, { rows: mine.filter(c => c.status === 'ativa') })));
+        h(B.CampaignTable, { rows: mine.filter(c => c.status === 'ativa'), emptyText: 'Nenhuma campanha ativa ainda.' })));
   }
 
-  function AdvCampanhas({ campaigns, go }) {
+  function AdvCampanhas({ campaigns, go, advertiser }) {
     const [f, setF] = useState('todas');
-    const mine = campaigns.filter(c => c.advertiser === ME);
+    const mine = campaigns.filter(c => c.advertiser === advertiser);
     const rows = f === 'todas' ? mine : mine.filter(c => c.status === f);
     return h(Page, { title: 'Campanhas', subtitle: mine.length + ' campanhas', action: h(B.Button, { onClick: () => go('Criar campanha') }, 'Criar campanha') },
       h(Chips, { label: 'Status', value: f, onChange: setF, options: [['todas', 'Todas'], ['ativa', 'Ativas'], ['pausada', 'Pausadas'], ['revisao', 'Em revisão'], ['encerrada', 'Encerradas']] }),
@@ -1190,14 +1203,15 @@ h1, h2, h3 { text-wrap: balance; }
           step > 0 ? h(B.Button, { variant: 'secondary', onClick: back }, 'Voltar') : h('span'),
           step < STEPS.length - 1 ? h(B.Button, { onClick: next }, 'Continuar') : h(B.Button, { variant: 'accent', onClick: publish }, `Pagar ${money(total)} e publicar`))));
   }
-  function AdvPixel({ notify }) {
+  function AdvPixel({ notify, site, fresh }) {
+    const wait = (tone, text) => h(B.Badge, { tone, dot: true }, text);
     return h(Page, { title: 'Pixel e rastreamento', subtitle: 'Como o BlogSim mede os resultados das suas campanhas.' },
       h('div', { className: 'app-cols' },
-        h(Card, { title: 'Pixel BlogSim', extra: h(B.Badge, { tone: 'success', dot: true }, 'Detectado') },
-          h('p', null, 'Mede as visitas no seu site. Instalado em passocerto.com.br, último sinal há 4 minutos.'),
+        h(Card, { title: 'Pixel BlogSim', extra: fresh ? wait('warning', 'Aguardando instalação') : wait('success', 'Detectado') },
+          h('p', null, fresh ? 'Mede as visitas no seu site. Instale em todas as páginas' + (site ? ' de ' + site : '') + '.' : 'Mede as visitas no seu site. Instalado em ' + site + ', último sinal há 4 minutos.'),
           h(Code, { label: 'Código do pixel', text: TRACK.visitas.code, notify })),
-        h(Card, { title: 'Link redirecionador', extra: h(B.Badge, { tone: 'success', dot: true }, 'Ativo') },
-          h('p', null, 'Conta cada conversa no WhatsApp iniciada a partir de um anúncio. 204 conversas nos últimos 14 dias.'),
+        h(Card, { title: 'Link redirecionador', extra: fresh ? wait('neutral', 'Sem uso ainda') : wait('success', 'Ativo') },
+          h('p', null, 'Conta cada conversa no WhatsApp iniciada a partir de um anúncio.' + (fresh ? '' : ' 204 conversas nos últimos 14 dias.')),
           h(Code, { label: 'Seu link', text: TRACK.conversas.code, notify })),
         h(Card, { title: 'Pixel no checkout', extra: h(B.Badge, { tone: 'warning', dot: true }, 'Aguardando instalação') },
           h('p', null, 'Mede as vendas. Instale na página de confirmação do pedido.'),
@@ -1205,11 +1219,11 @@ h1, h2, h3 { text-wrap: balance; }
           h('div', null, h(B.Button, { variant: 'secondary', size: 'sm', onClick: () => notify('Ainda não encontramos o pixel no checkout. A verificação pode levar até 10 minutos.') }, 'Verificar instalação')))));
   }
 
-  function AdvBilling({ balance, txns, onAdd, campaigns, billing }) {
+  function AdvBilling({ balance, txns, onAdd, campaigns, billing, advertiser }) {
     const [amt, setAmt] = useState('250');
     const [method, setMethod] = useState('pix');
     const [parcelas, setParcelas] = useState('1');
-    const spent = sum(campaigns.filter(c => c.advertiser === ME), 'invested');
+    const spent = sum(campaigns.filter(c => c.advertiser === advertiser), 'invested');
     const value = Number(String(amt).replace(/\./g, '').replace(',', '.')) || 0;
     const tooLow = value < billing.min;
     const canSplit = method === 'cartao' && value >= billing.installFrom;
@@ -1411,11 +1425,14 @@ h1, h2, h3 { text-wrap: balance; }
         h(B.Button, { size: 'sm', variant: 'secondary', onClick: () => decide(c.id, 'encerrada', 'Campanha recusada. O anunciante foi avisado.') }, 'Recusar')))));
   }
 
-  function AdminVisao({ campaigns, setCampaigns, blogs, pct, notify }) {
+  function AdminVisao({ campaigns, setCampaigns, blogs, pct, notify, pendingSignups, go }) {
     const volume = sum(campaigns, 'invested');
     const advertisers = new Set(campaigns.map(c => c.advertiser)).size;
     const pending = blogs.filter(b => b.status === 'pendente').length;
     return h(Page, { title: 'Visão geral', subtitle: 'Outubro de 2026 · comissão de ' + pct + '%' },
+      pendingSignups ? h('div', { className: 'app-gate app-gate-row' },
+        h('div', null, h('b', null, pendingSignups + (pendingSignups > 1 ? ' cadastros aguardando aprovação' : ' cadastro aguardando aprovação')), h('p', null, 'Responda em até 24 horas. Quem está em análise ainda não entra no painel.')),
+        h(B.Button, { size: 'sm', onClick: () => go('Cadastros') }, 'Ver cadastros')) : null,
       h('div', { className: 'app-metrics' },
         h(B.MetricCard, { label: 'Comissão da plataforma', value: volume * pct / 100, format: 'money', delta: 21, hint: 'vs. setembro', spark: spark(DAILY.volume) }),
         h(B.MetricCard, { label: 'Volume em aluguéis', value: volume, format: 'money', delta: 21, hint: 'vs. setembro' }),
@@ -1425,16 +1442,57 @@ h1, h2, h3 { text-wrap: balance; }
       h(Section, { title: 'Campanhas aguardando revisão' }, h(ReviewList, { campaigns, setCampaigns, notify })));
   }
 
-  function AdminBlogs({ blogs, setBlogs, notify }) {
-    const approve = id => { setBlogs(list => list.map(b => b.id === id ? { ...b, status: 'ativo' } : b)); notify('Blog aprovado. Os espaços já aparecem para os anunciantes.'); };
+  function AdminBlogs({ blogs }) {
     const status = b => b.status === 'ativo' ? h(B.Badge, { tone: 'success', dot: true }, 'Ativo')
       : b.status === 'script' ? h(B.Badge, { dot: true }, 'Aguardando script')
-      : h('div', { className: 'app-actions' }, h(B.Badge, { tone: 'warning', dot: true }, 'Pendente'), h(B.Button, { size: 'sm', onClick: () => approve(b.id) }, 'Aprovar'));
+      : b.status === 'negado' ? h(B.Badge, { tone: 'danger', dot: true }, 'Negado')
+      : h(B.Badge, { tone: 'warning', dot: true }, 'Em análise');
     return h(Page, { title: 'Blogs parceiros', subtitle: blogs.length + ' blogs cadastrados' },
       h(Table, { cols: [{ label: 'Blog' }, { label: 'Nicho' }, { label: 'Local' }, { label: 'Blogueiro' }, { label: 'Leitores/mês', num: true }, { label: 'Espaços', num: true }, { label: 'Status' }], empty: '',
         rows: blogs.map(b => [h('div', { className: 'app-blogcell' }, h(BlogLogo, { blog: b }), h('div', null, h('b', null, b.name), h('span', null, b.site || ''))),
           h(B.Badge, null, b.niche), place(b), b.owner, count(b.audience), b.slots, status(b)]) }));
   }
+  // Cadastros novos de blogueiros e anunciantes: o admin aprova ou nega. Só aprovado entra no painel.
+  function AdminCadastros({ users, blogs, onApprove, onDeny }) {
+    const [status, setStatus] = useState('pendente');
+    const [kind, setKind] = useState('todos');
+    const [denying, setDenying] = useState(null);
+    const [reason, setReason] = useState('');
+    const byId = Object.fromEntries(blogs.map(b => [b.id, b]));
+    const list = users.filter(u => u.role !== 'admin' && (status === 'todos' || u.status === status) && (kind === 'todos' || u.role === kind));
+    const pending = users.filter(u => u.role !== 'admin' && u.status === 'pendente').length;
+    const detail = u => {
+      if (u.role === 'blogueiro') {
+        const b = byId[u.blogId] || {};
+        return [['Blog', b.name], ['Endereço', b.site], ['Nicho', b.niche], ['Local', place(b)], ['Leitores por mês', b.audience ? count(b.audience) : '—']];
+      }
+      const c = u.company || {};
+      return [['Empresa', c.name], ['Razão social', c.legal], ['CNPJ', c.cnpj], ['Site', c.site || '—'], ['Telefone', c.phone], ['Local', place(c)]];
+    };
+    return h(Page, { title: 'Cadastros', subtitle: pending ? `${pending} ${pending > 1 ? 'cadastros aguardando' : 'cadastro aguardando'} análise. Responda em até 24 horas.` : 'Nenhum cadastro aguardando análise.' },
+      h('div', { className: 'app-filters' },
+        h(Chips, { label: 'Status', value: status, onChange: setStatus, options: [['pendente', 'Em análise'], ['aprovado', 'Aprovados'], ['negado', 'Negados'], ['todos', 'Todos']] }),
+        h(Chips, { label: 'Tipo', value: kind, onChange: setKind, options: [['todos', 'Todos'], ['blogueiro', 'Blogueiros'], ['anunciante', 'Anunciantes']] })),
+      list.length ? h('div', { className: 'app-signups' }, list.map(u => h('article', { key: u.id, className: 'app-signup' },
+        h('div', { className: 'app-signup-head' },
+          u.role === 'blogueiro' && byId[u.blogId] ? h(BlogLogo, { blog: byId[u.blogId] }) : h('span', { className: 'blog-logo', style: { background: '#585e7e' }, 'aria-hidden': true }, initials(u.company ? u.company.name : u.name)),
+          h('div', { className: 'app-signup-who' }, h('b', null, u.role === 'blogueiro' ? (byId[u.blogId] || {}).name : (u.company || {}).name), h('span', null, u.name + ' · ' + u.email)),
+          h('div', { className: 'app-actions' }, h(B.Badge, { tone: u.role === 'blogueiro' ? 'teal' : 'brand' }, ROLE_LABEL[u.role]), h(B.Badge, { tone: STATUS_TONE[u.status], dot: true }, STATUS_LABEL[u.status]))),
+        h('dl', { className: 'app-dl app-signup-dl' }, detail(u).flatMap(([k, v]) => [h('dt', { key: k + 't' }, k), h('dd', { key: k + 'd' }, v || '—')])),
+        h('p', { className: 'app-note' }, 'Cadastrado em ' + u.createdAt + (u.status === 'negado' && u.reason ? ' · Motivo da recusa: ' + u.reason : '')),
+        u.status !== 'pendente' ? null
+          : denying === u.id ? h('div', { className: 'app-deny' },
+              h('label', { className: 'bs-field-label', htmlFor: 'motivo-' + u.id }, 'Motivo da recusa'),
+              h('textarea', { id: 'motivo-' + u.id, className: 'app-textarea', rows: 2, maxLength: 240, placeholder: 'Ex.: o CNPJ não corresponde à empresa informada.', value: reason, onChange: e => setReason(e.target.value) }),
+              h('div', { className: 'app-actions' },
+                h(B.Button, { size: 'sm', variant: 'secondary', onClick: () => { setDenying(null); setReason(''); } }, 'Cancelar'),
+                h(B.Button, { size: 'sm', disabled: !reason.trim(), onClick: () => { onDeny(u.id, reason.trim()); setDenying(null); setReason(''); } }, 'Negar cadastro')))
+          : h('div', { className: 'app-actions' },
+              h(B.Button, { size: 'sm', onClick: () => onApprove(u.id) }, 'Aprovar'),
+              h(B.Button, { size: 'sm', variant: 'secondary', onClick: () => { setDenying(u.id); setReason(''); } }, 'Negar')))))
+        : h('p', { className: 'app-empty' }, status === 'pendente' ? 'Nenhum cadastro aguardando análise.' : 'Nenhum cadastro com esse filtro.'));
+  }
+
   function AdminAnunciantes({ campaigns }) {
     const by = {};
     campaigns.forEach(c => { const a = by[c.advertiser] || (by[c.advertiser] = { n: 0, live: 0, inv: 0 }); a.n++; a.inv += c.invested; if (c.status === 'ativa') a.live++; });
@@ -1488,15 +1546,65 @@ h1, h2, h3 { text-wrap: balance; }
   }  // ---------- Site e login ----------
   const ICON = d => h('svg', { width: 22, height: 22, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round', 'aria-hidden': true }, h('path', { d }));
   const ROLE_LABEL = { anunciante: 'Anunciante', blogueiro: 'Blogueiro', admin: 'Admin master' };
-  const ROLE_TONE = { anunciante: 'brand', blogueiro: 'teal', admin: 'neutral' };
   const START_PAGE = { anunciante: 'Painel', blogueiro: 'Painel', admin: 'Visão geral' };
-  // Contas de teste do protótipo (não há cadastro nem servidor).
-  const ACCOUNTS = [
-    { email: 'anunciante@blogsim.com.br', password: 'demo123', role: 'anunciante' },
-    { email: 'blog@blogsim.com.br', password: 'demo123', role: 'blogueiro' },
-    { email: 'admin@blogsim.com.br', password: 'demo123', role: 'admin' }
+  // SHA-256 em JS puro: em http:// o navegador não libera crypto.subtle.
+  // É só para não deixar senha legível no código do protótipo. A segurança de verdade
+  // (hash lento com argon2id, sessão no servidor) fica no back-end: docs/BACKEND.md.
+  function sha256(text) {
+    const K = [0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5, 0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174, 0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da, 0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967, 0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85, 0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070, 0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3, 0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2];
+    const bytes = Array.from(new TextEncoder().encode(text));
+    const bitLen = bytes.length * 8;
+    bytes.push(0x80);
+    while (bytes.length % 64 !== 56) bytes.push(0);
+    for (let i = 7; i >= 0; i--) bytes.push(i > 3 ? 0 : (bitLen >>> (i * 8)) & 0xff);
+    const H = [0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19];
+    const rotr = (x, n) => (x >>> n) | (x << (32 - n));
+    const W = new Array(64);
+    for (let o = 0; o < bytes.length; o += 64) {
+      for (let i = 0; i < 16; i++) W[i] = (bytes[o + i * 4] << 24) | (bytes[o + i * 4 + 1] << 16) | (bytes[o + i * 4 + 2] << 8) | bytes[o + i * 4 + 3];
+      for (let i = 16; i < 64; i++) {
+        const s0 = rotr(W[i - 15], 7) ^ rotr(W[i - 15], 18) ^ (W[i - 15] >>> 3);
+        const s1 = rotr(W[i - 2], 17) ^ rotr(W[i - 2], 19) ^ (W[i - 2] >>> 10);
+        W[i] = (W[i - 16] + s0 + W[i - 7] + s1) | 0;
+      }
+      let [a, b, c, d, e, f, g, hh] = H;
+      for (let i = 0; i < 64; i++) {
+        const t1 = (hh + (rotr(e, 6) ^ rotr(e, 11) ^ rotr(e, 25)) + ((e & f) ^ (~e & g)) + K[i] + W[i]) | 0;
+        const t2 = ((rotr(a, 2) ^ rotr(a, 13) ^ rotr(a, 22)) + ((a & b) ^ (a & c) ^ (b & c))) | 0;
+        hh = g; g = f; f = e; e = (d + t1) | 0; d = c; c = b; b = a; a = (t1 + t2) | 0;
+      }
+      [a, b, c, d, e, f, g, hh].forEach((v, i) => { H[i] = (H[i] + v) | 0; });
+    }
+    return H.map(v => (v >>> 0).toString(16).padStart(8, '0')).join('');
+  }
+  const newSalt = () => Array.from({ length: 8 }, () => Math.floor(Math.random() * 256).toString(16).padStart(2, '0')).join('');
+  const passHash = (salt, pw) => sha256(salt + ':' + pw);
+
+  // CNPJ: formato e dígitos verificadores.
+  function cnpjOk(v) {
+    const n = v.replace(/\D/g, '');
+    if (n.length !== 14 || /^(\d)\1+$/.test(n)) return false;
+    const dv = len => { let s = 0, w = len - 7; for (let i = 0; i < len; i++) { s += +n[i] * w--; if (w < 2) w = 9; } const r = s % 11; return r < 2 ? 0 : 11 - r; };
+    return dv(12) === +n[12] && dv(13) === +n[13];
+  }
+  const maskCnpj = v => v.replace(/\D/g, '').slice(0, 14).replace(/^(\d{2})(\d)/, '$1.$2').replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3').replace(/\.(\d{3})(\d)/, '.$1/$2').replace(/(\d{4})(\d)/, '$1-$2');
+
+  // Contas. Status: pendente (em análise), aprovado ou negado. Só aprovado entra no painel.
+  // As três de QA têm só sal e hash aqui; as senhas ficam em QA_CONTAS.md, fora do git.
+  const SEED_USERS = [
+    { id: 'u-admin', role: 'admin', name: 'Equipe BlogSim', email: 'admin.qa@blogsim.com.br', salt: '40d3c572f91ebf68', hash: '115a7735c70019132fe7efdf16373dff246f7d5fec22e4f6d6b4031110fdeee2', status: 'aprovado', createdAt: '01/10/2026' },
+    { id: 'u-adv', role: 'anunciante', name: 'Carla Mendes', email: 'anunciante.qa@blogsim.com.br', salt: '40c0baee29096622', hash: '6a994a99f913d2de8732b388e50c50f55f869fdf230d6a32ce8048e4b0e1ff57', status: 'aprovado', createdAt: '05/10/2026',
+      company: { name: ME, legal: 'Passo Certo Calçados Ltda.', cnpj: '11.444.777/0001-61', site: 'passocerto.com.br', phone: '(11) 98000-1234', city: 'São Paulo', uf: 'SP' } },
+    { id: 'u-blog', role: 'blogueiro', name: 'Renata Alves', email: 'blogueiro.qa@blogsim.com.br', salt: 'f65cc54d233b4483', hash: 'a1c017eed0efc9e5d32907445f56ae40310ebb41fe9a7b5fd11011c3b4bf18c2', status: 'aprovado', createdAt: '03/10/2026', blogId: 'b1', scriptVerified: true },
+    // Cadastros de exemplo para o admin analisar (sem senha: não entram).
+    { id: 'u-leo', role: 'blogueiro', name: 'Léo Martins', email: 'leo@bikeurbana.com.br', status: 'pendente', createdAt: '27/10/2026', blogId: 'b8' },
+    { id: 'u-otica', role: 'anunciante', name: 'Beatriz Souza', email: 'marketing@oticavisaoclara.com.br', status: 'pendente', createdAt: '27/10/2026',
+      company: { name: 'Ótica Visão Clara', legal: 'Visão Clara Comércio Óptico Ltda.', cnpj: '27.394.651/0001-60', site: 'oticavisaoclara.com.br', phone: '(31) 99876-5432', city: 'Belo Horizonte', uf: 'MG' } },
+    { id: 'u-neg', role: 'anunciante', name: 'Rafael Costa', email: 'contato@apostaganha.bet', status: 'negado', createdAt: '22/10/2026', reason: 'Apostas não são aceitas como anunciantes no BlogSim.',
+      company: { name: 'Aposta Ganha', legal: 'AG Entretenimento Ltda.', cnpj: '40.512.883/0001-33', site: 'apostaganha.bet', phone: '(21) 97777-0000', city: 'Rio de Janeiro', uf: 'RJ' } }
   ];
-  const Wordmark = () => h('span', { className: 'bs-wordmark' }, 'Blog', h('b', null, 'Sim'));
+  const STATUS_LABEL = { pendente: 'Em análise', aprovado: 'Aprovado', negado: 'Negado' };
+  const STATUS_TONE = { pendente: 'warning', aprovado: 'success', negado: 'danger' };  const Wordmark = () => h('span', { className: 'bs-wordmark' }, 'Blog', h('b', null, 'Sim'));
 
   // Animação da landing: o anunciante cria a campanha e o anúncio aparece no blog.
   const DEMO_MS = [1300, 1300, 2600, 1800, 800, 1700, 2400];
@@ -1702,8 +1810,8 @@ h1, h2, h3 { text-wrap: balance; }
     const pin = h('svg', { width: 13, height: 13, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2.2, 'aria-hidden': true }, h('path', { d: 'M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z' }), h('circle', { cx: 12, cy: 9.5, r: 2.5 }));
     const readers = COMPACT.format(sum(active, 'audience'));
     const ctas = h('div', { className: 'app-actions' },
-      h(B.Button, { onClick: () => onLogin('anunciante') }, 'Quero anunciar'),
-      h(B.Button, { variant: 'secondary', onClick: () => onSignup() }, 'Tenho um blog'));
+      h(B.Button, { onClick: () => onSignup('anunciante') }, 'Quero anunciar'),
+      h(B.Button, { variant: 'secondary', onClick: () => onSignup('blogueiro') }, 'Tenho um blog'));
     const measures = [
       ['visitas', 'Visitas no site', 'O pixel do BlogSim no seu site conta cada leitor que chegou pelo anúncio.', '9.870 visitas'],
       ['conversas', 'Conversas no WhatsApp', 'O link redirecionador abre o seu WhatsApp e registra a conversa antes.', '204 conversas'],
@@ -1735,7 +1843,7 @@ h1, h2, h3 { text-wrap: balance; }
             h('h2', null, Words('Tem um blog? Alugue os espaços dele.')),
             h('p', null, 'Você marca onde os anúncios podem aparecer e quanto custa cada espaço por semana. O BlogSim traz os anunciantes e repassa o valor, já descontada a comissão.'),
             h('ul', { className: 'lp-checks' }, ['Instale um script no blog uma vez.', 'Pause um espaço quando quiser.', 'Peça o saque pelo painel.'].map(x => h('li', { key: x }, x))),
-            h(B.Button, { variant: 'secondary', onClick: () => onSignup() }, 'Cadastrar meu blog')),
+            h(B.Button, { variant: 'secondary', onClick: () => onSignup('blogueiro') }, 'Cadastrar meu blog')),
           h('div', { role: 'img', 'aria-label': 'Página do blog Viagem com Criança com três espaços de anúncio: banner no topo, lateral e no meio do post.' },
             h(MiniPage, { blog: 'Viagem com Criança', large: true, slots: ['banner', 'lateral', 'inline'], tags: { banner: 'Banner topo', lateral: 'Lateral', inline: 'No meio do post' } })))),
 
@@ -1761,76 +1869,86 @@ h1, h2, h3 { text-wrap: balance; }
 
   const REMEMBER_KEY = 'blogsim-email';
   const readSaved = () => { try { return localStorage.getItem(REMEMBER_KEY) || ''; } catch (e) { return ''; } };
+  const LOOP_FILLED = { backgroundColor: '#f26a1b', borderColor: '#f26a1b', color: '#1d0d03', borderStyle: 'solid' };
 
-  function Login({ suggest, onLogin, onBack, onSignup }) {
+  // Cena animada ao lado do login e do cadastro: o espaço é alugado, recebe um clique e a venda é contada.
+  function useAuthArt(ref) {
+    useMotion(ref, (g, root) => {
+      const tl = g.timeline({ defaults: { ease: 'power3.out' } });
+      from(tl, root.querySelectorAll('.lg-card'), { y: 24, opacity: 0, duration: .7 });
+      const scene = root.querySelector('.lg-scene');
+      if (!scene) return;
+      from(tl, [scene], { y: 30, opacity: 0, duration: 1, ease: 'expo.out' }, .15);
+      const slot = scene.querySelector('.mp-slot'), chip = scene.querySelector('.lg-result');
+      if (!slot || !chip) return;
+      g.timeline({ repeat: -1, repeatDelay: .8, delay: .9 })
+        .set(chip, { opacity: 0 }).set(slot, RENT_FROM)
+        .to(slot, { ...LOOP_FILLED, duration: .6, ease: 'power1.inOut' })
+        .to(slot, { scale: .93, duration: .12, yoyo: true, repeat: 1, ease: 'power1.inOut' }, '+=.5')
+        .fromTo(chip, { y: 12, opacity: 0, scale: .9 }, { y: 0, opacity: 1, scale: 1, duration: .45, ease: 'back.out(2)' }, '-=.05')
+        .to(chip, { opacity: 0, y: -8, duration: .4 }, '+=1.6');
+    }, []);
+  }
+  const AuthArt = () => h('div', { className: 'lg-art', 'aria-hidden': true },
+    h('div', { className: 'lg-scene' },
+      h(MiniPage, { blog: 'Treino em Casa', slots: ['lateral'], large: true }),
+      h('div', { className: 'lg-result' }, h('span', null, 'Tênis de corrida · Treino em Casa'), h('b', null, '+1 venda'))));
+
+  // Troca de passo dentro do card, deslizando para o lado.
+  function useStepSlide(ref, key) {
+    const first = React.useRef(true);
+    React.useLayoutEffect(() => {
+      const g = window.gsap;
+      if (first.current) { first.current = false; return; }
+      if (!g || !ref.current || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      const tw = g.fromTo(ref.current, { x: 20, opacity: 0 }, { x: 0, opacity: 1, duration: .4, ease: 'power3.out', clearProps: 'transform,opacity' });
+      return () => tw.kill();
+    }, [key]);
+  }
+
+  function Login({ users, onLogin, onBack, onSignup }) {
     const [email, setEmail] = useState(readSaved);
     const [pw, setPw] = useState('');
     const [remember, setRemember] = useState(() => !!readSaved());
-    const [err, setErr] = useState('');
+    const [err, setErr] = useState(null);
     const [view, setView] = useState('login');
     const [resetEmail, setResetEmail] = useState('');
     const [resetErr, setResetErr] = useState('');
     function submit(e) {
       e.preventDefault();
-      const acc = ACCOUNTS.find(a => a.email === email.trim().toLowerCase() && a.password === pw);
-      if (!acc) { setErr('E-mail ou senha incorretos. Confira os dados ou escolha uma das contas abaixo.'); return; }
+      const u = users.find(x => x.email === email.trim().toLowerCase());
+      if (!u || !u.hash || passHash(u.salt, pw) !== u.hash) { setErr({ tone: 'danger', text: 'E-mail ou senha incorretos. Confira os dados e tente de novo.' }); return; }
+      if (u.status === 'pendente') { setErr({ tone: 'warning', text: 'Seu cadastro ainda está em análise. A equipe do BlogSim responde em até 24 horas no seu e-mail.' }); return; }
+      if (u.status === 'negado') { setErr({ tone: 'danger', text: 'Seu cadastro não foi aprovado.' + (u.reason ? ' Motivo: ' + u.reason : '') }); return; }
       // Guarda só o e-mail, e só neste navegador. A senha nunca é guardada.
-      try { if (remember) localStorage.setItem(REMEMBER_KEY, acc.email); else localStorage.removeItem(REMEMBER_KEY); } catch (e2) {}
-      onLogin(acc.role);
+      try { if (remember) localStorage.setItem(REMEMBER_KEY, u.email); else localStorage.removeItem(REMEMBER_KEY); } catch (e2) {}
+      onLogin(u);
     }
-    function fill(a) { setEmail(a.email); setPw(a.password); setErr(''); }
     function openForgot() { setResetEmail(email); setResetErr(''); setView('forgot'); }
     function sendReset(e) {
       e.preventDefault();
       if (!/^\S+@\S+\.\S+$/.test(resetEmail.trim())) { setResetErr('Informe um e-mail válido, como nome@empresa.com.br.'); return; }
       setView('sent');
     }
-    const ref = React.useRef(null);
-    useMotion(ref, (g, root) => {
-      const tl = g.timeline({ defaults: { ease: 'power3.out' } });
-      from(tl, root.querySelectorAll('.lg-card'), { y: 24, opacity: 0, duration: .7 });
-      from(tl, root.querySelectorAll('.lg-acc'), { y: 8, opacity: 0, stagger: .06, duration: .4 }, '-=.3');
-      const scene = root.querySelector('.lg-scene');
-      if (!scene) return;
-      from(tl, [scene], { y: 30, opacity: 0, duration: 1, ease: 'expo.out' }, .15);
-      // Loop: o espaço é alugado, o anúncio recebe um clique e a venda é contada.
-      const slot = scene.querySelector('.mp-slot'), chip = scene.querySelector('.lg-result');
-      const FILLED = { backgroundColor: '#f26a1b', borderColor: '#f26a1b', color: '#1d0d03', borderStyle: 'solid' };
-      g.timeline({ repeat: -1, repeatDelay: .8, delay: .9 })
-        .set(chip, { opacity: 0 }).set(slot, RENT_FROM)
-        .to(slot, { ...FILLED, duration: .6, ease: 'power1.inOut' })
-        .to(slot, { scale: .93, duration: .12, yoyo: true, repeat: 1, ease: 'power1.inOut' }, '+=.5')
-        .fromTo(chip, { y: 12, opacity: 0, scale: .9 }, { y: 0, opacity: 1, scale: 1, duration: .45, ease: 'back.out(2)' }, '-=.05')
-        .to(chip, { opacity: 0, y: -8, duration: .4 }, '+=1.6');
-    }, []);
-    // Troca de passo dentro do card (entrar, esqueci a senha, e-mail enviado).
-    const bodyRef = React.useRef(null), firstView = React.useRef(true);
-    React.useLayoutEffect(() => {
-      const g = window.gsap;
-      if (firstView.current) { firstView.current = false; return; }
-      if (!g || !bodyRef.current || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-      const tw = g.fromTo(bodyRef.current, { x: view === 'login' ? -20 : 20, opacity: 0 }, { x: 0, opacity: 1, duration: .4, ease: 'power3.out', clearProps: 'transform,opacity' });
-      return () => tw.kill();
-    }, [view]);
+    const ref = React.useRef(null), bodyRef = React.useRef(null);
+    useAuthArt(ref);
+    useStepSlide(bodyRef, view);
     const backToLogin = h('button', { type: 'button', className: 'lg-link', onClick: () => setView('login') }, 'Voltar para o login');
 
     let body;
     if (view === 'login') body = h(React.Fragment, null,
       h('h1', null, 'Entrar'),
       h('form', { className: 'lg-form', onSubmit: submit, noValidate: true },
-        h(B.TextField, { id: 'login-email', label: 'E-mail', type: 'email', autoComplete: 'username', value: email, onChange: e => setEmail(e.target.value) }),
-        h(B.TextField, { id: 'login-senha', label: 'Senha', type: 'password', autoComplete: 'current-password', value: pw, onChange: e => setPw(e.target.value) }),
+        h(B.TextField, { id: 'login-email', label: 'E-mail', type: 'email', autoComplete: 'username', value: email, onChange: e => { setEmail(e.target.value); setErr(null); } }),
+        h(B.TextField, { id: 'login-senha', label: 'Senha', type: 'password', autoComplete: 'current-password', value: pw, onChange: e => { setPw(e.target.value); setErr(null); } }),
         h('div', { className: 'lg-row' },
           h('label', { className: 'lg-check', htmlFor: 'login-lembrar' },
             h('input', { id: 'login-lembrar', type: 'checkbox', checked: remember, onChange: e => setRemember(e.target.checked) }),
             'Lembrar de mim'),
           h('button', { type: 'button', className: 'lg-link', onClick: openForgot }, 'Esqueci a senha')),
-        err ? h('p', { className: 'app-error', role: 'alert' }, err) : null,
+        err ? h('p', { className: 'lg-msg is-' + err.tone, role: 'alert' }, err.text) : null,
         h(B.Button, { type: 'submit', className: 'lg-submit' }, 'Entrar')),
-      h('div', { className: 'lg-demo' },
-        ACCOUNTS.map(a => h('button', { key: a.email, type: 'button', className: 'lg-acc' + (suggest === a.role ? ' is-suggested' : ''), onClick: () => fill(a) },
-          h(B.Badge, { tone: ROLE_TONE[a.role] }, ROLE_LABEL[a.role]), h('span', null, a.email)))),
-      h('p', { className: 'lg-alt' }, 'Tem um blog? ', h('button', { type: 'button', className: 'lg-link', onClick: onSignup }, 'Cadastre-se')));
+      h('p', { className: 'lg-alt' }, 'Ainda não tem conta? ', h('button', { type: 'button', className: 'lg-link', onClick: () => onSignup() }, 'Cadastre-se')));
     if (view === 'forgot') body = h(React.Fragment, null,
       h('h1', null, 'Recuperar senha'),
       h('p', { className: 'lg-text' }, 'Informe o e-mail da sua conta. Enviamos um link para você criar uma senha nova.'),
@@ -1847,11 +1965,9 @@ h1, h2, h3 { text-wrap: balance; }
       h('div', { className: 'lg-card' },
         h('button', { type: 'button', className: 'lg-home', onClick: onBack, 'aria-label': 'Ir para o site do BlogSim' }, Wordmark()),
         h('div', { className: 'lg-body', ref: bodyRef }, body)),
-      h('div', { className: 'lg-art', 'aria-hidden': true },
-        h('div', { className: 'lg-scene' },
-          h(MiniPage, { blog: 'Treino em Casa', slots: ['lateral'], large: true }),
-          h('div', { className: 'lg-result' }, h('span', null, 'Tênis de corrida · Treino em Casa'), h('b', null, '+1 venda')))));
+      h(AuthArt));
   }
+
   function SelectField({ id, label, value, onChange, options, error }) {
     return h('div', { className: 'bs-field app-select-field' + (error ? ' bs-field-error' : '') },
       h('label', { className: 'bs-field-label', htmlFor: id }, label),
@@ -1859,87 +1975,145 @@ h1, h2, h3 { text-wrap: balance; }
       error ? h('div', { className: 'bs-field-hint' }, error) : null);
   }
 
-  function Signup({ onSignup, onLogin, onBack }) {
-    const [f, setF] = useState({ name: '', email: '', pw: '', blog: '', site: '', niche: NICHES[0], uf: '', city: '' });
+  const SIGNUP_ROLES = [
+    { role: 'blogueiro', title: 'Tenho um blog', text: 'Quero alugar os espaços do meu blog para anunciantes e receber por isso.' },
+    { role: 'anunciante', title: 'Quero anunciar', text: 'Quero colocar a minha empresa em blogs do meu nicho e da minha região.' }
+  ];
+
+  function Signup({ users, preset, onSignup, onLogin, onBack }) {
+    const [role, setRole] = useState(preset || '');
+    const [step, setStep] = useState(preset ? 'form' : 'role');
+    const [f, setF] = useState({ name: '', email: '', pw: '', pw2: '', blog: '', site: '', niche: NICHES[0], audience: '', company: '', legal: '', cnpj: '', phone: '', uf: '', city: '' });
     const [logo, setLogo] = useState(null);
     const [logoErr, setLogoErr] = useState('');
     const [tried, setTried] = useState(false);
     const set = k => v => setF(s => ({ ...s, [k]: v }));
+    const email = f.email.trim().toLowerCase();
+    const isBlog = role === 'blogueiro';
     const errs = {
       name: f.name.trim() ? '' : 'Informe seu nome.',
-      email: /^\S+@\S+\.\S+$/.test(f.email.trim()) ? '' : 'Informe um e-mail válido, como nome@seublog.com.br.',
-      pw: f.pw.length >= 6 ? '' : 'Use pelo menos 6 caracteres.',
-      blog: f.blog.trim() ? '' : 'Informe o nome do blog.',
-      site: /\S+\.\S+/.test(f.site) ? '' : 'Informe o endereço do blog, como seublog.com.br.',
+      email: !/^\S+@\S+\.\S+$/.test(email) ? 'Informe um e-mail válido, como nome@empresa.com.br.' : users.some(u => u.email === email) ? 'Já existe uma conta com esse e-mail. Entre ou use outro e-mail.' : '',
+      pw: f.pw.length >= 8 && /[A-Za-z]/.test(f.pw) && /\d/.test(f.pw) ? '' : 'Use pelo menos 8 caracteres, com letras e números.',
+      pw2: f.pw2 && f.pw2 === f.pw ? '' : 'As senhas não são iguais.',
       uf: f.uf ? '' : 'Escolha o estado.',
-      city: f.city.trim() ? '' : 'Informe a cidade.'
+      city: f.city.trim() ? '' : 'Informe a cidade.',
+      ...(isBlog ? {
+        blog: f.blog.trim() ? '' : 'Informe o nome do blog.',
+        site: /\S+\.\S+/.test(f.site) ? '' : 'Informe o endereço do blog, como seublog.com.br.'
+      } : {
+        company: f.company.trim() ? '' : 'Informe o nome da empresa.',
+        legal: f.legal.trim() ? '' : 'Informe a razão social.',
+        cnpj: cnpjOk(f.cnpj) ? '' : 'Informe um CNPJ válido.',
+        phone: f.phone.replace(/\D/g, '').length >= 10 ? '' : 'Informe um telefone com DDD.'
+      })
     };
     const err = k => (tried && errs[k]) || undefined;
     function submit(e) {
       e.preventDefault(); setTried(true);
-      if (Object.values(errs).some(Boolean)) return;
-      onSignup({ ...f, logo });
+      if (Object.values(errs).some(Boolean)) {
+        const first = document.querySelector('.lg [aria-invalid="true"]'); if (first) first.focus();
+        return;
+      }
+      onSignup({ ...f, email, role, logo });
+      setStep('sent');
     }
-    const ref = React.useRef(null);
-    useMotion(ref, (g, root) => {
-      const tl = g.timeline({ defaults: { ease: 'power3.out' } });
-      from(tl, root.querySelectorAll('.lg-card'), { y: 24, opacity: 0, duration: .7 });
-      from(tl, root.querySelectorAll('.lg-art .mp'), { y: 30, opacity: 0, duration: 1, ease: 'expo.out' }, .15);
-    }, []);
+    const ref = React.useRef(null), bodyRef = React.useRef(null);
+    useAuthArt(ref);
+    useStepSlide(bodyRef, step);
     const field = (k, id, label, extra) => h(B.TextField, { id, label, value: f[k], onChange: e => set(k)(e.target.value), error: err(k), ...extra });
-    return h('main', { className: 'lg is-signup', ref },
+    const ufOptions = [h('option', { key: '', value: '' }, 'Escolha'), ...UFS.map(x => h('option', { key: x, value: x }, x))];
+
+    let body;
+    if (step === 'role') body = h(React.Fragment, null,
+      h('h1', null, 'Criar conta'),
+      h('p', { className: 'lg-text' }, 'Como você vai usar o BlogSim?'),
+      h('div', { className: 'su-roles', role: 'list' }, SIGNUP_ROLES.map(r => h('button', { key: r.role, type: 'button', role: 'listitem', className: 'su-role', onClick: () => { setRole(r.role); setTried(false); setStep('form'); } },
+        h('b', null, r.title), h('span', null, r.text)))),
+      h('p', { className: 'lg-alt' }, 'Já tem conta? ', h('button', { type: 'button', className: 'lg-link', onClick: onLogin }, 'Entrar')));
+    if (step === 'form') body = h(React.Fragment, null,
+      h('button', { type: 'button', className: 'lg-link', onClick: () => setStep('role') }, '← Trocar tipo de conta'),
+      h('h1', null, isBlog ? 'Cadastre seu blog' : 'Cadastre sua empresa'),
+      h('p', { className: 'lg-text' }, 'A equipe do BlogSim analisa cada cadastro em até 24 horas antes de liberar o painel.'),
+      h('form', { className: 'lg-form', onSubmit: submit, noValidate: true },
+        h('h2', { className: 'su-h' }, 'Seus dados'),
+        h('div', { className: 'lg-grid' },
+          field('name', 'su-nome', 'Seu nome', { autoComplete: 'name' }),
+          field('email', 'su-email', 'E-mail', { type: 'email', autoComplete: 'email' }),
+          field('pw', 'su-senha', 'Senha', { type: 'password', autoComplete: 'new-password', hint: '8 caracteres ou mais, com letras e números.' }),
+          field('pw2', 'su-senha2', 'Confirmar senha', { type: 'password', autoComplete: 'new-password' })),
+        isBlog ? h(React.Fragment, null,
+          h('h2', { className: 'su-h' }, 'Seu blog'),
+          h('div', { className: 'lg-grid' },
+            field('blog', 'su-blog', 'Nome do blog', {}),
+            field('site', 'su-site', 'Endereço do blog', { placeholder: 'seublog.com.br' }),
+            h(SelectField, { id: 'su-nicho', label: 'Nicho', value: f.niche, onChange: set('niche'), options: NICHES.map(x => h('option', { key: x, value: x }, x)) }),
+            field('audience', 'su-leitores', 'Leitores por mês', { inputMode: 'numeric', placeholder: 'Ex.: 20000', hint: 'Uma estimativa. Depois o script mede o número real.' }),
+            h(SelectField, { id: 'su-uf', label: 'Estado', value: f.uf, onChange: set('uf'), error: err('uf'), options: ufOptions }),
+            field('city', 'su-cidade', 'Cidade', {})),
+          h('div', { className: 'app-logo-row' },
+            h(BlogLogo, { blog: { name: f.blog.trim() || 'Seu Blog', color: '#2a49de', logo }, size: 'lg' }),
+            h('div', { className: 'bs-field' },
+              h('label', { className: 'bs-field-label', htmlFor: 'su-logo' }, 'Logo do blog (opcional)'),
+              h('input', { id: 'su-logo', type: 'file', accept: 'image/*', className: 'app-file', onChange: e => readLogo(e, setLogo, setLogoErr) }),
+              h('div', { className: logoErr ? 'app-error' : 'bs-field-hint' }, logoErr || 'Quadrada, até 1 MB. Dá para trocar depois em Meu blog.'))))
+        : h(React.Fragment, null,
+          h('h2', { className: 'su-h' }, 'Sua empresa'),
+          h('div', { className: 'lg-grid' },
+            field('company', 'su-empresa', 'Nome da empresa', { hint: 'Como aparece para os blogs.' }),
+            field('legal', 'su-razao', 'Razão social', {}),
+            h(B.TextField, { id: 'su-cnpj', label: 'CNPJ', inputMode: 'numeric', placeholder: '00.000.000/0000-00', value: f.cnpj, onChange: e => set('cnpj')(maskCnpj(e.target.value)), error: err('cnpj') }),
+            field('phone', 'su-telefone', 'WhatsApp ou telefone', { type: 'tel', autoComplete: 'tel', placeholder: '(11) 90000-0000' }),
+            field('site', 'su-site', 'Site da empresa (opcional)', { placeholder: 'suaempresa.com.br' }),
+            h(SelectField, { id: 'su-uf', label: 'Estado', value: f.uf, onChange: set('uf'), error: err('uf'), options: ufOptions }),
+            field('city', 'su-cidade', 'Cidade', {}))),
+        h(B.Button, { type: 'submit', className: 'lg-submit' }, 'Enviar cadastro')));
+    if (step === 'sent') body = h(React.Fragment, null,
+      h('h1', null, 'Cadastro enviado'),
+      h('p', { className: 'lg-text', role: 'status' }, 'Recebemos o cadastro ', isBlog ? 'do blog ' : 'da empresa ', h('b', null, isBlog ? f.blog.trim() : f.company.trim()), '. A equipe do BlogSim analisa em até 24 horas e responde no e-mail ', h('b', null, email), '.'),
+      h('p', { className: 'lg-text' }, isBlog ? 'Depois da aprovação, você entra e instala o script no blog para liberar o painel.' : 'Depois da aprovação, você entra, adiciona saldo e cria a primeira campanha.'),
+      h(B.Button, { className: 'lg-submit', onClick: onBack }, 'Voltar para o site'));
+
+    return h('main', { className: 'lg' + (step === 'form' ? ' is-signup' : ''), ref },
       h('div', { className: 'lg-card' },
         h('button', { type: 'button', className: 'lg-home', onClick: onBack, 'aria-label': 'Ir para o site do BlogSim' }, Wordmark()),
-        h('div', { className: 'lg-body' },
-          h('h1', null, 'Cadastre seu blog'),
-          h('p', { className: 'lg-text' }, 'Depois do cadastro, você instala um script no blog. Assim que ele for verificado, o painel é liberado.'),
-          h('form', { className: 'lg-form', onSubmit: submit, noValidate: true },
-            h('div', { className: 'lg-grid' },
-              field('name', 'su-nome', 'Seu nome', { autoComplete: 'name' }),
-              field('email', 'su-email', 'E-mail', { type: 'email', autoComplete: 'email' }),
-              field('pw', 'su-senha', 'Senha', { type: 'password', autoComplete: 'new-password', hint: 'Pelo menos 6 caracteres.' }),
-              field('blog', 'su-blog', 'Nome do blog', {}),
-              field('site', 'su-site', 'Endereço do blog', { placeholder: 'seublog.com.br' }),
-              h(SelectField, { id: 'su-nicho', label: 'Nicho', value: f.niche, onChange: set('niche'), options: NICHES.map(x => h('option', { key: x, value: x }, x)) }),
-              h(SelectField, { id: 'su-uf', label: 'Estado', value: f.uf, onChange: set('uf'), error: err('uf'), options: [h('option', { key: '', value: '' }, 'Escolha'), ...UFS.map(x => h('option', { key: x, value: x }, x))] }),
-              field('city', 'su-cidade', 'Cidade', {})),
-            h('div', { className: 'app-logo-row' },
-              h(BlogLogo, { blog: { name: f.blog.trim() || 'Seu Blog', color: '#2a49de', logo }, size: 'lg' }),
-              h('div', { className: 'bs-field' },
-                h('label', { className: 'bs-field-label', htmlFor: 'su-logo' }, 'Logo do blog (opcional)'),
-                h('input', { id: 'su-logo', type: 'file', accept: 'image/*', className: 'app-file', onChange: e => readLogo(e, setLogo, setLogoErr) }),
-                h('div', { className: logoErr ? 'app-error' : 'bs-field-hint' }, logoErr || 'Quadrada, até 1 MB. Dá para trocar depois em Meu blog.'))),
-            h(B.Button, { type: 'submit', className: 'lg-submit' }, 'Criar conta e continuar'))),
-        h('p', { className: 'lg-alt' }, 'Já tem conta? ', h('button', { type: 'button', className: 'lg-link', onClick: onLogin }, 'Entrar'))),
-      h('div', { className: 'lg-art', 'aria-hidden': true },
-        h('div', { className: 'lg-scene' }, h(MiniPage, { blog: 'Viagem com Criança', slots: ['banner', 'lateral'], tags: { banner: 'Banner topo', lateral: 'Lateral' }, large: true }))));
+        h('div', { className: 'lg-body', ref: bodyRef }, body)),
+      h(AuthArt));
   }
-
   // ---------- App ----------
   function App() {
-    const [screen, setScreen] = useState(() => { try { return location.hash === '#entrar' ? 'login' : 'site'; } catch (e) { return 'site'; } });
-    const [suggest, setSuggest] = useState(null);
+    const [screen, setScreen] = useState(() => { try { return { '#entrar': 'login', '#cadastro': 'cadastro' }[location.hash] || 'site'; } catch (e) { return 'site'; } });
+    const [signupRole, setSignupRole] = useState(null);
+    const [users, setUsers] = useState(SEED_USERS);
+    const [meId, setMeId] = useState(null);
     const [role, setRole] = useState('anunciante');
     const [page, setPage] = useState('Painel');
     const [campaigns, setCampaigns] = useState(INITIAL_CAMPAIGNS);
     const [cart, setCart] = useState([]);
-    const [balance, setBalance] = useState(3000);
-    const [txns, setTxns] = useState(INITIAL_TXNS);
+    // Saldo e extrato por anunciante (a conta de QA começa com dados de exemplo; uma conta nova começa zerada).
+    const [advBal, setAdvBal] = useState({ [ME]: 3000 });
+    const [advTxns, setAdvTxns] = useState({ [ME]: INITIAL_TXNS });
     const [payouts, setPayouts] = useState(INITIAL_PAYOUTS);
     const [blogs, setBlogs] = useState(BLOGS.map(b => ({ ...b, slots: b.slots.length, status: b.status || 'ativo' })));
     const [pct, setPct] = useState(20);
     // Regras de recarga definidas pelo admin: mínimo, valor a partir do qual o cartão parcela e máximo de parcelas.
     const [billing, setBilling] = useState({ min: 100, installFrom: 500, maxInstallments: 6 });
-    // Blogueiro logado: o de exemplo ou um recém-cadastrado, que só vê o painel completo depois de verificar o script.
+    // Blogueiro logado: só vê o painel completo depois de verificar o script.
     const [blogger, setBlogger] = useState({ blogId: 'b1', fresh: false, verified: true });
     const [slotsByBlog, setSlotsByBlog] = useState({ b1: INITIAL_MY_SLOTS });
     const [balByBlog, setBalByBlog] = useState({ b1: 1640 });
+    const [toast, setToast] = useState(null);
+    const [menuOpen, setMenuOpen] = useState(false);
+
+    const me = users.find(u => u.id === meId) || null;
+    const advertiser = me && me.company ? me.company.name : ME;
+    const balance = advBal[advertiser] || 0;
+    const txns = advTxns[advertiser] || [];
     const myBlog = blogs.find(b => b.id === blogger.blogId) || blogs[0];
     const mySlots = slotsByBlog[blogger.blogId] || [];
     const setMySlots = fn => setSlotsByBlog(m => ({ ...m, [blogger.blogId]: typeof fn === 'function' ? fn(m[blogger.blogId] || []) : fn }));
     const bloggerBalance = balByBlog[blogger.blogId] || 0;
-    const [toast, setToast] = useState(null);
-    const [menuOpen, setMenuOpen] = useState(false);
+    const pendingSignups = users.filter(u => u.role !== 'admin' && u.status === 'pendente').length;
+
     const sideRef = React.useRef(null);
     useMotion(sideRef, (g, root) => {
       g.from(root.querySelectorAll('.bs-wordmark, .bs-nav > .bs-badge, .bs-nav-item, .bs-nav-user'), { x: -12, opacity: 0, stagger: .035, duration: .45, ease: 'power3.out' });
@@ -1951,21 +2125,48 @@ h1, h2, h3 { text-wrap: balance; }
 
     const top = () => { try { window.scrollTo(0, 0); } catch (e) {} };
     const go = p => { setMenuOpen(false); setPage(p); top(); };
-    function openLogin(r) { setSuggest(r || null); setScreen('login'); top(); }
-    function openSignup() { setScreen('cadastro'); top(); }
-    function login(r) {
-      if (r === 'blogueiro') setBlogger({ blogId: 'b1', fresh: false, verified: true });
-      setRole(r); setPage(START_PAGE[r]); setMenuOpen(false); setScreen('app'); top();
+    const toSite = () => { setScreen('site'); top(); };
+    function openLogin() { setScreen('login'); top(); }
+    function openSignup(r) { setSignupRole(r || null); setScreen('cadastro'); top(); }
+
+    function login(u) {
+      let start = START_PAGE[u.role];
+      if (u.role === 'blogueiro') {
+        const verified = !!u.scriptVerified;
+        setBlogger({ blogId: u.blogId, fresh: u.id !== 'u-blog', verified });
+        if (!verified) start = 'Instalar script';
+      }
+      setMeId(u.id); setRole(u.role); setPage(start); setMenuOpen(false); setScreen('app'); top();
     }
+    function logout() { setMenuOpen(false); setMeId(null); setScreen('site'); top(); notify('Você saiu da sua conta.'); }
+
+    // Cadastro: a conta nasce em análise. O blog do blogueiro também, até o admin aprovar.
     function signup(d) {
-      const id = 'b' + Date.now();
-      setBlogs(list => [...list, { id, name: d.blog.trim(), niche: d.niche, owner: d.name.trim(), audience: 0, city: d.city.trim(), uf: d.uf, color: '#2a49de', site: d.site.trim(), logo: d.logo, desc: '', slots: 0, status: 'script' }]);
-      setBlogger({ blogId: id, fresh: true, verified: false });
-      setRole('blogueiro'); setPage('Instalar script'); setMenuOpen(false); setScreen('app'); top();
-      notify('Conta criada. Instale o script no seu blog para liberar o painel.');
+      const id = 'u' + Date.now(), salt = newSalt();
+      const user = { id, role: d.role, name: d.name.trim(), email: d.email, salt, hash: passHash(salt, d.pw), status: 'pendente', createdAt: TODAY };
+      if (d.role === 'blogueiro') {
+        user.blogId = 'b' + Date.now();
+        setBlogs(list => [...list, { id: user.blogId, name: d.blog.trim(), niche: d.niche, owner: user.name, audience: parseInt(String(d.audience).replace(/\D/g, ''), 10) || 0, city: d.city.trim(), uf: d.uf, color: '#2a49de', site: d.site.trim(), logo: d.logo, desc: '', slots: 0, status: 'pendente' }]);
+      } else {
+        user.company = { name: d.company.trim(), legal: d.legal.trim(), cnpj: d.cnpj, site: d.site.trim(), phone: d.phone.trim(), city: d.city.trim(), uf: d.uf };
+      }
+      setUsers(list => [...list, user]);
+    }
+    function approve(id) {
+      const u = users.find(x => x.id === id);
+      setUsers(list => list.map(x => x.id === id ? { ...x, status: 'aprovado', reason: undefined } : x));
+      if (u && u.blogId) setBlogs(list => list.map(b => b.id === u.blogId && b.status === 'pendente' ? { ...b, status: 'script' } : b));
+      notify('Cadastro aprovado. ' + (u ? u.name.split(' ')[0] : 'A pessoa') + ' já pode entrar.');
+    }
+    function deny(id, reason) {
+      const u = users.find(x => x.id === id);
+      setUsers(list => list.map(x => x.id === id ? { ...x, status: 'negado', reason } : x));
+      if (u && u.blogId) setBlogs(list => list.map(b => b.id === u.blogId ? { ...b, status: 'negado' } : b));
+      notify('Cadastro negado.');
     }
     function verifyScript() {
       setBlogger(b => ({ ...b, verified: true }));
+      setUsers(list => list.map(x => x.id === meId ? { ...x, scriptVerified: true } : x));
       setBlogs(list => list.map(b => b.id === blogger.blogId && b.status === 'script' ? { ...b, status: 'ativo' } : b));
       setPage('Meus espaços'); top();
       notify('Script encontrado. Seu painel está liberado.');
@@ -1976,19 +2177,17 @@ h1, h2, h3 { text-wrap: balance; }
       if (patch.name && patch.name !== old) setPayouts(list => list.map(p => p.blog === old ? { ...p, blog: patch.name } : p));
       notify('Blog atualizado');
     }
-    function logout() { setMenuOpen(false); setScreen('site'); top(); notify('Você saiu da sua conta.'); }
-
+    const addTxn = (desc, value) => setAdvTxns(m => ({ ...m, [advertiser]: [{ date: TODAY, desc, value }, ...(m[advertiser] || [])] }));
     function publishCampaign(c) {
-      setCampaigns(list => [{ id: 'c' + Date.now(), name: c.name, advertiser: ME, objective: c.objective, status: 'revisao', invested: c.total, clicks: 0, results: 0, blogs: c.blogs, blogNames: c.blogNames }, ...list]);
-      setBalance(b => b - c.total);
-      setTxns(t => [{ date: TODAY, desc: `${c.name} · ${c.slots} ${c.slots > 1 ? 'espaços' : 'espaço'}`, value: -c.total }, ...t]);
+      setCampaigns(list => [{ id: 'c' + Date.now(), name: c.name, advertiser, objective: c.objective, status: 'revisao', invested: c.total, clicks: 0, results: 0, blogs: c.blogs, blogNames: c.blogNames }, ...list]);
+      setAdvBal(m => ({ ...m, [advertiser]: (m[advertiser] || 0) - c.total }));
+      addTxn(`${c.name} · ${c.slots} ${c.slots > 1 ? 'espaços' : 'espaço'}`, -c.total);
       setPage('Campanhas');
-      notify('Campanha enviada para revisão. Entre como admin para aprovar.');
+      notify('Campanha enviada para revisão. O admin aprova antes de ela entrar no ar.');
     }
     function addBalance(v, method, n) {
-      const how = method === 'cartao' ? 'cartão de crédito' + (n > 1 ? ` em ${n}x` : '') : 'Pix';
-      setBalance(b => b + v);
-      setTxns(t => [{ date: TODAY, desc: 'Recarga via ' + how, value: v }, ...t]);
+      setAdvBal(m => ({ ...m, [advertiser]: (m[advertiser] || 0) + v }));
+      addTxn('Recarga via ' + (method === 'cartao' ? 'cartão de crédito' + (n > 1 ? ` em ${n}x` : '') : 'Pix'), v);
       notify('Saldo adicionado: ' + money(v));
     }
     function withdraw() {
@@ -1998,20 +2197,19 @@ h1, h2, h3 { text-wrap: balance; }
     }
 
     const toastEl = h('div', { className: 'app-toast', role: 'status', 'aria-live': 'polite', hidden: !toast }, toast ? toast.msg : '');
-    const toSite = () => { setScreen('site'); top(); };
-    if (screen === 'site') return h('div', { className: 'lp-root' }, h(Landing, { onLogin: openLogin, onSignup: openSignup, blogs }), toastEl);
-    if (screen === 'login') return h('div', { className: 'lp-root' }, h(Login, { suggest, onLogin: login, onBack: toSite, onSignup: openSignup }), toastEl);
-    if (screen === 'cadastro') return h('div', { className: 'lp-root' }, h(Signup, { onSignup: signup, onLogin: () => openLogin('blogueiro'), onBack: toSite }), toastEl);
+    if (screen === 'login') return h('div', { className: 'lp-root' }, h(Login, { users, onLogin: login, onBack: toSite, onSignup: openSignup }), toastEl);
+    if (screen === 'cadastro') return h('div', { className: 'lp-root' }, h(Signup, { key: signupRole || 'escolha', users, preset: signupRole, onSignup: signup, onLogin: openLogin, onBack: toSite }), toastEl);
+    if (screen !== 'app' || !me) return h('div', { className: 'lp-root' }, h(Landing, { onLogin: openLogin, onSignup: openSignup, blogs }), toastEl);
 
-    const ctx = { go, notify, campaigns, setCampaigns, cart, setCart, balance, blogs };
+    const ctx = { go, notify, campaigns, setCampaigns, cart, setCart, balance, blogs, advertiser };
     const screens = {
       anunciante: {
         'Painel': () => h(AdvPainel, ctx),
         'Campanhas': () => h(AdvCampanhas, ctx),
         'Criar campanha': () => h(CreateCampaign, { ...ctx, onPublish: publishCampaign }),
         'Explorar blogs': () => h(AdvExplorar, ctx),
-        'Pixel e rastreamento': () => h(AdvPixel, ctx),
-        'Faturamento': () => h(AdvBilling, { balance, txns, onAdd: addBalance, campaigns, billing })
+        'Pixel e rastreamento': () => h(AdvPixel, { notify, site: me.company ? me.company.site : '', fresh: !campaigns.some(c => c.advertiser === advertiser) }),
+        'Faturamento': () => h(AdvBilling, { balance, txns, onAdd: addBalance, campaigns, billing, advertiser })
       },
       blogueiro: {
         'Painel': () => h(BlogPainel, { mySlots, blog: myBlog, fresh: blogger.fresh }),
@@ -2022,8 +2220,9 @@ h1, h2, h3 { text-wrap: balance; }
         'Instalar script': () => h(BlogScript, { notify, blog: myBlog, verified: blogger.verified, onVerify: verifyScript })
       },
       admin: {
-        'Visão geral': () => h(AdminVisao, { campaigns, setCampaigns, blogs, pct, notify }),
-        'Blogs parceiros': () => h(AdminBlogs, { blogs: blogs.map(b => slotsByBlog[b.id] ? { ...b, slots: slotsByBlog[b.id].length } : b), setBlogs, notify }),
+        'Visão geral': () => h(AdminVisao, { campaigns, setCampaigns, blogs, pct, notify, pendingSignups, go }),
+        'Cadastros': () => h(AdminCadastros, { users, blogs, onApprove: approve, onDeny: deny }),
+        'Blogs parceiros': () => h(AdminBlogs, { blogs: blogs.map(b => slotsByBlog[b.id] ? { ...b, slots: slotsByBlog[b.id].length } : b) }),
         'Anunciantes': () => h(AdminAnunciantes, { campaigns }),
         'Campanhas': () => h(AdminCampanhas, { campaigns, setCampaigns, notify }),
         'Saques': () => h(AdminSaques, { payouts, setPayouts, notify }),
@@ -2031,6 +2230,10 @@ h1, h2, h3 { text-wrap: balance; }
       }
     };
     const screenFn = screens[role][page];
+    const navItems = role === 'blogueiro' ? (blogger.verified ? ['Painel', 'Meu blog', 'Meus espaços', 'Receita', 'Insights', 'Instalar script'] : ['Instalar script', 'Meu blog'])
+      : role === 'admin' ? ['Visão geral', 'Cadastros', 'Blogs parceiros', 'Anunciantes', 'Campanhas', 'Saques', 'Configurações'] : undefined;
+    const first = me.name.split(' ')[0];
+    const userLabel = role === 'blogueiro' ? first + ' · ' + myBlog.name : role === 'anunciante' ? first + ' · ' + advertiser : me.name;
 
     return h('div', { className: 'app-root' },
       h('div', { className: 'app-shell' },
@@ -2040,15 +2243,11 @@ h1, h2, h3 { text-wrap: balance; }
         menuOpen ? h('div', { className: 'app-backdrop', onClick: () => setMenuOpen(false) }) : null,
         h('aside', { id: 'app-nav', ref: sideRef, className: 'app-side' + (menuOpen ? ' is-open' : '') },
           h('button', { type: 'button', className: 'app-drawer-close', 'aria-label': 'Fechar menu', onClick: () => setMenuOpen(false) }, ICON('M6 6l12 12M18 6L6 18')),
-          h(B.SideNav, {
-            key: role + blogger.verified, role, active: page === 'Criar campanha' ? 'Campanhas' : page, onNavigate: go, onLogout: logout,
-            items: role === 'blogueiro' ? (blogger.verified ? ['Painel', 'Meu blog', 'Meus espaços', 'Receita', 'Insights', 'Instalar script'] : ['Instalar script', 'Meu blog']) : undefined,
-            user: role === 'blogueiro' ? myBlog.owner.split(' ')[0] + ' · ' + myBlog.name : USER[role]
-          })),
+          h(B.SideNav, { key: role + blogger.verified, role, items: navItems, active: page === 'Criar campanha' ? 'Campanhas' : page, onNavigate: go, onLogout: logout, user: userLabel })),
         h('main', { className: 'app-main', key: role + page }, h(Reveal, null, screenFn ? screenFn() : null))),
       toastEl);
   }
-
   ReactDOM.createRoot(document.getElementById('app')).render(h(App));
 })();
+
 </script>

@@ -10,12 +10,13 @@ Abra `index.html` no navegador. Não precisa de servidor nem de instalação; o 
 
 As animações usam GSAP com ScrollTrigger e respeitam a opção "reduzir movimento" do sistema: com ela ligada, tudo aparece parado e completo.
 
-## Contas de teste
+## Contas e cadastro
 
-A tela de login mostra três contas, uma por perfil (Anunciante, Blogueiro e Admin master). Clique numa conta para preencher e-mail e senha e depois em Entrar.
-
-Blogueiros também podem se cadastrar ("Tenho um blog" na landing ou "Cadastre-se" no login). Depois do cadastro, o painel mostra só Instalar script e Meu blog; o resto é liberado quando ele clica em Verificar instalação. As contas ficam em `src/app.js`, na constante `ACCOUNTS`.
-
+- **Criar conta:** "Quero anunciar" ou "Tenho um blog" na landing, ou "Cadastre-se" no login. A pessoa escolhe o perfil e preenche os dados do blog ou da empresa (com CNPJ).
+- Todo cadastro entra **em análise**. O admin aprova ou nega em **Cadastros**. Em análise ou negado, o login mostra o status e não entra.
+- Blogueiro aprovado só vê **Instalar script** e **Meu blog** até clicar em **Verificar instalação**.
+- As contas de QA (admin master, anunciante e blogueiro) ficam em `QA_CONTAS.md`, só na máquina local. No código vão apenas sal e hash.
+- Tudo isso é simulado no navegador e some ao recarregar. O plano do back-end (API, segurança, e-mails pelo SMTP) está em [`docs/BACKEND.md`](docs/BACKEND.md).
 ## Estrutura
 
 | Caminho | O que é |
