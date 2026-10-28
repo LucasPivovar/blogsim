@@ -124,8 +124,15 @@ test('fluxo completo: cadastro, confirmação, aprovação, campanha, saque', as
   const pw = 'SenhaBoa123';
   const b = client();
   const s = await b('POST', '/api/auth/signup', { role: 'blogueiro', name: 'Nina Teste', email, password: pw,
-    blog: { name: 'Blog da Nina', site: 'blogdanina.com.br', niche: 'Pets', audience: 9000, city: 'Joinville', uf: 'SC' } });
+    blog: { name: 'Blog da Nina', site: 'blogdanina.com.br', niche: 'Pets', audience: 9000, city: 'Joinville', uf: 'SC',
+      logo: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==' } });
   assert.equal(s.status, 201);
+  const logo = await app.inject({ method: 'GET', url: (await one('SELECT logo_path FROM blogs WHERE name = ?', 'Blog da Nina')).logo_path });
+  assert.equal(logo.statusCode, 200, 'logo do cadastro abre');
+  assert.equal(logo.headers['x-content-type-options'], 'nosniff');
+  const bad = await b('POST', '/api/auth/signup', { role: 'anunciante', name: 'Ana Teste', email: 'cnpj@teste.com', password: pw,
+    company: { tradeName: 'Loja da Ana', legalName: 'Ana Teste ME', cnpj: '11222333000199', phone: '(47) 99999-0000', site: '', city: 'Joinville', uf: 'SC' } });
+  assert.equal(bad.body.error.message, 'Informe um CNPJ válido.');
   assert.equal((await b('POST', '/api/auth/login', { email, password: pw })).body.error.code, 'EMAIL_NOT_VERIFIED');
 
   const link = (await lastMail(email, 'confirmar_email')).html.match(/verify-email\?token=([\w-]+)/)[1];

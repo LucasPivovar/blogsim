@@ -79,7 +79,7 @@ export async function buildApp() {
   app.setNotFoundHandler((req, reply) => reply.code(404).send(req.url.startsWith('/api/') ? { error: { code: 'NOT_FOUND', message: 'Rota não encontrada.' } } : 'Página não encontrada.'));
 
   if (existsSync(frontDir)) await app.register(fastifyStatic, { root: frontDir, prefix: '/', index: ['index.html'] });
-  await app.register(fastifyStatic, { root: uploadDir, prefix: '/uploads/', decorateReply: false, setHeaders: res => res.setHeader('X-Content-Type-Options', 'nosniff') });
+  await app.register(fastifyStatic, { root: uploadDir, prefix: '/uploads/', decorateReply: false, setHeaders: reply => reply.header('X-Content-Type-Options', 'nosniff') });
 
   return app;
 }
