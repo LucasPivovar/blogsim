@@ -18,7 +18,7 @@ Object.assign(process.env, {
 
 const { buildApp } = await import('../src/server.js');
 const { seed } = await import('../src/db/seed.js');
-const { one, migrate, closeDb } = await import('../src/db/index.js');
+const { one, all, migrate, closeDb } = await import('../src/db/index.js');
 
 const ORIGIN = 'http://localhost:4100';
 let app;
@@ -36,16 +36,24 @@ function client() {
   };
 }
 const safeJson = s => { try { return JSON.parse(s); } catch { return s; } };
+// Login completo: senha e, quando pedido, o código que chegou por e-mail.
+async function signIn(c, email, password, trust = false) {
+  const before = new Date().toISOString();
+  const r = await c('POST', '/api/auth/login', { email, password });
+  if (r.status !== 200 || !r.body.twoFactor) return r;
+  const code = (await lastMail(email, 'codigo_login', before)).text.match(/\b(\d{6})\b/)[1];
+  return c('POST', '/api/auth/login/verify', { challenge: r.body.challenge, code, trust });
+}
 async function loginAs(role) {
   const c = client();
-  const r = await c('POST', '/api/auth/login', { email: `${role}.qa@blogsim.com.br`, password: PW[role] });
+  const r = await signIn(c, `${role}.qa@blogsim.com.br`, PW[role]);
   assert.equal(r.status, 200, `login ${role}`);
   return c;
 }
 // O e-mail é registrado logo depois da resposta; espera um pouco por ele.
-async function lastMail(to, template) {
+async function lastMail(to, template, after = '1970-01-01T00:00:00Z') {
   for (let i = 0; i < 40; i++) {
-    const row = await one('SELECT * FROM email_outbox WHERE to_email = ? AND template = ? ORDER BY created_at DESC LIMIT 1', to, template);
+    const row = await one('SELECT * FROM email_outbox WHERE to_email = ? AND template = ? AND created_at >= ? ORDER BY created_at DESC LIMIT 1', to, template, after);
     if (row) return row;
     await new Promise(r => setTimeout(r, 25));
   }
@@ -73,12 +81,53 @@ test('login errado não diz se o e-mail existe', async () => {
   assert.deepEqual(a.body, b.body);
 });
 
-test('cookie de sessão é httpOnly e SameSite', async () => {
+test('verificação em duas etapas: código por e-mail e navegador confiável', async () => {
+  const email = 'admin.qa@blogsim.com.br';
   const c = client();
-  const r = await c('POST', '/api/auth/login', { email: 'admin.qa@blogsim.com.br', password: PW.admin });
-  const set = [].concat(r.headers['set-cookie']).join(';').toLowerCase();
+  // Senha certa ainda não entra: pede o código.
+  const first = await c('POST', '/api/auth/login', { email, password: PW.admin });
+  assert.equal(first.body.twoFactor, true);
+  assert.equal(first.body.email, 'ad******@blogsim.com.br');
+  assert.ok(!first.headers['set-cookie'], 'sem sessão antes do código');
+  assert.equal((await c('GET', '/api/state')).status, 401);
+  const mail = await lastMail(email, 'codigo_login');
+  const code = mail.text.match(/\b(\d{6})\b/)[1];
+  assert.match(mail.html, new RegExp(code), 'o código aparece no e-mail');
+
+  // Código errado conta tentativa; depois de 5, o código morre.
+  const wrong = code === '000000' ? '111111' : '000000';
+  assert.equal((await c('POST', '/api/auth/login/verify', { challenge: first.body.challenge, code: wrong })).body.error.code, 'CODE_INVALID');
+  for (let i = 0; i < 4; i++) await c('POST', '/api/auth/login/verify', { challenge: first.body.challenge, code: wrong });
+  assert.equal((await c('POST', '/api/auth/login/verify', { challenge: first.body.challenge, code })).body.error.code, 'CODE_EXPIRED');
+
+  // Pedir de novo anula o código anterior.
+  const before = new Date().toISOString();
+  const second = await c('POST', '/api/auth/login', { email, password: PW.admin });
+  const third = await c('POST', '/api/auth/login', { email, password: PW.admin });
+  let codes = [];
+  for (let i = 0; i < 40 && codes.length < 2; i++) {
+    codes = (await all('SELECT text FROM email_outbox WHERE to_email = ? AND template = ? AND created_at >= ? ORDER BY created_at', email, 'codigo_login', before)).map(m => m.text.match(/\b(\d{6})\b/)[1]);
+    await new Promise(r => setTimeout(r, 25));
+  }
+  assert.equal((await c('POST', '/api/auth/login/verify', { challenge: second.body.challenge, code: codes[0] })).body.error.code, 'CODE_EXPIRED');
+
+  // Código certo com "confiar neste navegador": sessão + cookie do navegador.
+  const ok = await c('POST', '/api/auth/login/verify', { challenge: third.body.challenge, code: codes.at(-1), trust: true });
+  assert.equal(ok.status, 200);
+  const set = [].concat(ok.headers['set-cookie']).join(';').toLowerCase();
+  assert.match(set, /blogsim_session=/); assert.match(set, /blogsim_device=/);
   assert.match(set, /httponly/); assert.match(set, /samesite=lax/);
-  assert.ok(!JSON.stringify(r.body).includes('password'), 'a resposta não traz hash de senha');
+  assert.ok(!JSON.stringify(ok.body).includes('password'), 'a resposta não traz hash de senha');
+  assert.equal((await c('POST', '/api/auth/login/verify', { challenge: third.body.challenge, code: codes.at(-1) })).body.error.code, 'CODE_EXPIRED', 'código vale uma vez');
+
+  // No navegador confiável, a senha basta.
+  const again = await c('POST', '/api/auth/login', { email, password: PW.admin });
+  assert.equal(again.status, 200); assert.equal(again.body.user.role, 'admin');
+
+  // Trocar a senha (ou derrubar as sessões) volta a pedir o código.
+  const { endAllSessions } = await import('../src/lib/security.js');
+  await endAllSessions((await one('SELECT id FROM users WHERE email = ?', email)).id);
+  assert.equal((await c('POST', '/api/auth/login', { email, password: PW.admin })).body.twoFactor, true);
 });
 
 test('cada perfil só acessa as próprias rotas', async () => {
@@ -146,7 +195,7 @@ test('fluxo completo: cadastro, confirmação, aprovação, campanha, saque', as
   const admin = await loginAs('admin');
   const user = await one('SELECT id FROM users WHERE email = ?', email);
   assert.equal((await admin('POST', `/api/admin/signups/${user.id}/approve`, {})).status, 200);
-  assert.equal((await b('POST', '/api/auth/login', { email, password: pw })).status, 200);
+  assert.equal((await signIn(b, email, pw)).status, 200);
 
   assert.equal((await b('POST', '/api/blogs/me/slots', { placement: 'lateral', price: 100 })).status, 403, 'sem script não cria espaço');
   assert.equal((await b('POST', '/api/blogs/me/verify-script', {})).status, 200);
@@ -203,7 +252,8 @@ test('script do blog: entrega anúncio e mede visualização e clique', async ()
   assert.equal((await app.inject({ method: 'GET', url: '/api/ads/BL-NAOEXISTE' })).json().ads.length, 0);
 
   const view = new URL(ad.view);
-  for (let i = 0; i < 3; i++) assert.equal((await app.inject({ method: 'GET', url: view.pathname + view.search, headers: ua })).statusCode, 204);
+  const page = '&p=%2Fdicas%2Ftreino-de-20-minutos&tt=Treino%20de%2020%20minutos';
+  for (let i = 0; i < 3; i++) assert.equal((await app.inject({ method: 'GET', url: view.pathname + view.search + page, headers: ua })).statusCode, 204);
   await app.inject({ method: 'GET', url: view.pathname + view.search, headers: { 'user-agent': 'Googlebot/2.1' } });
   await app.inject({ method: 'GET', url: view.pathname + view.search.slice(0, -3) + 'abc', headers: ua });
   assert.equal((await one('SELECT views FROM campaigns WHERE id = ?', camp.id)).views, camp.views + 1, 'mesma pessoa conta uma vez; robô e link adulterado não contam');
@@ -213,6 +263,16 @@ test('script do blog: entrega anúncio e mede visualização e clique', async ()
   assert.equal(click.headers.location, 'https://passocerto.com.br/');
   const today = await one('SELECT SUM(views) AS v, SUM(clicks) AS c FROM ad_stats WHERE campaign_id = ?', camp.id);
   assert.deepEqual([today.v, today.c], [1, 1]);
+  const post = await one('SELECT * FROM ad_pages WHERE path = ?', '/dicas/treino-de-20-minutos');
+  assert.deepEqual([post.title, post.views], ['Treino de 20 minutos', 1], 'post onde o anúncio apareceu');
+
+  // Painel do anunciante com os números medidos.
+  const adv = await loginAs('anunciante');
+  const st = (await adv('GET', '/api/state')).body.stats;
+  assert.equal(st.clicks.series.length, 14);
+  assert.equal(st.clicks.total, 1); assert.equal(st.views.total, 1);
+  assert.equal(st.clicks.series.at(-1).value, 1, 'o clique de hoje é a última barra');
+  assert.ok(st.invested.total > 0);
 
   const admin = await loginAs('admin');
   const r = await admin('POST', '/api/dev/reports/daily', {});

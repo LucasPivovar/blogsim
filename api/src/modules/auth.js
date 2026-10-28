@@ -1,11 +1,11 @@
 // Cadastro, confirmação de e-mail, login, sessão e recuperação de senha.
 import { z } from 'zod';
-import { randomBytes } from 'node:crypto';
+import { randomBytes, randomInt } from 'node:crypto';
 import { config } from '../config.js';
 import { one, all, run, id, now, tx, audit } from '../db/index.js';
 import { parse, conflict, badRequest, forbidden, HttpError } from '../lib/errors.js';
 import * as f from '../lib/fields.js';
-import { hashPassword, verifyOrWaste, newToken, sha256, startSession, endSession, endAllSessions, requireUser } from '../lib/security.js';
+import { hashPassword, verifyOrWaste, newToken, sha256, safeEqual, startSession, endSession, endAllSessions, requireUser, trustDevice, isTrustedDevice } from '../lib/security.js';
 import { saveLogo } from '../lib/uploads.js';
 import { queueMail } from '../lib/mailer.js';
 
@@ -28,6 +28,9 @@ const useToken = async (token, purpose) => {
   return row;
 };
 const loginLink = () => `${config.APP_URL}/#entrar`;
+const CODE_TTL = 10 * 60000;
+// lu***@gmail.com: mostra para onde o código foi sem expor o endereço inteiro.
+const maskEmail = e => { const [u, dom] = e.split('@'); return `${u.slice(0, 2)}${'*'.repeat(Math.max(1, u.length - 2))}@${dom}`; };
 
 export async function profile(user) {
   const out = { id: user.id, role: user.role, name: user.name, email: user.email, status: user.status };
@@ -101,7 +104,35 @@ export default async function auth(app) {
     if (!user.email_verified_at) throw forbidden('Confirme seu e-mail pelo link que enviamos para liberar o cadastro.', 'EMAIL_NOT_VERIFIED');
     if (user.status === 'pendente') throw forbidden('Seu cadastro ainda está em análise. A equipe do BlogSim responde em até 24 horas no seu e-mail.', 'PENDING');
     if (user.status === 'negado') throw forbidden('Seu cadastro não foi aprovado.', 'DENIED', { reason: user.denial_reason });
-    await startSession(req, reply, user.id, d.remember);
+    if (await isTrustedDevice(req, user.id)) {
+      await startSession(req, reply, user.id, d.remember);
+      return { user: await profile(user) };
+    }
+    // Segunda etapa: um código de 6 dígitos vai para o e-mail. Pedir de novo anula o código anterior.
+    const code = String(randomInt(0, 1_000_000)).padStart(6, '0');
+    const challenge = id();
+    await run('UPDATE login_codes SET used_at = ? WHERE user_id = ? AND used_at IS NULL', now(), user.id);
+    await run('INSERT INTO login_codes (id, user_id, code_hash, remember, expires_at, created_at) VALUES (?, ?, ?, ?, ?, ?)',
+      challenge, user.id, sha256(challenge + code), d.remember, new Date(Date.now() + CODE_TTL).toISOString(), now());
+    queueMail(user.email, 'codigo_login', { name: user.name, code }, req.log);
+    return { twoFactor: true, challenge, email: maskEmail(user.email) };
+  });
+
+  app.post('/api/auth/login/verify', { config: { rateLimit: { max: 10, timeWindow: '1 minute' } } }, async (req, reply) => {
+    const d = parse(z.object({ challenge: z.uuid(), code: z.string().trim().regex(/^\d{6}$/, 'Digite os 6 números do código.'), trust: z.boolean().default(false) }), req.body);
+    const expired = () => badRequest('O código expirou. Entre de novo para receber outro.', 'CODE_EXPIRED');
+    // Conta a tentativa antes de comparar: no máximo 5 por código.
+    const row = await one('UPDATE login_codes SET attempts = attempts + 1 WHERE id = ? AND used_at IS NULL AND expires_at > ? AND attempts < 5 RETURNING *', d.challenge, now());
+    if (!row) throw expired();
+    if (!safeEqual(sha256(row.id + d.code), row.code_hash)) {
+      if (row.attempts >= 5) throw badRequest('Muitas tentativas erradas. Entre de novo para receber outro código.', 'CODE_EXPIRED');
+      throw badRequest('Código incorreto. Confira o e-mail e tente de novo.', 'CODE_INVALID');
+    }
+    if (!(await run('UPDATE login_codes SET used_at = ? WHERE id = ? AND used_at IS NULL', now(), row.id)).changes) throw expired();
+    const user = await one('SELECT * FROM users WHERE id = ?', row.user_id);
+    if (user.status !== 'aprovado' || !user.email_verified_at) throw forbidden('Sua conta não está liberada para entrar.');
+    await startSession(req, reply, user.id, row.remember);
+    if (d.trust) await trustDevice(reply, user.id);
     return { user: await profile(user) };
   });
 

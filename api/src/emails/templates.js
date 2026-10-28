@@ -115,6 +115,18 @@ export const TEMPLATES = {
     }),
     sample: { name: 'Carla Mendes' }
   },
+  codigo_login: {
+    label: 'Código para entrar', to: 'Quem está entrando', when: 'Login num navegador novo (verificação em duas etapas)',
+    subject: () => 'Seu código para entrar no BlogSim',
+    body: d => ({
+      preheader: 'O código vale por 10 minutos.',
+      title: 'Código para entrar',
+      blocks: [p(`Olá, ${first(d.name)}. Use este código para terminar de entrar no BlogSim.`),
+        highlight('Seu código', d.code),
+        muted('O código vale por 10 minutos e só funciona uma vez. Se não foi você que tentou entrar, alguém sabe a sua senha: troque-a em "Esqueci a senha".')]
+    }),
+    sample: { name: 'Carla Mendes', code: '482913' }
+  },
 
   pagamento_solicitado: {
     label: 'Solicitação de pagamento', to: 'Anunciante', when: 'Anunciante pede para adicionar saldo',

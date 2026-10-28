@@ -186,3 +186,36 @@ CREATE TABLE IF NOT EXISTS ad_seen (
   day DATE NOT NULL
 );
 CREATE INDEX IF NOT EXISTS ad_seen_day ON ad_seen(day);
+-- Verificação em duas etapas: código de 6 dígitos por e-mail ao entrar num navegador novo.
+CREATE TABLE IF NOT EXISTS login_codes (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  code_hash TEXT NOT NULL,
+  remember BOOLEAN NOT NULL DEFAULT FALSE,
+  attempts INTEGER NOT NULL DEFAULT 0,
+  expires_at TIMESTAMPTZ NOT NULL,
+  used_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL
+);
+CREATE INDEX IF NOT EXISTS login_codes_user ON login_codes(user_id);
+
+-- Navegadores em que a pessoa marcou "confiar": pulam o código por 30 dias. No banco fica só o hash.
+CREATE TABLE IF NOT EXISTS trusted_devices (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  token_hash TEXT NOT NULL UNIQUE,
+  expires_at TIMESTAMPTZ NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL
+);
+CREATE INDEX IF NOT EXISTS trusted_devices_user ON trusted_devices(user_id);
+
+-- Em quais posts do blog os anúncios foram vistos e clicados (tela Insights do blogueiro).
+CREATE TABLE IF NOT EXISTS ad_pages (
+  blog_id TEXT NOT NULL REFERENCES blogs(id) ON DELETE CASCADE,
+  day DATE NOT NULL,
+  path TEXT NOT NULL,
+  title TEXT NOT NULL DEFAULT '',
+  views INTEGER NOT NULL DEFAULT 0,
+  clicks INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (blog_id, day, path)
+);

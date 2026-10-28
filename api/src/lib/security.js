@@ -40,7 +40,27 @@ export async function endSession(req, reply) {
   reply.clearCookie(COOKIE, { path: '/' });
 }
 
-export const endAllSessions = userId => run('DELETE FROM sessions WHERE user_id = ?', userId);
+// Troca de senha ou cadastro negado: derruba as sessões e volta a pedir o código em todo navegador.
+export async function endAllSessions(userId) {
+  await run('DELETE FROM sessions WHERE user_id = ?', userId);
+  await run('DELETE FROM trusted_devices WHERE user_id = ?', userId);
+}
+
+// ----- Navegador confiável: depois do código, a pessoa pode pular a verificação por 30 dias. -----
+const DEVICE = config.cookieSecure ? '__Host-blogsim_device' : 'blogsim_device';
+
+export async function trustDevice(reply, userId) {
+  const { token, hash: tokenHash } = newToken();
+  const ttl = 30 * DAY;
+  await run('INSERT INTO trusted_devices (id, user_id, token_hash, expires_at, created_at) VALUES (?, ?, ?, ?, ?)', id(), userId, tokenHash, new Date(Date.now() + ttl).toISOString(), now());
+  reply.setCookie(DEVICE, token, { httpOnly: true, secure: config.cookieSecure, sameSite: 'lax', path: '/', maxAge: Math.floor(ttl / 1000) });
+}
+
+export async function isTrustedDevice(req, userId) {
+  const token = req.cookies[DEVICE];
+  if (!token) return false;
+  return Boolean(await one('SELECT 1 FROM trusted_devices WHERE token_hash = ? AND user_id = ? AND expires_at > ?', sha256(token), userId, now()));
+}
 
 // Carrega a pessoa logada. Conta que deixou de estar aprovada perde a sessão na hora.
 export async function loadUser(req) {

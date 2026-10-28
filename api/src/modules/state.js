@@ -10,6 +10,7 @@ import { balanceCents, txView } from './billing.js';
 import { availableCents, payoutView } from './payouts.js';
 import { signupView } from './admin.js';
 import { reais, brDate } from '../lib/format.js';
+import { advertiserStats, bloggerStats, adminStats } from './stats.js';
 
 const BLOGS = `SELECT b.*, u.name AS owner, (SELECT COUNT(*) FROM slots s WHERE s.blog_id = b.id) AS slot_count FROM blogs b LEFT JOIN users u ON u.id = b.user_id`;
 const PAYOUTS = 'SELECT p.*, b.name AS blog_name FROM payouts p JOIN blogs b ON b.id = p.blog_id';
@@ -30,7 +31,8 @@ export default async function state(app) {
         blogs: (await all(`${BLOGS} WHERE b.status = 'ativo'`)).map(blogView), slots: await marketSlots(),
         campaigns: await campaignViews(await all('SELECT * FROM campaigns WHERE advertiser_id = ? ORDER BY created_at DESC', user.id)),
         balance: reais(await balanceCents(user.id)),
-        txns: (await all('SELECT * FROM wallet_tx WHERE user_id = ? ORDER BY created_at DESC', user.id)).map(txView) };
+        txns: (await all('SELECT * FROM wallet_tx WHERE user_id = ? ORDER BY created_at DESC', user.id)).map(txView),
+        stats: await advertiserStats(user.id) };
     }
 
     if (user.role === 'blogueiro') {
@@ -44,7 +46,8 @@ export default async function state(app) {
       const earned = await one('SELECT COALESCE(SUM(amount_cents), 0) AS v, COUNT(*) AS n FROM earnings WHERE blog_id = ?', blog.id);
       return { ...base, blog: { ...blogView(blog), scriptUrl: config.scriptUrl }, mySlots, fresh: earned.n === 0, received: reais(earned.v),
         balance: reais(await availableCents(blog.id)),
-        payouts: (await all(`${PAYOUTS} WHERE p.blog_id = ? ORDER BY p.requested_at DESC`, blog.id)).map(payoutView) };
+        payouts: (await all(`${PAYOUTS} WHERE p.blog_id = ? ORDER BY p.requested_at DESC`, blog.id)).map(payoutView),
+        stats: await bloggerStats(blog) };
     }
 
     // admin
@@ -54,6 +57,7 @@ export default async function state(app) {
       campaigns: await campaignViews(await all('SELECT * FROM campaigns ORDER BY created_at DESC')),
       payouts: (await all(`${PAYOUTS} ORDER BY p.requested_at DESC`)).map(payoutView),
       pendingRecharges: (await all("SELECT w.*, co.trade_name FROM wallet_tx w JOIN companies co ON co.user_id = w.user_id WHERE w.kind = 'recarga' AND w.status = 'pendente' ORDER BY w.created_at"))
-        .map(t => ({ ...txView(t), advertiser: t.trade_name })) };
+        .map(t => ({ ...txView(t), advertiser: t.trade_name })),
+      stats: await adminStats() };
   });
 }

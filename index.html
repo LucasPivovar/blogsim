@@ -971,7 +971,8 @@ h1, h2, h3 { text-wrap: balance; }
       return () => ro.disconnect();
     }, []);
     const H = 190, L = 56, R = 8, T = 24, Bm = 28;
-    const max = niceMax(Math.max(...data.map(d => d.value)));
+    // Contagens com poucos números: eixo mínimo de 4 para as marcas serem inteiras (0, 1, 2, 3, 4).
+    const max = niceMax(Math.max(isMoney ? 0 : 4, ...data.map(d => d.value)));
     const iw = W - L - R, ih = H - T - Bm, bw = iw / data.length;
     const short = v => (isMoney ? 'R$ ' : '') + COMPACT.format(v);
     const last = data.length - 1;
@@ -989,18 +990,24 @@ h1, h2, h3 { text-wrap: balance; }
       })));
   }
   // ---------- Anunciante ----------
-  function AdvPainel({ campaigns, go, advertiser }) {
+  // Números reais (stats da API): variação só quando houve movimento nos 14 dias anteriores.
+  const dlt = x => x && x.delta !== null ? x.delta : undefined;
+  const cmp = x => x && x.delta === null ? 'nos últimos 14 dias' : 'vs. 14 dias anteriores';
+
+  function AdvPainel({ campaigns, go, advertiser, stats }) {
     const mine = campaigns.filter(c => c.advertiser === advertiser);
     const fresh = !mine.length;
-    const inv = sum(mine, 'invested'), clk = sum(mine, 'clicks'), res = sum(mine, 'results'), views = sum(mine, 'views');
+    const s = stats;
+    const res = sum(mine, 'results'), spent = sum(mine, 'invested');
+    const inv = s ? s.invested.total : spent, clk = s ? s.clicks.total : sum(mine, 'clicks'), views = s ? s.views.total : sum(mine, 'views');
     return h(Page, { title: 'Painel', subtitle: 'Últimos 14 dias · ' + advertiser, action: h(B.Button, { onClick: () => go('Criar campanha') }, 'Criar campanha') },
       h('div', { className: 'app-metrics' },
-        h(B.MetricCard, { label: 'Investido', value: inv, format: 'money', delta: fresh ? undefined : 12.4, hint: fresh ? 'nenhuma campanha ainda' : 'vs. 14 dias anteriores', spark: fresh ? undefined : [3100, 3300, 3250, 3600, 3900, 4400, inv] }),
-        h(B.MetricCard, { label: 'Cliques', value: clk, format: 'count', delta: fresh ? undefined : 8.1, hint: fresh ? 'medidos pelos blogs' : 'vs. 14 dias anteriores', spark: fresh ? undefined : spark(DAILY.clicks) }),
-        h(B.MetricCard, { label: 'Visualizações', value: views, format: 'count', delta: fresh ? undefined : 9.8, hint: 'vezes que seus anúncios apareceram' }),
-        h(B.MetricCard, { label: 'Resultados', value: res, format: 'count', hint: (res ? money(inv / res) : 'R$ 0,00') + ' por resultado' })),
+        h(B.MetricCard, { label: 'Investido', value: inv, format: 'money', delta: fresh ? undefined : s ? dlt(s.invested) : 12.4, hint: fresh ? 'nenhuma campanha ainda' : cmp(s && s.invested), spark: fresh ? undefined : s ? spark(s.invested.series) : [3100, 3300, 3250, 3600, 3900, 4400, inv] }),
+        h(B.MetricCard, { label: 'Cliques', value: clk, format: 'count', delta: fresh ? undefined : s ? dlt(s.clicks) : 8.1, hint: fresh ? 'medidos pelos blogs' : cmp(s && s.clicks), spark: fresh ? undefined : spark(s ? s.clicks.series : DAILY.clicks) }),
+        h(B.MetricCard, { label: 'Visualizações', value: views, format: 'count', delta: fresh ? undefined : s ? dlt(s.views) : 9.8, hint: 'vezes que seus anúncios apareceram' }),
+        h(B.MetricCard, { label: 'Resultados', value: res, format: 'count', hint: (res ? money(spent / res) : 'R$ 0,00') + ' por resultado' })),
       fresh ? h('p', { className: 'app-empty' }, 'Os cliques por dia aparecem aqui quando a sua primeira campanha entrar no ar. Comece em Explorar blogs ou em Criar campanha.')
-        : h(Card, { title: 'Cliques por dia' }, h(BarChart, { data: DAILY.clicks, label: 'Cliques por dia nos últimos 14 dias' })),
+        : h(Card, { title: 'Cliques por dia' }, h(BarChart, { data: s ? s.clicks.series : DAILY.clicks, label: 'Cliques por dia nos últimos 14 dias' })),
       h(Section, { title: 'Campanhas ativas', extra: h(B.Button, { variant: 'ghost', size: 'sm', onClick: () => go('Campanhas') }, 'Ver todas') },
         h(B.CampaignTable, { rows: mine.filter(c => c.status === 'ativa'), emptyText: 'Nenhuma campanha ativa ainda.' })));
   }
@@ -1277,16 +1284,20 @@ h1, h2, h3 { text-wrap: balance; }
     r.readAsDataURL(f);
   }
 
-  function BlogPainel({ mySlots, blog, fresh }) {
+  function BlogPainel({ mySlots, blog, fresh, stats }) {
     const rented = mySlots.filter(s => s.rent);
+    const s = stats;
+    // Demonstração: números de exemplo. Com a API: receita, visualizações e cliques medidos.
+    const rev = s ? s.revenue.total : fresh ? 0 : 2184, views = s ? s.views.total : fresh ? 0 : 96400, clk = s ? s.clicks.total : fresh ? 0 : 2870;
+    const ctr = views ? (clk / views * 100).toFixed(2).replace('.', ',') + '%' : '0%';
     return h(Page, { title: 'Painel', subtitle: 'Últimos 14 dias · ' + blog.name },
       h('div', { className: 'app-metrics' },
-        h(B.MetricCard, { label: 'Receita', value: fresh ? 0 : 2184, format: 'money', delta: fresh ? undefined : 18, hint: fresh ? 'nenhum aluguel ainda' : 'vs. 14 dias anteriores', spark: fresh ? undefined : spark(DAILY.revenue) }),
-        h(B.MetricCard, { label: 'Visualizações dos anúncios', value: fresh ? 0 : 96400, format: 'count', delta: fresh ? undefined : 9.5, hint: fresh ? 'medidas pelo script' : 'vs. 14 dias anteriores' }),
-        h(B.MetricCard, { label: 'Cliques', value: fresh ? 0 : 2870, format: 'count', delta: fresh ? undefined : 4.2, hint: fresh ? 'medidos pelo script' : 'vs. 14 dias anteriores' }),
-        h(B.MetricCard, { label: 'CTR', value: fresh ? '0%' : '2,98%', hint: 'cliques ÷ visualizações' })),
+        h(B.MetricCard, { label: 'Receita', value: rev, format: 'money', delta: fresh ? undefined : s ? dlt(s.revenue) : 18, hint: fresh ? 'nenhum aluguel ainda' : cmp(s && s.revenue), spark: fresh ? undefined : spark(s ? s.revenue.series : DAILY.revenue) }),
+        h(B.MetricCard, { label: 'Visualizações dos anúncios', value: views, format: 'count', delta: fresh ? undefined : s ? dlt(s.views) : 9.5, hint: fresh ? 'medidas pelo script' : cmp(s && s.views) }),
+        h(B.MetricCard, { label: 'Cliques', value: clk, format: 'count', delta: fresh ? undefined : s ? dlt(s.clicks) : 4.2, hint: fresh ? 'medidos pelo script' : cmp(s && s.clicks) }),
+        h(B.MetricCard, { label: 'CTR', value: s ? ctr : fresh ? '0%' : '2,98%', hint: 'cliques ÷ visualizações' })),
       fresh ? h('p', { className: 'app-empty' }, 'A receita por dia aparece aqui quando o primeiro anúncio entrar no seu blog. Crie seus espaços em Meus espaços para começar.')
-        : h(Card, { title: 'Receita por dia' }, h(BarChart, { data: DAILY.revenue, isMoney: true, label: 'Receita por dia nos últimos 14 dias' })),
+        : h(Card, { title: 'Receita por dia' }, h(BarChart, { data: s ? s.revenue.series : DAILY.revenue, isMoney: true, label: 'Receita por dia nos últimos 14 dias' })),
       h(Section, { title: 'Anúncios no seu blog agora' },
         h(Table, { cols: [{ label: 'Anunciante' }, { label: 'Espaço' }, { label: 'Até' }, { label: 'Valor por semana', num: true }], empty: 'Nenhum espaço alugado agora.',
           rows: rented.map(s => [s.rent.adv, PLACE[s.placement], s.rent.until, money(s.price)]) })));
@@ -1396,7 +1407,17 @@ h1, h2, h3 { text-wrap: balance; }
           rows: mine.map(p => [p.date, p.status === 'pago' ? h(B.Badge, { tone: 'success', dot: true }, 'Pago') : h(B.Badge, { tone: 'warning', dot: true }, 'Em processamento'), money(p.value)]) })));
   }
 
-  function BlogInsights({ blog, fresh }) {
+  function BlogInsights({ blog, fresh, stats }) {
+    const pctText = (c, v) => v ? (c / v * 100).toFixed(2).replace('.', ',') + '%' : '0%';
+    if (stats) return h(Page, { title: 'Insights', subtitle: 'Onde seus leitores mais veem e clicam em anúncios. Últimos 30 dias.' },
+      h('div', { className: 'app-metrics' },
+        h(B.MetricCard, { label: 'Leitores por mês', value: blog.audience, format: 'count', hint: 'informado por você em Meu blog' }),
+        h(B.MetricCard, { label: 'Espaço mais alugado', value: stats.topSlot ? PLACE[stats.topSlot.placement] : '—', hint: stats.topSlot ? `${stats.topSlot.weeks} ${stats.topSlot.weeks > 1 ? 'semanas alugado' : 'semana alugado'} no total` : 'nenhum aluguel ainda' }),
+        h(B.MetricCard, { label: 'Nicho', value: blog.niche, hint: `${stats.nicheAdvertisers} ${stats.nicheAdvertisers === 1 ? 'anunciante' : 'anunciantes'} no nicho nos últimos 30 dias` })),
+      h(Section, { title: 'Posts com mais cliques em anúncios' },
+        h(Table, { cols: [{ label: 'Post' }, { label: 'Visualizações', num: true }, { label: 'Cliques', num: true }, { label: 'CTR', num: true }],
+          empty: 'Os posts aparecem aqui quando os anúncios forem vistos no seu blog. A medição é feita pelo script.',
+          rows: stats.topPosts.map(p => [h('div', { className: 'app-blogcell' }, h('div', null, h('b', null, p.title || p.path), p.title ? h('span', null, p.path) : null)), count(p.views), count(p.clicks), pctText(p.clicks, p.views)]) })));
     if (fresh) return h(Page, { title: 'Insights', subtitle: 'Onde seus leitores mais clicam em anúncios.' },
       h('p', { className: 'app-empty' }, 'Os insights aparecem depois das primeiras visitas medidas pelo script: posts mais lidos, cliques em anúncios e CTR.'));
     return h(Page, { title: 'Insights', subtitle: 'Onde seus leitores mais clicam em anúncios.' },
@@ -1445,20 +1466,21 @@ h1, h2, h3 { text-wrap: balance; }
         h(B.Button, { size: 'sm', variant: 'secondary', onClick: () => decide(c.id, 'recusada') }, 'Recusar')))));
   }
 
-  function AdminVisao({ campaigns, onDecide, blogs, pct, pendingSignups, go }) {
-    const volume = sum(campaigns, 'invested');
+  function AdminVisao({ campaigns, onDecide, blogs, pct, pendingSignups, go, stats }) {
+    const s = stats && stats.volume;
+    const volume = s ? s.total : sum(campaigns, 'invested');
     const advertisers = new Set(campaigns.map(c => c.advertiser)).size;
     const pending = blogs.filter(b => b.status === 'pendente').length;
-    return h(Page, { title: 'Visão geral', subtitle: 'Outubro de 2026 · comissão de ' + pct + '%' },
+    return h(Page, { title: 'Visão geral', subtitle: (s ? 'Últimos 14 dias' : 'Outubro de 2026') + ' · comissão de ' + pct + '%' },
       pendingSignups ? h('div', { className: 'app-gate app-gate-row' },
         h('div', null, h('b', null, pendingSignups + (pendingSignups > 1 ? ' cadastros aguardando aprovação' : ' cadastro aguardando aprovação')), h('p', null, 'Responda em até 24 horas. Quem está em análise ainda não entra no painel.')),
         h(B.Button, { size: 'sm', onClick: () => go('Cadastros') }, 'Ver cadastros')) : null,
       h('div', { className: 'app-metrics' },
-        h(B.MetricCard, { label: 'Comissão da plataforma', value: volume * pct / 100, format: 'money', delta: 21, hint: 'vs. setembro', spark: spark(DAILY.volume) }),
-        h(B.MetricCard, { label: 'Volume em aluguéis', value: volume, format: 'money', delta: 21, hint: 'vs. setembro' }),
+        h(B.MetricCard, { label: 'Comissão da plataforma', value: volume * pct / 100, format: 'money', delta: s ? dlt(s) : 21, hint: s ? cmp(s) : 'vs. setembro', spark: spark(s ? s.series : DAILY.volume) }),
+        h(B.MetricCard, { label: 'Volume em aluguéis', value: volume, format: 'money', delta: s ? dlt(s) : 21, hint: s ? cmp(s) : 'vs. setembro' }),
         h(B.MetricCard, { label: 'Blogs ativos', value: blogs.length - pending, format: 'count', hint: pending ? pending + ' aguardando aprovação' : 'nenhum pendente' }),
         h(B.MetricCard, { label: 'Anunciantes', value: advertisers, format: 'count', hint: 'com pelo menos uma campanha' })),
-      h(Card, { title: 'Volume em aluguéis por dia' }, h(BarChart, { data: DAILY.volume, isMoney: true, label: 'Volume em aluguéis por dia nos últimos 14 dias' })),
+      h(Card, { title: 'Volume em aluguéis por dia' }, h(BarChart, { data: s ? s.series : DAILY.volume, isMoney: true, label: 'Volume em aluguéis por dia nos últimos 14 dias' })),
       h(Section, { title: 'Campanhas aguardando revisão' }, h(ReviewList, { campaigns, onDecide })));
   }
 
@@ -1929,7 +1951,7 @@ h1, h2, h3 { text-wrap: balance; }
     }, [key]);
   }
 
-  function Login({ authenticate, requestReset, onLogin, onBack, onSignup, flash }) {
+  function Login({ authenticate, verifyCode, requestReset, onLogin, onBack, onSignup, flash }) {
     const [email, setEmail] = useState(readSaved);
     const [pw, setPw] = useState('');
     const [remember, setRemember] = useState(() => !!readSaved());
@@ -1938,18 +1960,47 @@ h1, h2, h3 { text-wrap: balance; }
     const [view, setView] = useState('login');
     const [resetEmail, setResetEmail] = useState('');
     const [resetErr, setResetErr] = useState('');
+    // Segunda etapa: o código que chega por e-mail.
+    const [challenge, setChallenge] = useState(null);
+    const [code, setCode] = useState('');
+    const [trust, setTrust] = useState(false);
+    const [codeMsg, setCodeMsg] = useState(null);
+    function finish(u) {
+      // Guarda só o e-mail, e só neste navegador. A senha nunca é guardada.
+      try { if (remember) localStorage.setItem(REMEMBER_KEY, u.email); else localStorage.removeItem(REMEMBER_KEY); } catch (e2) {}
+      onLogin(u);
+    }
     async function submit(e) {
       e.preventDefault();
       if (busy) return;
       setBusy(true);
       try {
         const u = await authenticate(email.trim().toLowerCase(), pw, remember);
-        // Guarda só o e-mail, e só neste navegador. A senha nunca é guardada.
-        try { if (remember) localStorage.setItem(REMEMBER_KEY, u.email); else localStorage.removeItem(REMEMBER_KEY); } catch (e2) {}
-        onLogin(u);
+        if (u.twoFactor) { setChallenge(u); setCode(''); setCodeMsg(null); setView('code'); return; }
+        finish(u);
       } catch (x) {
         setErr({ tone: x.tone || 'danger', text: x.message });
       } finally { setBusy(false); }
+    }
+    async function submitCode(e) {
+      e.preventDefault();
+      if (busy) return;
+      if (!/^\d{6}$/.test(code.trim())) { setCodeMsg({ tone: 'danger', text: 'Digite os 6 números do código.' }); return; }
+      setBusy(true);
+      try { finish(await verifyCode(challenge.challenge, code.trim(), trust)); }
+      catch (x) {
+        if (x.code === 'CODE_EXPIRED') { setView('login'); setPw(''); setErr({ tone: 'warning', text: x.message }); }
+        else setCodeMsg({ tone: 'danger', text: x.message });
+      } finally { setBusy(false); }
+    }
+    async function resendCode() {
+      setBusy(true);
+      try {
+        const u = await authenticate(email.trim().toLowerCase(), pw, remember);
+        if (u.twoFactor) { setChallenge(u); setCode(''); setCodeMsg({ tone: 'success', text: 'Enviamos um código novo. O anterior deixou de valer.' }); }
+        else finish(u);
+      } catch (x) { setCodeMsg({ tone: 'danger', text: x.message }); }
+      finally { setBusy(false); }
     }
     function openForgot() { setResetEmail(email); setResetErr(''); setView('forgot'); }
     async function sendReset(e) {
@@ -1977,6 +2028,19 @@ h1, h2, h3 { text-wrap: balance; }
         err ? h('p', { className: 'lg-msg is-' + err.tone, role: 'alert' }, err.text) : null,
         h(B.Button, { type: 'submit', className: 'lg-submit', loading: busy }, busy ? 'Entrando' : 'Entrar')),
       h('p', { className: 'lg-alt' }, 'Ainda não tem conta? ', h('button', { type: 'button', className: 'lg-link', onClick: () => onSignup() }, 'Cadastre-se')));
+    if (view === 'code') body = h(React.Fragment, null,
+      h('h1', null, 'Confirme que é você'),
+      h('p', { className: 'lg-text' }, 'Enviamos um código de 6 números para ', h('b', null, challenge ? challenge.email : 'seu e-mail'), '. Ele vale por 10 minutos.'),
+      h('form', { className: 'lg-form', onSubmit: submitCode, noValidate: true },
+        h(B.TextField, { id: 'login-codigo', label: 'Código', inputMode: 'numeric', autoComplete: 'one-time-code', maxLength: 6, value: code,
+          onChange: e => { setCode(e.target.value.replace(/\D/g, '').slice(0, 6)); setCodeMsg(null); } }),
+        h('label', { className: 'lg-check', htmlFor: 'login-confiar' },
+          h('input', { id: 'login-confiar', type: 'checkbox', checked: trust, onChange: e => setTrust(e.target.checked) }),
+          'Não pedir o código neste navegador por 30 dias'),
+        codeMsg ? h('p', { className: 'lg-msg is-' + codeMsg.tone, role: codeMsg.tone === 'danger' ? 'alert' : 'status' }, codeMsg.text) : null,
+        h(B.Button, { type: 'submit', className: 'lg-submit', loading: busy }, busy ? 'Confirmando' : 'Entrar')),
+      h('p', { className: 'lg-alt' }, 'Não chegou? Confira o spam ou ', h('button', { type: 'button', className: 'lg-link', disabled: busy, onClick: resendCode }, 'reenvie o código'), '.'),
+      backToLogin);
     if (view === 'forgot') body = h(React.Fragment, null,
       h('h1', null, 'Recuperar senha'),
       h('p', { className: 'lg-text' }, 'Informe o e-mail da sua conta. Enviamos um link para você criar uma senha nova.'),
@@ -2221,7 +2285,8 @@ h1, h2, h3 { text-wrap: balance; }
       balance: r.me.role === 'blogueiro' ? 0 : r.balance || 0, txns: r.txns || [],
       myBlog: r.blog, mySlots: r.mySlots || [], bloggerBalance: r.me.role === 'blogueiro' ? r.balance : 0,
       fresh: !!r.fresh, received: r.received, verified: !!(r.blog && r.blog.scriptVerified),
-      pct: r.settings.commissionPct, billing: { min: r.settings.rechargeMin, installFrom: r.settings.installmentsFrom, maxInstallments: r.settings.maxInstallments }
+      pct: r.settings.commissionPct, billing: { min: r.settings.rechargeMin, installFrom: r.settings.installmentsFrom, maxInstallments: r.settings.maxInstallments },
+      stats: r.stats
     } : null;
     const advertiser = me && me.company ? me.company.name : ME;
     const myBlogDemo = blogs.find(b => b.id === blogger.blogId) || blogs[0];
@@ -2285,7 +2350,9 @@ h1, h2, h3 { text-wrap: balance; }
         return u;
       }
       try {
-        await api('/api/auth/login', { email, password: pw, remember });
+        const r = await api('/api/auth/login', { email, password: pw, remember });
+        // Navegador novo: falta o código que foi para o e-mail.
+        if (r.twoFactor) return { twoFactor: true, challenge: r.challenge, email: r.email };
         const s = await api('/api/state');
         lastState.current = s;
         return s.me;
@@ -2298,6 +2365,13 @@ h1, h2, h3 { text-wrap: balance; }
         if (e.code === 'DENIED') throw { tone: 'danger', message: e.message + (e.reason ? ' Motivo: ' + e.reason : '') };
         throw { tone: 'danger', message: e.message };
       }
+    }
+    async function verifyCode(challenge, code, trust) {
+      try { await api('/api/auth/login/verify', { challenge, code, trust }); }
+      catch (e) { throw { tone: 'danger', message: e.message, code: e.code }; }
+      const s = await api('/api/state');
+      lastState.current = s;
+      return s.me;
     }
     const requestReset = email => live ? api('/api/auth/forgot-password', { email }) : Promise.resolve();
     const resetPassword = (token, password) => api('/api/auth/reset-password', { token, password });
@@ -2430,13 +2504,13 @@ h1, h2, h3 { text-wrap: balance; }
 
     const toastEl = h('div', { className: 'app-toast', role: 'status', 'aria-live': 'polite', hidden: !toast }, toast ? toast.msg : '');
     if (screen === 'reset') return h('div', { className: 'lp-root' }, h(ResetPassword, { token: entry.token, resetPassword, onLogin: openLogin, onBack: toSite }), toastEl);
-    if (screen === 'login') return h('div', { className: 'lp-root' }, h(Login, { authenticate, requestReset, flash, onLogin: login, onBack: toSite, onSignup: openSignup }), toastEl);
+    if (screen === 'login') return h('div', { className: 'lp-root' }, h(Login, { authenticate, verifyCode, requestReset, flash, onLogin: login, onBack: toSite, onSignup: openSignup }), toastEl);
     if (screen === 'cadastro') return h('div', { className: 'lp-root' }, h(Signup, { key: signupRole || 'escolha', users: live ? [] : users, preset: signupRole, onSignup: signup, onLogin: openLogin, onBack: toSite, confirmByEmail: live }), toastEl);
     if (screen !== 'app' || !me) return h('div', { className: 'lp-root' }, h(Landing, { onLogin: openLogin, onSignup: openSignup, blogs }), toastEl);
 
     const myBlog = data.myBlog || {};
     const balance = data.balance;
-    const ctx = { go, notify, campaigns: data.campaigns, cart, setCart, balance, blogs: data.blogs, advertiser };
+    const ctx = { go, notify, campaigns: data.campaigns, cart, setCart, balance, blogs: data.blogs, advertiser, stats: data.stats };
     const screens = {
       anunciante: {
         'Painel': () => h(AdvPainel, ctx),
@@ -2447,15 +2521,15 @@ h1, h2, h3 { text-wrap: balance; }
         'Faturamento': () => h(AdvBilling, { balance, txns: data.txns, onAdd: addBalance, onConfirm: live ? confirmRecharge : undefined, campaigns: data.campaigns, billing: data.billing, advertiser })
       },
       blogueiro: {
-        'Painel': () => h(BlogPainel, { mySlots: data.mySlots, blog: myBlog, fresh: data.fresh }),
+        'Painel': () => h(BlogPainel, { mySlots: data.mySlots, blog: myBlog, fresh: data.fresh, stats: data.stats }),
         'Meu blog': () => h(BlogMeuBlog, { key: myBlog.id, blog: myBlog, onSave: saveBlog }),
         'Meus espaços': () => h(BlogEspacos, { mySlots: data.mySlots, onSlotSave: saveSlot, onSlotAdd: addSlot, blog: myBlog }),
         'Receita': () => h(BlogReceita, { bloggerBalance: data.bloggerBalance, onWithdraw: withdraw, payouts: data.payouts, pct: data.pct, blog: myBlog, fresh: data.fresh, received: data.received }),
-        'Insights': () => h(BlogInsights, { blog: myBlog, fresh: data.fresh }),
+        'Insights': () => h(BlogInsights, { blog: myBlog, fresh: data.fresh, stats: data.stats }),
         'Instalar script': () => h(BlogScript, { notify, blog: myBlog, verified: data.verified, onVerify: verifyScript })
       },
       admin: {
-        'Visão geral': () => h(AdminVisao, { campaigns: data.campaigns, onDecide: decideCampaign, blogs: data.blogs, pct: data.pct, pendingSignups, go }),
+        'Visão geral': () => h(AdminVisao, { campaigns: data.campaigns, onDecide: decideCampaign, blogs: data.blogs, pct: data.pct, pendingSignups, go, stats: data.stats }),
         'Cadastros': () => h(AdminCadastros, { users: data.users, blogs: data.blogs, onApprove: approve, onDeny: deny }),
         'Blogs parceiros': () => h(AdminBlogs, { blogs: live ? data.blogs : blogs.map(b => slotsByBlog[b.id] ? { ...b, slots: slotsByBlog[b.id].length } : b) }),
         'Anunciantes': () => h(AdminAnunciantes, { campaigns: data.campaigns }),

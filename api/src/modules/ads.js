@@ -24,12 +24,19 @@ function readToken(token) {
 
 const BOT = /bot|crawl|spider|slurp|preview|facebookexternalhit|headless|lighthouse/i;
 
+// Post do blog onde o anúncio apareceu, mandado pelo script (?p=caminho&tt=título).
+function pageOf(query) {
+  const path = String(query.p || '').slice(0, 200);
+  if (!path.startsWith('/')) return null;
+  return { path, title: String(query.tt || '').replace(/[\u0000-\u001f]/g, ' ').trim().slice(0, 120) };
+}
+
 // Conta uma visualização ou clique. A mesma pessoa (IP + navegador) conta uma vez por anúncio por dia.
 async function count(kind, token, req) {
   const ad = readToken(token);
   const ua = String(req.headers['user-agent'] || '');
   if (!ad || !ua || BOT.test(ua)) return null;
-  const live = await one(`SELECT c.ad_link FROM campaign_slots cs JOIN campaigns c ON c.id = cs.campaign_id
+  const live = await one(`SELECT c.ad_link, s.blog_id FROM campaign_slots cs JOIN campaigns c ON c.id = cs.campaign_id JOIN slots s ON s.id = cs.slot_id
                           WHERE cs.campaign_id = ? AND cs.slot_id = ? AND c.status = 'ativa'`, ad.campaignId, ad.slotId);
   if (!live) return null;
   const day = spDay();
@@ -41,6 +48,10 @@ async function count(kind, token, req) {
     await run(`INSERT INTO ad_stats (campaign_id, slot_id, day, ${column}) VALUES (?, ?, ?, 1)
                ON CONFLICT (campaign_id, slot_id, day) DO UPDATE SET ${column} = ad_stats.${column} + 1`, ad.campaignId, ad.slotId, day);
     await run(`UPDATE campaigns SET ${column} = ${column} + 1 WHERE id = ?`, ad.campaignId);
+    const page = pageOf(req.query);
+    if (page) await run(`INSERT INTO ad_pages (blog_id, day, path, title, ${column}) VALUES (?, ?, ?, ?, 1)
+               ON CONFLICT (blog_id, day, path) DO UPDATE SET ${column} = ad_pages.${column} + 1, title = CASE WHEN excluded.title <> '' THEN excluded.title ELSE ad_pages.title END`,
+      live.blog_id, day, page.path, page.title);
   });
   return live;
 }
@@ -114,9 +125,12 @@ const SCRIPT = String.raw`/* BlogSim · anúncios nos blogs parceiros */
   }
   function el(tag, cls, text) { var n = document.createElement(tag); if (cls) n.className = cls; if (text) n.textContent = text; return n; }
 
+  // Qual post do blog: entra na contagem para o blogueiro ver onde os anúncios rendem mais.
+  var PAGE = 'p=' + encodeURIComponent(location.pathname.slice(0, 200)) + '&tt=' + encodeURIComponent((document.title || '').slice(0, 120));
+
   function card(ad) {
     var a = el('a');
-    a.href = ad.click; a.target = '_blank'; a.rel = 'sponsored noopener';
+    a.href = ad.click + '?' + PAGE; a.target = '_blank'; a.rel = 'sponsored noopener';
     a.appendChild(el('span', 'tag', 'Anúncio'));
     a.appendChild(el('b', '', ad.title));
     if (ad.text) a.appendChild(el('p', '', ad.text));
@@ -148,7 +162,7 @@ const SCRIPT = String.raw`/* BlogSim · anúncios nos blogs parceiros */
     var h = host(wrap);
     function close() { if (h.parentNode) h.parentNode.removeChild(h); }
     x.onclick = close; wrap.onclick = function (e) { if (e.target === wrap) close(); };
-    setTimeout(function () { document.body.appendChild(h); ping(ad.view); }, 4000);
+    setTimeout(function () { document.body.appendChild(h); ping(ad.view + '&' + PAGE); }, 4000);
   }
 
   // Onde cada espaço entra: num elemento data-blogsim="espaço" do blog ou, sem ele, num lugar padrão.
@@ -164,7 +178,7 @@ const SCRIPT = String.raw`/* BlogSim · anúncios nos blogs parceiros */
       var p = ps[Math.min(1, ps.length - 1)];
       p.parentNode.insertBefore(h, p.nextSibling);
     } else return; // lateral só aparece onde o blog marcou
-    watch(h, ad.view);
+    watch(h, ad.view + '&' + PAGE);
   }
 
   function start() {
