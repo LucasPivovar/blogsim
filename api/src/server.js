@@ -20,6 +20,9 @@ import campaigns from './modules/campaigns.js';
 import payouts from './modules/payouts.js';
 import state from './modules/state.js';
 import dev from './modules/dev.js';
+import ads from './modules/ads.js';
+import { migrate, closeDb } from './db/index.js';
+import { seed } from './db/seed.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const frontDir = resolve(here, '../../dist');
@@ -58,7 +61,7 @@ export async function buildApp() {
   });
 
   app.addHook('onRequest', async req => {
-    req.user = loadUser(req);
+    req.user = await loadUser(req);
     const changes = !['GET', 'HEAD', 'OPTIONS'].includes(req.method);
     if (changes && req.url.startsWith('/api/') && !sameOrigin(req)) throw forbidden('Requisição de outra origem bloqueada.', 'BAD_ORIGIN');
   });
@@ -73,7 +76,7 @@ export async function buildApp() {
   });
 
   app.get('/api/health', async () => ({ ok: true, api: true, dev: !config.isProd, smtp: config.smtpEnabled }));
-  for (const mod of [auth, admin, blogs, billing, campaigns, payouts, state, dev]) await app.register(mod);
+  for (const mod of [auth, admin, blogs, billing, campaigns, payouts, state, ads, dev]) await app.register(mod);
 
   app.setNotFoundHandler((req, reply) => reply.code(404).send(req.url.startsWith('/api/') ? { error: { code: 'NOT_FOUND', message: 'Rota não encontrada.' } } : 'Página não encontrada.'));
 
@@ -84,7 +87,11 @@ export async function buildApp() {
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+  await migrate();
+  // No computador o banco começa com as contas de QA e os dados de exemplo; em produção começa vazio.
+  if (!config.isProd && config.QA_ADMIN_PASSWORD) await seed({ quiet: true });
   const app = await buildApp();
+  for (const signal of ['SIGINT', 'SIGTERM']) process.once(signal, async () => { await app.close(); await closeDb(); process.exit(0); });
   await app.listen({ host: config.HOST, port: config.PORT });
   console.log(`BlogSim API em ${config.APP_URL}`);
   if (!config.isProd) console.log(`E-mails (templates e caixa de saída): ${config.APP_URL}/dev/emails`);

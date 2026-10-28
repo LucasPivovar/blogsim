@@ -1432,8 +1432,12 @@ h1, h2, h3 { text-wrap: balance; }
           h('li', null, 'Copie o código abaixo.'),
           h('li', null, 'Cole no cabeçalho do seu blog, antes do fechamento da tag head. No WordPress, use um plugin de cabeçalho.'),
           h('li', null, 'Clique em Verificar instalação.')),
-        h(Code, { label: 'Código', text: '<script async src="https://cdn.blogsim.com.br/slots.js" data-blog="' + (blog.scriptToken || String(blog.id).toUpperCase()) + '"></' + 'script>', notify }),
-        h('div', null, h(B.Button, { variant: verified ? 'secondary' : 'primary', loading: checking, onClick: verify }, checking ? 'Verificando' : 'Verificar instalação'))));
+        h(Code, { label: 'Código', text: '<script async src="' + (blog.scriptUrl || 'https://blogsim.com.br/slots.js') + '" data-blog="' + (blog.scriptToken || String(blog.id).toUpperCase()) + '"></' + 'script>', notify }),
+        h('div', null, h(B.Button, { variant: verified ? 'secondary' : 'primary', loading: checking, onClick: verify }, checking ? 'Verificando' : 'Verificar instalação'))),
+      h(Card, { title: 'Onde cada anúncio aparece' },
+        h('p', null, 'O script coloca o banner no topo da página, o anúncio do meio do post depois do segundo parágrafo e o pop-up alguns segundos depois de a página abrir (uma vez por visita). A lateral só aparece onde você marcar. Para escolher o lugar de qualquer espaço, cole na posição desejada:'),
+        h(Code, { label: 'Marcação', text: '<div data-blogsim="lateral"></div>', notify }),
+        h('p', { className: 'app-note' }, 'Troque lateral por banner ou inline (o pop-up não precisa de marcação). Cada anúncio que aparece na tela conta uma visualização e cada clique conta um clique, uma vez por leitor por dia.')));
   }
   // ---------- Admin master ----------
   function ReviewList({ campaigns, onDecide }) {

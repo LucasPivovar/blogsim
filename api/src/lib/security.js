@@ -26,27 +26,27 @@ export const newToken = () => { const token = randomBytes(32).toString('base64ur
 export const COOKIE = config.cookieSecure ? '__Host-blogsim_session' : 'blogsim_session';
 const DAY = 24 * 60 * 60 * 1000;
 
-export function startSession(req, reply, userId, remember) {
+export async function startSession(req, reply, userId, remember) {
   const { token, hash: tokenHash } = newToken();
   const ttl = (remember ? 30 : 7) * DAY;
-  run('INSERT INTO sessions (id, user_id, token_hash, expires_at, created_at, ip, user_agent) VALUES (?, ?, ?, ?, ?, ?, ?)',
+  await run('INSERT INTO sessions (id, user_id, token_hash, expires_at, created_at, ip, user_agent) VALUES (?, ?, ?, ?, ?, ?, ?)',
     id(), userId, tokenHash, new Date(Date.now() + ttl).toISOString(), now(), req.ip, String(req.headers['user-agent'] || '').slice(0, 200));
   reply.setCookie(COOKIE, token, { httpOnly: true, secure: config.cookieSecure, sameSite: 'lax', path: '/', maxAge: Math.floor(ttl / 1000) });
 }
 
-export function endSession(req, reply) {
+export async function endSession(req, reply) {
   const token = req.cookies[COOKIE];
-  if (token) run('DELETE FROM sessions WHERE token_hash = ?', sha256(token));
+  if (token) await run('DELETE FROM sessions WHERE token_hash = ?', sha256(token));
   reply.clearCookie(COOKIE, { path: '/' });
 }
 
 export const endAllSessions = userId => run('DELETE FROM sessions WHERE user_id = ?', userId);
 
 // Carrega a pessoa logada. Conta que deixou de estar aprovada perde a sessão na hora.
-export function loadUser(req) {
+export async function loadUser(req) {
   const token = req.cookies[COOKIE];
   if (!token) return null;
-  const row = one(`SELECT u.* FROM sessions s JOIN users u ON u.id = s.user_id
+  const row = await one(`SELECT u.* FROM sessions s JOIN users u ON u.id = s.user_id
                    WHERE s.token_hash = ? AND s.expires_at > ?`, sha256(token), now());
   return row && row.status === 'aprovado' && row.email_verified_at ? row : null;
 }
@@ -70,9 +70,9 @@ export function requireRole(req, ...roles) {
 }
 
 // Blog da pessoa logada; o blogueiro só mexe no próprio.
-export function myBlog(req, { verified = false } = {}) {
+export async function myBlog(req, { verified = false } = {}) {
   const user = requireRole(req, 'blogueiro');
-  const blog = one('SELECT * FROM blogs WHERE user_id = ?', user.id);
+  const blog = await one('SELECT * FROM blogs WHERE user_id = ?', user.id);
   if (!blog) throw forbidden('Sua conta não tem blog vinculado.');
   if (verified && !blog.script_verified_at) throw forbidden('Instale e verifique o script do BlogSim para liberar esta parte.', 'SCRIPT_NOT_VERIFIED');
   return blog;

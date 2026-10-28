@@ -1,4 +1,4 @@
-// Testes da API com banco em memória: segurança das rotas e o fluxo principal de ponta a ponta.
+// Testes da API com um PostgreSQL em memória (PGlite): segurança das rotas e o fluxo principal de ponta a ponta.
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdtempSync, rmSync } from 'node:fs';
@@ -10,19 +10,19 @@ const uploads = mkdtempSync(join(tmpdir(), 'blogsim-test-'));
 const secret = () => 'T' + randomBytes(9).toString('hex') + '9';
 const PW = { admin: secret(), anunciante: secret(), blogueiro: secret() };
 Object.assign(process.env, {
-  NODE_ENV: 'test', DB_FILE: ':memory:', UPLOAD_DIR: uploads, APP_URL: 'http://localhost:4100',
+  NODE_ENV: 'test', DATABASE_URL: 'pglite:memory', TRACK_SECRET: randomBytes(32).toString('hex'), UPLOAD_DIR: uploads, APP_URL: 'http://localhost:4100',
   SMTP_HOST: '', SMTP_USER: '', SMTP_PASS: '', ADMIN_NOTIFY_EMAIL: 'admin.qa@blogsim.com.br',
   QA_ADMIN_PASSWORD: PW.admin, QA_ANUNCIANTE_PASSWORD: PW.anunciante, QA_BLOGUEIRO_PASSWORD: PW.blogueiro
 });
 
 const { buildApp } = await import('../src/server.js');
 const { seed } = await import('../src/db/seed.js');
-const { one } = await import('../src/db/index.js');
+const { one, migrate, closeDb } = await import('../src/db/index.js');
 
 const ORIGIN = 'http://localhost:4100';
 let app;
-before(async () => { await seed({ quiet: true }); app = await buildApp(); await app.ready(); });
-after(async () => { await app.close(); rmSync(uploads, { recursive: true, force: true }); });
+before(async () => { await migrate(); await seed({ quiet: true }); app = await buildApp(); await app.ready(); });
+after(async () => { await app.close(); await closeDb(); rmSync(uploads, { recursive: true, force: true }); });
 
 // Cliente com cookie de sessão, como um navegador.
 function client() {
@@ -41,7 +41,14 @@ async function loginAs(role) {
   assert.equal(r.status, 200, `login ${role}`);
   return c;
 }
-const lastMail = (to, template) => one('SELECT * FROM email_outbox WHERE to_email = ? AND template = ? ORDER BY created_at DESC, rowid DESC LIMIT 1', to, template);
+// O e-mail é registrado logo depois da resposta; espera um pouco por ele.
+async function lastMail(to, template) {
+  for (let i = 0; i < 40; i++) {
+    const row = await one('SELECT * FROM email_outbox WHERE to_email = ? AND template = ? ORDER BY created_at DESC LIMIT 1', to, template);
+    if (row) return row;
+    await new Promise(r => setTimeout(r, 25));
+  }
+}
 
 test('rotas protegidas pedem sessão', async () => {
   const c = client();
@@ -85,21 +92,21 @@ test('cada perfil só acessa as próprias rotas', async () => {
 
 test('blogueiro não mexe no espaço de outro blog (IDOR)', async () => {
   const blog = await loginAs('blogueiro');
-  const other = one("SELECT s.id FROM slots s JOIN blogs b ON b.id = s.blog_id JOIN users u ON u.id = b.user_id WHERE u.email <> 'blogueiro.qa@blogsim.com.br' LIMIT 1");
+  const other = await one("SELECT s.id FROM slots s JOIN blogs b ON b.id = s.blog_id JOIN users u ON u.id = b.user_id WHERE u.email <> 'blogueiro.qa@blogsim.com.br' LIMIT 1");
   const r = await blog('PATCH', `/api/blogs/me/slots/${other.id}`, { price: 999 });
   assert.equal(r.status, 404);
 });
 
 test('campos extras são descartados (mass assignment)', async () => {
   const blog = await loginAs('blogueiro');
-  const mine = one("SELECT s.id, s.blog_id FROM slots s JOIN blogs b ON b.id = s.blog_id JOIN users u ON u.id = b.user_id WHERE u.email = 'blogueiro.qa@blogsim.com.br' LIMIT 1");
+  const mine = await one("SELECT s.id, s.blog_id FROM slots s JOIN blogs b ON b.id = s.blog_id JOIN users u ON u.id = b.user_id WHERE u.email = 'blogueiro.qa@blogsim.com.br' LIMIT 1");
   assert.equal((await blog('PATCH', `/api/blogs/me/slots/${mine.id}`, { price: 120, blog_id: 'outro', blogId: 'outro' })).status, 200);
-  assert.equal(one('SELECT blog_id FROM slots WHERE id = ?', mine.id).blog_id, mine.blog_id);
+  assert.equal((await one('SELECT blog_id FROM slots WHERE id = ?', mine.id)).blog_id, mine.blog_id);
   const s = client();
   const r = await s('POST', '/api/auth/signup', { role: 'anunciante', status: 'aprovado', emailVerified: true, name: 'Ana Teste', email: 'ana@teste.com', password: 'SenhaBoa123',
     company: { tradeName: 'Loja da Ana', legalName: 'Ana Teste ME', cnpj: '11222333000181', phone: '(47) 99999-0000', site: '', city: 'Joinville', uf: 'SC' } });
   assert.equal(r.status, 201);
-  const u = one("SELECT status, role, email_verified_at FROM users WHERE email = 'ana@teste.com'");
+  const u = await one("SELECT status, role, email_verified_at FROM users WHERE email = 'ana@teste.com'");
   assert.deepEqual([u.status, u.role, u.email_verified_at], ['pendente', 'anunciante', null]);
   assert.equal((await s('POST', '/api/auth/signup', { role: 'admin', name: 'Hacker', email: 'h@teste.com', password: 'SenhaBoa123' })).status, 400, 'não dá para se cadastrar como admin');
 });
@@ -120,16 +127,16 @@ test('fluxo completo: cadastro, confirmação, aprovação, campanha, saque', as
   assert.equal(s.status, 201);
   assert.equal((await b('POST', '/api/auth/login', { email, password: pw })).body.error.code, 'EMAIL_NOT_VERIFIED');
 
-  const link = lastMail(email, 'confirmar_email').html.match(/verify-email\?token=([\w-]+)/)[1];
+  const link = (await lastMail(email, 'confirmar_email')).html.match(/verify-email\?token=([\w-]+)/)[1];
   const v = await b('GET', `/api/auth/verify-email?token=${link}`);
   assert.equal(v.status, 302); assert.match(v.headers.location, /email-confirmado/);
   assert.match((await b('GET', `/api/auth/verify-email?token=${link}`)).headers.location, /email-invalido/, 'link vale uma vez só');
-  assert.ok(lastMail(email, 'boas_vindas'));
-  assert.ok(lastMail('admin.qa@blogsim.com.br', 'admin_novo_cadastro'));
+  assert.ok(await lastMail(email, 'boas_vindas'));
+  assert.ok(await lastMail('admin.qa@blogsim.com.br', 'admin_novo_cadastro'));
   assert.equal((await b('POST', '/api/auth/login', { email, password: pw })).body.error.code, 'PENDING');
 
   const admin = await loginAs('admin');
-  const user = one('SELECT id FROM users WHERE email = ?', email);
+  const user = await one('SELECT id FROM users WHERE email = ?', email);
   assert.equal((await admin('POST', `/api/admin/signups/${user.id}/approve`, {})).status, 200);
   assert.equal((await b('POST', '/api/auth/login', { email, password: pw })).status, 200);
 
@@ -147,7 +154,7 @@ test('fluxo completo: cadastro, confirmação, aprovação, campanha, saque', as
   const camp = await adv('POST', '/api/campaigns', { name: 'Teste de fluxo', objective: 'visitas', slotIds: [slot.id], weeks: 2, ad: { title: 'Ração premium', text: '', link: 'https://exemplo.com.br' } });
   assert.equal(camp.status, 201);
   assert.equal((await adv('GET', '/api/state')).body.balance, before + 300);
-  const c = one("SELECT id FROM campaigns WHERE name = 'Teste de fluxo'");
+  const c = await one("SELECT id FROM campaigns WHERE name = 'Teste de fluxo'");
   assert.equal((await adv('POST', `/api/admin/campaigns/${c.id}/approve`, {})).status, 403);
   assert.equal((await admin('POST', `/api/admin/campaigns/${c.id}/approve`, {})).status, 200);
 
@@ -155,7 +162,7 @@ test('fluxo completo: cadastro, confirmação, aprovação, campanha, saque', as
   assert.equal(st.balance, 160, '200 de aluguel menos 20% de comissão');
   assert.equal((await b('POST', '/api/payouts', {})).status, 201);
   assert.equal((await b('GET', '/api/state')).body.balance, 0);
-  assert.ok(lastMail(email, 'saque_solicitado'));
+  assert.ok(await lastMail(email, 'saque_solicitado'));
 });
 
 test('senha nova: link vale uma vez e derruba as sessões', async () => {
@@ -163,11 +170,45 @@ test('senha nova: link vale uma vez e derruba as sessões', async () => {
   const anon = client();
   assert.equal((await anon('POST', '/api/auth/forgot-password', { email: 'ninguem@blogsim.com.br' })).status, 200, 'não revela se o e-mail existe');
   await anon('POST', '/api/auth/forgot-password', { email: 'blogueiro.qa@blogsim.com.br' });
-  const token = lastMail('blogueiro.qa@blogsim.com.br', 'recuperar_senha').html.match(/nova-senha=([\w-]+)/)[1];
+  const token = (await lastMail('blogueiro.qa@blogsim.com.br', 'recuperar_senha')).html.match(/nova-senha=([\w-]+)/)[1];
   const nova = 'OutraSenha456';
   assert.equal((await anon('POST', '/api/auth/reset-password', { token, password: nova })).status, 200);
   assert.equal((await anon('POST', '/api/auth/reset-password', { token, password: nova })).status, 400);
   assert.equal((await c('GET', '/api/state')).status, 401, 'sessão antiga caiu');
   PW.blogueiro = nova;
   await loginAs('blogueiro');
+});
+test('script do blog: entrega anúncio e mede visualização e clique', async () => {
+  const blog = await one("SELECT script_token FROM blogs WHERE name = 'Treino em Casa'");
+  const camp = await one("SELECT id, views, clicks FROM campaigns WHERE name = 'Black Friday – Tênis'");
+  const ua = { 'user-agent': 'Mozilla/5.0 (Windows NT 10.0) Teste' };
+
+  const js = await app.inject({ method: 'GET', url: '/slots.js' });
+  assert.equal(js.statusCode, 200);
+  assert.equal(js.headers['cross-origin-resource-policy'], 'cross-origin');
+  assert.match(js.body, /http:\/\/localhost:4100/);
+
+  const res = await app.inject({ method: 'GET', url: `/api/ads/${blog.script_token}`, headers: { origin: 'https://treinoemcasa.com.br' } });
+  assert.equal(res.headers['access-control-allow-origin'], '*');
+  const ad = res.json().ads.find(a => a.placement === 'lateral');
+  assert.ok(ad, 'anúncio da lateral no ar');
+  assert.equal((await app.inject({ method: 'GET', url: '/api/ads/BL-NAOEXISTE' })).json().ads.length, 0);
+
+  const view = new URL(ad.view);
+  for (let i = 0; i < 3; i++) assert.equal((await app.inject({ method: 'GET', url: view.pathname + view.search, headers: ua })).statusCode, 204);
+  await app.inject({ method: 'GET', url: view.pathname + view.search, headers: { 'user-agent': 'Googlebot/2.1' } });
+  await app.inject({ method: 'GET', url: view.pathname + view.search.slice(0, -3) + 'abc', headers: ua });
+  assert.equal((await one('SELECT views FROM campaigns WHERE id = ?', camp.id)).views, camp.views + 1, 'mesma pessoa conta uma vez; robô e link adulterado não contam');
+
+  const click = await app.inject({ method: 'GET', url: new URL(ad.click).pathname, headers: ua });
+  assert.equal(click.statusCode, 302);
+  assert.equal(click.headers.location, 'https://passocerto.com.br/');
+  const today = await one('SELECT SUM(views) AS v, SUM(clicks) AS c FROM ad_stats WHERE campaign_id = ?', camp.id);
+  assert.deepEqual([today.v, today.c], [1, 1]);
+
+  const admin = await loginAs('admin');
+  const r = await admin('POST', '/api/dev/reports/daily', {});
+  assert.equal(r.status, 200);
+  const mail = await lastMail('anunciante.qa@blogsim.com.br', 'relatorio_diario');
+  assert.match(mail.text, /Cliques hoje: 1/);
 });

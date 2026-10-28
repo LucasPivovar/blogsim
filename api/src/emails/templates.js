@@ -226,19 +226,22 @@ export const TEMPLATES = {
     label: 'Relatório do dia', to: 'Anunciante e blogueiro com campanha no ar', when: 'Todo dia, pelo job npm run report:daily',
     subject: d => `Seu dia no BlogSim · ${d.date}`,
     body: d => ({
-      preheader: d.role === 'blogueiro' ? `Você tem ${BRL(d.total)} a receber das campanhas no ar.` : `Suas campanhas no ar somam ${NUM(d.clicks)} cliques.`,
+      preheader: d.role === 'blogueiro'
+        ? `Hoje: ${NUM(d.views)} visualizações e ${NUM(d.clicks)} cliques nos anúncios do ${d.blog}.`
+        : `Hoje: ${NUM(d.views)} visualizações e ${NUM(d.clicks)} cliques nas suas campanhas.`,
       title: `Relatório de ${d.date}`,
       blocks: d.role === 'blogueiro'
-        ? [p(`Olá, ${first(d.name)}. Este é o resumo dos anúncios no <b>${esc(d.blog)}</b>.`),
-          highlight('A receber das campanhas no ar', BRL(d.total)),
-          table(['Anunciante', 'Espaço', 'No ar até'], d.rows.map(r => [r.advertiser, PLACE[r.placement] || r.placement, r.until])),
+        ? [p(`Olá, ${first(d.name)}. Estes são os números de hoje dos anúncios no <b>${esc(d.blog)}</b>, medidos pelo script do BlogSim.`),
+          info([['Visualizações hoje', NUM(d.views)], ['Cliques hoje', NUM(d.clicks)], ['A receber das campanhas no ar', BRL(d.total)]]),
+          table(['Anunciante', 'Espaço', 'Vis. hoje', 'Cliques hoje', 'No ar até'], d.rows.map(r => [r.advertiser, PLACE[r.placement] || r.placement, NUM(r.views), NUM(r.clicks), r.until])),
           button('Ver Receita', d.link)]
-        : [p(`Olá, ${first(d.name)}. Este é o resumo das suas campanhas no ar.`),
-          highlight('Cliques até agora', NUM(d.clicks)),
-          table(['Campanha', 'Visualizações', 'Cliques', 'Resultados'], d.rows.map(r => [r.campaign, NUM(r.views), NUM(r.clicks), NUM(r.results)])),
+        : [p(`Olá, ${first(d.name)}. Estes são os números de hoje das suas campanhas no ar, medidos nos blogs.`),
+          info([['Visualizações hoje', NUM(d.views)], ['Cliques hoje', NUM(d.clicks)]]),
+          table(['Campanha', 'Vis. hoje', 'Cliques hoje', 'Vis. no total', 'Cliques no total'], d.rows.map(r => [r.campaign, NUM(r.dayViews), NUM(r.dayClicks), NUM(r.views), NUM(r.clicks)])),
           button('Ver painel', d.link)]
     }),
-    sample: { role: 'anunciante', name: 'Carla Mendes', date: '27/10/2026', clicks: 1474, rows: [{ campaign: 'Black Friday – Tênis', views: 41200, clicks: 1380, results: 46 }, { campaign: 'Atendimento pelo WhatsApp', views: 3120, clicks: 94, results: 21 }], link: 'https://blogsim.com.br/#entrar' }
+    sample: { role: 'anunciante', name: 'Carla Mendes', date: '27/10/2026', views: 3240, clicks: 118, link: 'https://blogsim.com.br/#entrar',
+      rows: [{ campaign: 'Black Friday – Tênis', dayViews: 2910, dayClicks: 104, views: 41200, clicks: 1380 }, { campaign: 'Atendimento pelo WhatsApp', dayViews: 330, dayClicks: 14, views: 3120, clicks: 94 }] }
   }
 };
 

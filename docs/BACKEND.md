@@ -1,6 +1,6 @@
 # Back-end do BlogSim
 
-**Situação: construído e rodando só no ambiente local** (pasta [`api/`](../api/README.md), Node + SQLite). O site em `blogsim.com.br` continua em modo demonstração. Este documento é o plano; como rodar está em [`api/README.md`](../api/README.md). Antes de ir para produção faltam: PostgreSQL, provedor de pagamento (Pix e cartão), medição de visualizações e cliques pelo script e o proxy `/api/` no nginx.
+**Situação: construído e rodando só no ambiente local** (pasta [`api/`](../api/README.md), Node + PostgreSQL, com medição de visualizações e cliques pelo script do blog). O site em `blogsim.com.br` continua em modo demonstração. Este documento é o plano; como rodar e o passo a passo para subir estão em [`api/README.md`](../api/README.md). Ainda falta o provedor de pagamento (Pix e cartão).
 
 ## O que o front já faz e o que o back-end precisa fazer
 

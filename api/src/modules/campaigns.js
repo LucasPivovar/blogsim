@@ -2,7 +2,7 @@
 import { z } from 'zod';
 import { config } from '../config.js';
 import { one, all, run, id, now, tx, audit, getSettings } from '../db/index.js';
-import { parse, badRequest, notFound, conflict, forbidden } from '../lib/errors.js';
+import { parse, badRequest, notFound, conflict } from '../lib/errors.js';
 import * as f from '../lib/fields.js';
 import { requireRole, requireUser } from '../lib/security.js';
 import { queueMail } from '../lib/mailer.js';
@@ -11,13 +11,15 @@ import { balanceCents } from './billing.js';
 
 const link = () => `${config.APP_URL}/#entrar`;
 
-export function campaignView(c) {
-  const blogs = all('SELECT DISTINCT b.name FROM campaign_slots cs JOIN slots s ON s.id = cs.slot_id JOIN blogs b ON b.id = s.blog_id WHERE cs.campaign_id = ? ORDER BY b.name', c.id).map(r => r.name);
-  const company = one('SELECT trade_name FROM companies WHERE user_id = ?', c.advertiser_id);
-  return { id: c.id, name: c.name, advertiser: company ? company.trade_name : '', objective: c.objective, status: c.status === 'recusada' ? 'recusada' : c.status,
+export async function campaignView(c) {
+  const blogs = (await all('SELECT DISTINCT b.name FROM campaign_slots cs JOIN slots s ON s.id = cs.slot_id JOIN blogs b ON b.id = s.blog_id WHERE cs.campaign_id = ? ORDER BY b.name', c.id)).map(r => r.name);
+  const company = await one('SELECT trade_name FROM companies WHERE user_id = ?', c.advertiser_id);
+  return { id: c.id, name: c.name, advertiser: company ? company.trade_name : '', objective: c.objective, status: c.status,
     invested: reais(c.total_cents), clicks: c.clicks, views: c.views, results: c.results, blogs: blogs.length, blogNames: blogs,
     weeks: c.weeks, startsAt: brDate(c.starts_at), endsAt: brDate(c.ends_at), reason: c.review_note || undefined };
 }
+export const campaignViews = rows => Promise.all(rows.map(campaignView));
+const byId = async campaignId => campaignView(await one('SELECT * FROM campaigns WHERE id = ?', campaignId));
 
 const createSchema = z.object({
   name: f.text(2, 80, 'Dê um nome à campanha.'),
@@ -27,90 +29,93 @@ const createSchema = z.object({
   ad: z.object({ title: f.text(2, 40, 'Escreva um título para o anúncio.'), text: z.string().trim().max(90).default(''), link: f.text(4, 300, 'Diga para onde o leitor vai ao clicar no anúncio.') })
 });
 
-export function endCampaign(c, actorId, log) {
-  run("UPDATE campaigns SET status = 'encerrada', ends_at = COALESCE(ends_at, ?) WHERE id = ?", now(), c.id);
-  audit(actorId, 'campanha_encerrada', c.id);
-  const adv = one('SELECT * FROM users WHERE id = ?', c.advertiser_id);
-  const fresh = one('SELECT * FROM campaigns WHERE id = ?', c.id);
-  queueMail(adv.email, 'campanha_encerrada', { campaign: c.name, invested: reais(fresh.total_cents), views: fresh.views, clicks: fresh.clicks, results: fresh.results, link: link() }, log);
+export async function endCampaign(c, actorId, log) {
+  const ended = await one("UPDATE campaigns SET status = 'encerrada', ends_at = COALESCE(ends_at, ?) WHERE id = ? AND status IN ('ativa', 'pausada') RETURNING *", now(), c.id);
+  if (!ended) return;
+  await audit(actorId, 'campanha_encerrada', c.id);
+  const adv = await one('SELECT * FROM users WHERE id = ?', c.advertiser_id);
+  queueMail(adv.email, 'campanha_encerrada', { campaign: c.name, invested: reais(ended.total_cents), views: ended.views, clicks: ended.clicks, results: ended.results, link: link() }, log);
 }
 
 export default async function campaigns(app) {
   app.get('/api/campaigns', async req => {
     const user = requireRole(req, 'anunciante', 'admin');
-    const rows = user.role === 'admin' ? all('SELECT * FROM campaigns ORDER BY created_at DESC') : all('SELECT * FROM campaigns WHERE advertiser_id = ? ORDER BY created_at DESC', user.id);
-    return { campaigns: rows.map(campaignView) };
+    const rows = user.role === 'admin' ? await all('SELECT * FROM campaigns ORDER BY created_at DESC') : await all('SELECT * FROM campaigns WHERE advertiser_id = ? ORDER BY created_at DESC', user.id);
+    return { campaigns: await campaignViews(rows) };
   });
 
   app.post('/api/campaigns', { config: { rateLimit: { max: 20, timeWindow: '10 minutes' } } }, async (req, reply) => {
     const user = requireRole(req, 'anunciante');
     const d = parse(createSchema, req.body);
     const ids = [...new Set(d.slotIds)];
-    const slots = all(`SELECT s.* FROM slots s JOIN blogs b ON b.id = s.blog_id WHERE b.status = 'ativo' AND s.active = 1 AND s.id IN (${ids.map(() => '?').join(',')})`, ...ids);
+    const slots = await all(`SELECT s.* FROM slots s JOIN blogs b ON b.id = s.blog_id WHERE b.status = 'ativo' AND s.active AND s.id IN (${ids.map(() => '?').join(',')})`, ...ids);
     if (slots.length !== ids.length) throw badRequest('Algum espaço escolhido não está mais disponível. Escolha de novo.');
     const total = slots.reduce((t, s) => t + s.price_cents, 0) * d.weeks;
-    const campaignId = tx(() => {
-      // Saldo conferido dentro da transação: duas abas ao mesmo tempo não gastam o mesmo dinheiro.
-      const balance = balanceCents(user.id);
+    const campaignId = await tx(async () => {
+      // A conta do anunciante fica travada até o fim: duas abas ao mesmo tempo não gastam o mesmo dinheiro.
+      await one('SELECT id FROM users WHERE id = ? FOR UPDATE', user.id);
+      const balance = await balanceCents(user.id);
       if (total > balance) throw badRequest(`Seu saldo é de R$ ${(balance / 100).toFixed(2).replace('.', ',')}. Adicione mais saldo em Faturamento para publicar.`, 'INSUFFICIENT_BALANCE');
       const cid = id();
-      run(`INSERT INTO campaigns (id, advertiser_id, name, objective, status, weeks, total_cents, ad_title, ad_text, ad_link, created_at)
+      await run(`INSERT INTO campaigns (id, advertiser_id, name, objective, status, weeks, total_cents, ad_title, ad_text, ad_link, created_at)
            VALUES (?, ?, ?, ?, 'revisao', ?, ?, ?, ?, ?, ?)`, cid, user.id, d.name, d.objective, d.weeks, total, d.ad.title, d.ad.text, d.ad.link, now());
-      for (const s of slots) run('INSERT INTO campaign_slots (campaign_id, slot_id, price_cents) VALUES (?, ?, ?)', cid, s.id, s.price_cents);
-      run("INSERT INTO wallet_tx (id, user_id, kind, amount_cents, status, description, campaign_id, created_at) VALUES (?, ?, 'campanha', ?, 'pago', ?, ?, ?)",
+      for (const s of slots) await run('INSERT INTO campaign_slots (campaign_id, slot_id, price_cents) VALUES (?, ?, ?)', cid, s.id, s.price_cents);
+      await run("INSERT INTO wallet_tx (id, user_id, kind, amount_cents, status, description, campaign_id, created_at) VALUES (?, ?, 'campanha', ?, 'pago', ?, ?, ?)",
         id(), user.id, -total, `${d.name} · ${slots.length} ${slots.length > 1 ? 'espaços' : 'espaço'}`, cid, now());
       return cid;
     });
     reply.code(201);
-    return { campaign: campaignView(one('SELECT * FROM campaigns WHERE id = ?', campaignId)) };
+    return { campaign: await byId(campaignId) };
   });
 
   // Encerrar: o dono da campanha ou o admin.
   app.post('/api/campaigns/:id/end', async req => {
     const user = requireUser(req);
-    const c = one('SELECT * FROM campaigns WHERE id = ?', req.params.id);
+    const c = await one('SELECT * FROM campaigns WHERE id = ?', req.params.id);
     if (!c || (user.role !== 'admin' && c.advertiser_id !== user.id)) throw notFound('Campanha não encontrada.');
     if (!['ativa', 'pausada'].includes(c.status)) throw conflict('Só campanhas no ar podem ser encerradas.');
-    endCampaign(c, user.id, req.log);
-    return { campaign: campaignView(one('SELECT * FROM campaigns WHERE id = ?', c.id)) };
+    await endCampaign(c, user.id, req.log);
+    return { campaign: await byId(c.id) };
   });
 
   // Aprovar: entra no ar, o blogueiro recebe a parte dele e todo mundo é avisado.
   app.post('/api/admin/campaigns/:id/approve', async req => {
     const adminUser = requireRole(req, 'admin');
-    const c = one('SELECT * FROM campaigns WHERE id = ?', req.params.id);
+    const c = await one('SELECT * FROM campaigns WHERE id = ?', req.params.id);
     if (!c) throw notFound('Campanha não encontrada.');
-    if (c.status !== 'revisao') throw conflict('Esta campanha já foi revisada.');
     const start = now(), end = addDays(start, c.weeks * 7);
-    const pct = getSettings().commissionPct;
-    const lines = all(`SELECT cs.price_cents, s.placement, b.id AS blog_id, b.name AS blog, u.email, u.name AS owner FROM campaign_slots cs
+    const pct = (await getSettings()).commissionPct;
+    const lines = await all(`SELECT cs.price_cents, s.placement, b.id AS blog_id, b.name AS blog, u.email, u.name AS owner FROM campaign_slots cs
                        JOIN slots s ON s.id = cs.slot_id JOIN blogs b ON b.id = s.blog_id LEFT JOIN users u ON u.id = b.user_id WHERE cs.campaign_id = ?`, c.id);
-    tx(() => {
-      run("UPDATE campaigns SET status = 'ativa', starts_at = ?, ends_at = ?, reviewed_by = ? WHERE id = ?", start, end, adminUser.id, c.id);
-      for (const l of lines) run('INSERT INTO earnings (id, blog_id, campaign_id, amount_cents, created_at) VALUES (?, ?, ?, ?, ?)', id(), l.blog_id, c.id, Math.round(l.price_cents * c.weeks * (100 - pct) / 100), now());
-      audit(adminUser.id, 'campanha_aprovada', c.id);
+    const share = l => Math.round(l.price_cents * c.weeks * (100 - pct) / 100);
+    await tx(async () => {
+      // Só sai de "revisão" uma vez: dois cliques não geram ganho em dobro.
+      const moved = await run("UPDATE campaigns SET status = 'ativa', starts_at = ?, ends_at = ?, reviewed_by = ? WHERE id = ? AND status = 'revisao'", start, end, adminUser.id, c.id);
+      if (!moved.changes) throw conflict('Esta campanha já foi revisada.');
+      for (const l of lines) await run('INSERT INTO earnings (id, blog_id, campaign_id, amount_cents, created_at) VALUES (?, ?, ?, ?, ?)', id(), l.blog_id, c.id, share(l), now());
+      await audit(adminUser.id, 'campanha_aprovada', c.id);
     });
-    const adv = one('SELECT u.email, co.trade_name FROM users u JOIN companies co ON co.user_id = u.id WHERE u.id = ?', c.advertiser_id);
+    const adv = await one('SELECT u.email, co.trade_name FROM users u JOIN companies co ON co.user_id = u.id WHERE u.id = ?', c.advertiser_id);
     queueMail(adv.email, 'campanha_iniciada', { campaign: c.name, start: brDate(start), end: brDate(end), total: reais(c.total_cents), blogs: lines.map(l => ({ blog: l.blog, placement: l.placement })), link: link() }, req.log);
-    for (const l of lines) if (l.email) queueMail(l.email, 'anuncio_publicado', { blog: l.blog, advertiser: adv.trade_name, placement: l.placement, until: brDate(end), earnings: reais(Math.round(l.price_cents * c.weeks * (100 - pct) / 100)), link: link() }, req.log);
-    return { campaign: campaignView(one('SELECT * FROM campaigns WHERE id = ?', c.id)) };
+    for (const l of lines) if (l.email) queueMail(l.email, 'anuncio_publicado', { blog: l.blog, advertiser: adv.trade_name, placement: l.placement, until: brDate(end), earnings: reais(share(l)), link: link() }, req.log);
+    return { campaign: await byId(c.id) };
   });
 
   // Recusar: o valor volta inteiro para o saldo.
   app.post('/api/admin/campaigns/:id/deny', async req => {
     const adminUser = requireRole(req, 'admin');
     const { reason } = parse(z.object({ reason: f.reason }), req.body);
-    const c = one('SELECT * FROM campaigns WHERE id = ?', req.params.id);
+    const c = await one('SELECT * FROM campaigns WHERE id = ?', req.params.id);
     if (!c) throw notFound('Campanha não encontrada.');
-    if (c.status !== 'revisao') throw conflict('Esta campanha já foi revisada.');
-    tx(() => {
-      run("UPDATE campaigns SET status = 'recusada', review_note = ?, reviewed_by = ? WHERE id = ?", reason, adminUser.id, c.id);
-      run("INSERT INTO wallet_tx (id, user_id, kind, amount_cents, status, description, campaign_id, created_at) VALUES (?, ?, 'estorno', ?, 'pago', ?, ?, ?)",
+    await tx(async () => {
+      const moved = await run("UPDATE campaigns SET status = 'recusada', review_note = ?, reviewed_by = ? WHERE id = ? AND status = 'revisao'", reason, adminUser.id, c.id);
+      if (!moved.changes) throw conflict('Esta campanha já foi revisada.');
+      await run("INSERT INTO wallet_tx (id, user_id, kind, amount_cents, status, description, campaign_id, created_at) VALUES (?, ?, 'estorno', ?, 'pago', ?, ?, ?)",
         id(), c.advertiser_id, c.total_cents, `Estorno · ${c.name}`, c.id, now());
-      audit(adminUser.id, 'campanha_recusada', c.id, { reason });
+      await audit(adminUser.id, 'campanha_recusada', c.id, { reason });
     });
-    const adv = one('SELECT email FROM users WHERE id = ?', c.advertiser_id);
+    const adv = await one('SELECT email FROM users WHERE id = ?', c.advertiser_id);
     queueMail(adv.email, 'campanha_recusada', { campaign: c.name, reason, refund: reais(c.total_cents), link: link() }, req.log);
-    return { campaign: campaignView(one('SELECT * FROM campaigns WHERE id = ?', c.id)) };
+    return { campaign: await byId(c.id) };
   });
 }
