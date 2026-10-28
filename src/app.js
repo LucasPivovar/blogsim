@@ -70,7 +70,10 @@
     return typeof l === 'string'
       ? h('img', { className: 'blog-logo' + (size === 'lg' ? ' is-lg' : ''), src: l, alt: 'Logo do ' + blog.name })
       : h('span', { className: 'blog-logo' + (size === 'lg' ? ' is-lg' : ''), style: { background: l.color }, 'aria-hidden': true }, l.text);
-  }  const SLOTS = BLOGS.flatMap(b => b.slots.map(([p, price]) => ({ id: b.id + '-' + p, blogId: b.id, blog: b.name, niche: b.niche, audience: b.audience, city: b.city, uf: b.uf, color: b.color, name: b.name, placement: p, price })));
+  }
+  // Espaços à venda. Com a API, o App troca esta lista pela do servidor a cada atualização.
+  let SLOTS = BLOGS.flatMap(b => b.slots.map(([p, price]) => ({ id: b.id + '-' + p, blogId: b.id, blog: b.name, niche: b.niche, audience: b.audience, city: b.city, uf: b.uf, color: b.color, name: b.name, placement: p, price })));
+  const DEMO_SLOTS = SLOTS;
   const NICHES = [...new Set(BLOGS.map(b => b.niche))];
 
   const CAMPAIGN_BLOGS = {
@@ -363,10 +366,13 @@
 
     function next() { if (!valid) { setTried(true); return; } setTried(false); setStep(step + 1); }
     function back() { setTried(false); setErr(''); setStep(step - 1); }
-    function publish() {
+    async function publish() {
       if (total > balance) { setErr(`Seu saldo é ${money(balance)}. Adicione ${money(total - balance)} em Faturamento para publicar.`); return; }
-      onPublish({ name: name.trim(), objective: obj, total, blogs: new Set(sel.map(s => s.blogId)).size, blogNames: [...new Set(sel.map(s => s.blog))], slots: sel.length });
-      setCart([]);
+      try {
+        await onPublish({ name: name.trim(), objective: obj, total, blogs: new Set(sel.map(s => s.blogId)).size, blogNames: [...new Set(sel.map(s => s.blog))], slots: sel.length,
+          slotIds: sel.map(s => s.id), weeks: w, ad: { title: adTitle.trim(), text: adText.trim(), link: track.trim() } });
+        setCart([]);
+      } catch (e) { setErr(e.message); }
     }
     function onFile(e) {
       const f = e.target.files && e.target.files[0];
@@ -448,7 +454,7 @@
           h('div', null, h(B.Button, { variant: 'secondary', size: 'sm', onClick: () => notify('Ainda não encontramos o pixel no checkout. A verificação pode levar até 10 minutos.') }, 'Verificar instalação')))));
   }
 
-  function AdvBilling({ balance, txns, onAdd, campaigns, billing, advertiser }) {
+  function AdvBilling({ balance, txns, onAdd, onConfirm, campaigns, billing, advertiser }) {
     const [amt, setAmt] = useState('250');
     const [method, setMethod] = useState('pix');
     const [parcelas, setParcelas] = useState('1');
@@ -475,8 +481,12 @@
           : h('p', { className: 'app-note' }, `Parcelamento no cartão a partir de ${money(billing.installFrom)}.`)) : null,
         h('div', null, h(B.Button, { variant: 'accent', disabled: tooLow, onClick: () => onAdd(value, method, n) }, `Adicionar ${money(value)}` + (n > 1 ? ` em ${n}x` : '')))),
       h(Section, { title: 'Movimentações' },
-        h(Table, { cols: [{ label: 'Data' }, { label: 'Descrição' }, { label: 'Valor', num: true }], empty: 'Nenhuma movimentação.',
-          rows: txns.map(t => [t.date, t.desc, (t.value > 0 ? '+' : '−') + money(Math.abs(t.value))]) })));
+        h(Table, { cols: [{ label: 'Data' }, { label: 'Descrição' }, { label: 'Situação' }, { label: 'Valor', num: true }], empty: 'Nenhuma movimentação.',
+          rows: txns.map(t => [t.date, t.desc,
+            t.status === 'pendente' ? h('div', { className: 'app-actions' }, h(B.Badge, { tone: 'warning', dot: true }, 'Aguardando pagamento'),
+              onConfirm ? h(B.Button, { size: 'sm', variant: 'secondary', onClick: () => onConfirm(t.id) }, 'Simular pagamento aprovado') : null)
+              : h(B.Badge, { tone: 'success', dot: true }, 'Concluído'),
+            (t.value > 0 ? '+' : '−') + money(Math.abs(t.value))]) })));
   }
   // ---------- Blogueiro ----------
   // Lê a logo enviada pelo blogueiro como data URL.
@@ -550,7 +560,7 @@
             desc ? h('p', null, desc) : null,
             h('span', null, (blog.audience ? count(blog.audience) : '—') + ' leitores por mês')))));
   }
-  function SlotEditor({ slot, onChange, notify }) {
+  function SlotEditor({ slot, onChange }) {
     const [price, setPrice] = useState(String(slot.price).replace('.', ','));
     const value = Number(price.replace(/\./g, '').replace(',', '.'));
     const bad = !(value >= 50);
@@ -560,8 +570,8 @@
       slot.rent ? h('p', null, 'Anunciante: ' + slot.rent.adv + '.') : h('p', null, slot.active ? 'Aparece para anunciantes em Explorar blogs.' : 'Não aparece para anunciantes enquanto estiver pausado.'),
       h(B.TextField, { id: 'preco-' + slot.id, label: 'Preço', prefix: 'R$', suffix: '/semana', inputMode: 'decimal', value: price, onChange: e => setPrice(e.target.value), error: bad ? 'O preço mínimo é R$ 50,00 por semana.' : undefined, hint: 'Vale para os próximos aluguéis.' }),
       h('div', { className: 'app-actions' },
-        h(B.Button, { size: 'sm', disabled: bad || value === slot.price, onClick: () => { onChange({ ...slot, price: value }); notify('Preço atualizado'); } }, 'Salvar preço'),
-        h(B.Button, { size: 'sm', variant: 'secondary', disabled: !!slot.rent, onClick: () => { onChange({ ...slot, active: !slot.active }); notify(slot.active ? 'Espaço pausado' : 'Espaço ativado'); } }, slot.active ? 'Pausar espaço' : 'Ativar espaço')),
+        h(B.Button, { size: 'sm', disabled: bad || value === slot.price, onClick: () => onChange({ ...slot, price: value }, 'Preço atualizado') }, 'Salvar preço'),
+        h(B.Button, { size: 'sm', variant: 'secondary', disabled: !!slot.rent, onClick: () => onChange({ ...slot, active: !slot.active }, slot.active ? 'Espaço pausado' : 'Espaço ativado') }, slot.active ? 'Pausar espaço' : 'Ativar espaço')),
       slot.rent ? h('p', { className: 'app-note' }, 'Espaços alugados só podem ser pausados depois do fim do aluguel.') : null);
   }
 
@@ -582,25 +592,26 @@
       h(BlogPreview, { blog: blog.name, placement: cur.placement, ad }));
   }
 
-  function BlogEspacos({ mySlots, setMySlots, notify, blog }) {
+  function BlogEspacos({ mySlots, onSlotSave, onSlotAdd, blog }) {
     const missing = Object.keys(PLACE).filter(p => !mySlots.some(s => s.placement === p));
-    const update = s => setMySlots(list => list.map(x => x.id === s.id ? s : x));
-    function add(p) { setMySlots(list => [...list, { id: 'm' + Date.now(), placement: p, price: 200, active: true, rent: null }]); notify('Espaço ' + PLACE[p] + ' criado'); }
+    const update = onSlotSave;
+    const add = onSlotAdd;
     return h(Page, { title: 'Meus espaços', subtitle: 'Onde os anúncios aparecem no ' + blog.name + ' e quanto custam.' },
-      mySlots.length ? h('div', { className: 'app-cols' }, mySlots.map(s => h(SlotEditor, { key: s.id, slot: s, onChange: update, notify })))
+      mySlots.length ? h('div', { className: 'app-cols' }, mySlots.map(s => h(SlotEditor, { key: s.id, slot: s, onChange: update })))
         : h('p', { className: 'app-empty' }, 'Você ainda não tem espaços. Escolha abaixo onde os anúncios podem aparecer no seu blog.'),
       h(SpacesPreview, { mySlots, blog }),
       missing.length ? h(Card, { title: 'Adicionar espaço' },
         h('p', null, 'Cada espaço novo aparece para os anunciantes assim que você o cria.'),
         h('div', { className: 'app-actions' }, missing.map(p => h(B.Button, { key: p, variant: 'secondary', size: 'sm', onClick: () => add(p) }, 'Adicionar ' + PLACE[p])))) : null);
   }
-  function BlogReceita({ bloggerBalance, onWithdraw, payouts, pct, blog, fresh }) {
+  function BlogReceita({ bloggerBalance, onWithdraw, payouts, pct, blog, fresh, received }) {
     const mine = payouts.filter(p => p.blog === blog.name);
     return h(Page, { title: 'Receita', subtitle: 'O que seus espaços renderam e seus saques.' },
       h('div', { className: 'app-metrics' },
         h(B.MetricCard, { label: 'Saldo disponível', value: bloggerBalance, format: 'money', hint: 'pronto para saque' }),
-        h(B.MetricCard, { label: 'A liberar', value: fresh ? 0 : 544, format: 'money', hint: 'aluguéis ainda em andamento' }),
-        h(B.MetricCard, { label: 'Recebido em 2026', value: fresh ? 0 : 18920, format: 'money', delta: fresh ? undefined : 32, hint: fresh ? 'desde o cadastro' : 'vs. 2025' })),
+        received === undefined ? h(B.MetricCard, { label: 'A liberar', value: fresh ? 0 : 544, format: 'money', hint: 'aluguéis ainda em andamento' }) : null,
+        received === undefined ? h(B.MetricCard, { label: 'Recebido em 2026', value: fresh ? 0 : 18920, format: 'money', delta: fresh ? undefined : 32, hint: fresh ? 'desde o cadastro' : 'vs. 2025' })
+          : h(B.MetricCard, { label: 'Ganho total', value: received, format: 'money', hint: 'desde o cadastro, já sem a comissão' })),
       h(Card, { title: 'Sacar' },
         h('p', null, `Você recebe o valor dos aluguéis menos a comissão de ${pct}% do BlogSim. O saque cai na sua conta em até 2 dias úteis.`),
         h('div', null, h(B.Button, { variant: 'accent', disabled: bloggerBalance <= 0, onClick: onWithdraw }, bloggerBalance > 0 ? 'Solicitar saque de ' + money(bloggerBalance) : 'Sem saldo para sacar'))),
@@ -627,7 +638,7 @@
     function verify() {
       if (verified) { notify('Script encontrado. Seus espaços estão no ar.'); return; }
       setChecking(true);
-      setTimeout(() => { setChecking(false); onVerify(); }, 900);
+      setTimeout(async () => { try { await onVerify(); } catch (e) { notify(e.message); } finally { setChecking(false); } }, 900);
     }
     return h(Page, { title: 'Instalar script', subtitle: 'Instale este código no seu blog para os anúncios aparecerem nos espaços alugados.' },
       verified ? null : h('div', { className: 'app-gate' },
@@ -638,23 +649,23 @@
           h('li', null, 'Copie o código abaixo.'),
           h('li', null, 'Cole no cabeçalho do seu blog, antes do fechamento da tag head. No WordPress, use um plugin de cabeçalho.'),
           h('li', null, 'Clique em Verificar instalação.')),
-        h(Code, { label: 'Código', text: '<script async src="https://cdn.blogsim.com.br/slots.js" data-blog="' + blog.id.toUpperCase() + '"></' + 'script>', notify }),
+        h(Code, { label: 'Código', text: '<script async src="https://cdn.blogsim.com.br/slots.js" data-blog="' + (blog.scriptToken || String(blog.id).toUpperCase()) + '"></' + 'script>', notify }),
         h('div', null, h(B.Button, { variant: verified ? 'secondary' : 'primary', loading: checking, onClick: verify }, checking ? 'Verificando' : 'Verificar instalação'))));
   }
   // ---------- Admin master ----------
-  function ReviewList({ campaigns, setCampaigns, notify }) {
+  function ReviewList({ campaigns, onDecide }) {
     const queue = campaigns.filter(c => c.status === 'revisao');
-    const decide = (id, status, msg) => { setCampaigns(list => list.map(c => c.id === id ? { ...c, status } : c)); notify(msg); };
+    const decide = (id, status) => onDecide(id, status === 'ativa');
     if (!queue.length) return h('p', { className: 'app-empty' }, 'Nenhuma campanha aguardando revisão.');
     return h('div', { className: 'app-review' }, queue.map(c => h('div', { key: c.id, className: 'app-review-row' },
       h('div', { className: 'app-review-main' }, h('b', null, c.name), h('span', null, `${c.advertiser} · ${money(c.invested)}`), c.blogNames ? h('span', null, 'Blogs: ' + c.blogNames.join(', ')) : null),
       h('div', { className: 'app-actions' },
         h(B.Badge, { tone: OBJ_TONE[c.objective] }, OBJ_LABEL[c.objective]),
-        h(B.Button, { size: 'sm', onClick: () => decide(c.id, 'ativa', 'Campanha aprovada e no ar') }, 'Aprovar'),
-        h(B.Button, { size: 'sm', variant: 'secondary', onClick: () => decide(c.id, 'encerrada', 'Campanha recusada. O anunciante foi avisado.') }, 'Recusar')))));
+        h(B.Button, { size: 'sm', onClick: () => decide(c.id, 'ativa') }, 'Aprovar'),
+        h(B.Button, { size: 'sm', variant: 'secondary', onClick: () => decide(c.id, 'recusada') }, 'Recusar')))));
   }
 
-  function AdminVisao({ campaigns, setCampaigns, blogs, pct, notify, pendingSignups, go }) {
+  function AdminVisao({ campaigns, onDecide, blogs, pct, pendingSignups, go }) {
     const volume = sum(campaigns, 'invested');
     const advertisers = new Set(campaigns.map(c => c.advertiser)).size;
     const pending = blogs.filter(b => b.status === 'pendente').length;
@@ -668,7 +679,7 @@
         h(B.MetricCard, { label: 'Blogs ativos', value: blogs.length - pending, format: 'count', hint: pending ? pending + ' aguardando aprovação' : 'nenhum pendente' }),
         h(B.MetricCard, { label: 'Anunciantes', value: advertisers, format: 'count', hint: 'com pelo menos uma campanha' })),
       h(Card, { title: 'Volume em aluguéis por dia' }, h(BarChart, { data: DAILY.volume, isMoney: true, label: 'Volume em aluguéis por dia nos últimos 14 dias' })),
-      h(Section, { title: 'Campanhas aguardando revisão' }, h(ReviewList, { campaigns, setCampaigns, notify })));
+      h(Section, { title: 'Campanhas aguardando revisão' }, h(ReviewList, { campaigns, onDecide })));
   }
 
   function AdminBlogs({ blogs }) {
@@ -730,14 +741,14 @@
         rows: Object.entries(by).sort((a, b) => b[1].inv - a[1].inv).map(([name, a]) => [h('b', null, name), a.n, a.live, money(a.inv)]) }));
   }
 
-  function AdminCampanhas({ campaigns, setCampaigns, notify }) {
+  function AdminCampanhas({ campaigns, onDecide }) {
     return h(Page, { title: 'Campanhas', subtitle: campaigns.length + ' campanhas na plataforma' },
-      h(Section, { title: 'Aguardando revisão' }, h(ReviewList, { campaigns, setCampaigns, notify })),
+      h(Section, { title: 'Aguardando revisão' }, h(ReviewList, { campaigns, onDecide })),
       h(Section, { title: 'Todas' }, h(B.CampaignTable, { rows: campaigns.map(c => ({ ...c, name: c.name + ' · ' + c.advertiser })) })));
   }
 
-  function AdminSaques({ payouts, setPayouts, notify }) {
-    const pay = id => { setPayouts(list => list.map(p => p.id === id ? { ...p, status: 'pago' } : p)); notify('Saque marcado como pago'); };
+  function AdminSaques({ payouts, onPay }) {
+    const pay = onPay;
     const pending = payouts.filter(p => p.status === 'pendente');
     return h(Page, { title: 'Saques', subtitle: `Pedidos de saque dos blogueiros · ${pending.length} pendentes · ${money(sum(pending, 'value'))}` },
       h(Table, { cols: [{ label: 'Blog' }, { label: 'Solicitado em' }, { label: 'Valor', num: true }, { label: 'Status' }], empty: 'Nenhum saque solicitado.',
@@ -746,7 +757,7 @@
             : h('div', { className: 'app-actions' }, h(B.Badge, { tone: 'warning', dot: true }, 'Pendente'), h(B.Button, { size: 'sm', onClick: () => pay(p.id) }, 'Marcar como pago'))]) }));
   }
 
-  function AdminConfig({ pct, setPct, billing, setBilling, notify }) {
+  function AdminConfig({ pct, billing, onSave, devTools }) {
     const num = s => Number(String(s).replace(/\./g, '').replace(',', '.'));
     const [draft, setDraft] = useState(String(pct));
     const [min, setMin] = useState('50,00');
@@ -764,14 +775,15 @@
         h('div', { className: 'app-fields' },
           h(B.TextField, { id: 'cfg-comissao', label: 'Comissão do BlogSim', suffix: '%', inputMode: 'decimal', value: draft, onChange: e => setDraft(e.target.value), error: bad ? 'Use um valor entre 0 e 50%.' : undefined, hint: 'Descontada de cada aluguel antes do saque do blogueiro.' }),
           h(B.TextField, { id: 'cfg-minimo', label: 'Preço mínimo por espaço', prefix: 'R$', suffix: '/semana', inputMode: 'decimal', value: min, onChange: e => setMin(e.target.value) })),
-        h('div', null, h(B.Button, { disabled: bad, onClick: () => { setPct(n); notify('Configurações salvas'); } }, 'Salvar configurações'))),
+        h('div', null, h(B.Button, { disabled: bad, onClick: () => onSave({ pct: n }, 'Configurações salvas') }, 'Salvar configurações'))),
       h(Card, { title: 'Recarga de saldo do anunciante' },
         h('p', null, 'Valem para a tela Faturamento do anunciante. Pix e cartão de crédito aceitam qualquer valor a partir da recarga mínima; o parcelamento só aparece no cartão.'),
         h('div', { className: 'app-fields' },
           h(B.TextField, { id: 'cfg-recarga-min', label: 'Recarga mínima', prefix: 'R$', inputMode: 'decimal', value: rMin, onChange: e => setRMin(e.target.value), error: errMin || undefined }),
           h(B.TextField, { id: 'cfg-parcelar', label: 'Parcelar no cartão a partir de', prefix: 'R$', inputMode: 'decimal', value: rFrom, onChange: e => setRFrom(e.target.value), error: errFrom || undefined }),
           h(B.TextField, { id: 'cfg-parcelas', label: 'Máximo de parcelas', suffix: 'x', inputMode: 'numeric', value: rMax, onChange: e => setRMax(e.target.value), error: errMax || undefined })),
-        h('div', null, h(B.Button, { disabled: !!(errMin || errFrom || errMax), onClick: () => { setBilling({ min: a, installFrom: f, maxInstallments: m }); notify('Regras de recarga salvas'); } }, 'Salvar regras de recarga'))));
+        h('div', null, h(B.Button, { disabled: !!(errMin || errFrom || errMax), onClick: () => onSave({ billing: { min: a, installFrom: f, maxInstallments: m } }, 'Regras de recarga salvas') }, 'Salvar regras de recarga'))),
+      devTools || null);
   }  // ---------- Site e login ----------
   const ICON = d => h('svg', { width: 22, height: 22, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round', 'aria-hidden': true }, h('path', { d }));
   const ROLE_LABEL = { anunciante: 'Anunciante', blogueiro: 'Blogueiro', admin: 'Admin master' };
@@ -1137,28 +1149,33 @@
     }, [key]);
   }
 
-  function Login({ users, onLogin, onBack, onSignup }) {
+  function Login({ authenticate, requestReset, onLogin, onBack, onSignup, flash }) {
     const [email, setEmail] = useState(readSaved);
     const [pw, setPw] = useState('');
     const [remember, setRemember] = useState(() => !!readSaved());
-    const [err, setErr] = useState(null);
+    const [err, setErr] = useState(flash || null);
+    const [busy, setBusy] = useState(false);
     const [view, setView] = useState('login');
     const [resetEmail, setResetEmail] = useState('');
     const [resetErr, setResetErr] = useState('');
-    function submit(e) {
+    async function submit(e) {
       e.preventDefault();
-      const u = users.find(x => x.email === email.trim().toLowerCase());
-      if (!u || !u.hash || passHash(u.salt, pw) !== u.hash) { setErr({ tone: 'danger', text: 'E-mail ou senha incorretos. Confira os dados e tente de novo.' }); return; }
-      if (u.status === 'pendente') { setErr({ tone: 'warning', text: 'Seu cadastro ainda está em análise. A equipe do BlogSim responde em até 24 horas no seu e-mail.' }); return; }
-      if (u.status === 'negado') { setErr({ tone: 'danger', text: 'Seu cadastro não foi aprovado.' + (u.reason ? ' Motivo: ' + u.reason : '') }); return; }
-      // Guarda só o e-mail, e só neste navegador. A senha nunca é guardada.
-      try { if (remember) localStorage.setItem(REMEMBER_KEY, u.email); else localStorage.removeItem(REMEMBER_KEY); } catch (e2) {}
-      onLogin(u);
+      if (busy) return;
+      setBusy(true);
+      try {
+        const u = await authenticate(email.trim().toLowerCase(), pw, remember);
+        // Guarda só o e-mail, e só neste navegador. A senha nunca é guardada.
+        try { if (remember) localStorage.setItem(REMEMBER_KEY, u.email); else localStorage.removeItem(REMEMBER_KEY); } catch (e2) {}
+        onLogin(u);
+      } catch (x) {
+        setErr({ tone: x.tone || 'danger', text: x.message });
+      } finally { setBusy(false); }
     }
     function openForgot() { setResetEmail(email); setResetErr(''); setView('forgot'); }
-    function sendReset(e) {
+    async function sendReset(e) {
       e.preventDefault();
       if (!/^\S+@\S+\.\S+$/.test(resetEmail.trim())) { setResetErr('Informe um e-mail válido, como nome@empresa.com.br.'); return; }
+      try { await requestReset(resetEmail.trim().toLowerCase()); } catch (x) { setResetErr(x.message); return; }
       setView('sent');
     }
     const ref = React.useRef(null), bodyRef = React.useRef(null);
@@ -1178,7 +1195,7 @@
             'Lembrar de mim'),
           h('button', { type: 'button', className: 'lg-link', onClick: openForgot }, 'Esqueci a senha')),
         err ? h('p', { className: 'lg-msg is-' + err.tone, role: 'alert' }, err.text) : null,
-        h(B.Button, { type: 'submit', className: 'lg-submit' }, 'Entrar')),
+        h(B.Button, { type: 'submit', className: 'lg-submit', loading: busy }, busy ? 'Entrando' : 'Entrar')),
       h('p', { className: 'lg-alt' }, 'Ainda não tem conta? ', h('button', { type: 'button', className: 'lg-link', onClick: () => onSignup() }, 'Cadastre-se')));
     if (view === 'forgot') body = h(React.Fragment, null,
       h('h1', null, 'Recuperar senha'),
@@ -1211,7 +1228,9 @@
     { role: 'anunciante', title: 'Quero anunciar', text: 'Quero colocar a minha empresa em blogs do meu nicho e da minha região.' }
   ];
 
-  function Signup({ users, preset, onSignup, onLogin, onBack }) {
+  function Signup({ users, preset, onSignup, onLogin, onBack, confirmByEmail }) {
+    const [serverErr, setServerErr] = useState('');
+    const [busy, setBusy] = useState(false);
     const [role, setRole] = useState(preset || '');
     const [step, setStep] = useState(preset ? 'form' : 'role');
     const [f, setF] = useState({ name: '', email: '', pw: '', pw2: '', blog: '', site: '', niche: NICHES[0], audience: '', company: '', legal: '', cnpj: '', phone: '', uf: '', city: '' });
@@ -1239,14 +1258,16 @@
       })
     };
     const err = k => (tried && errs[k]) || undefined;
-    function submit(e) {
+    async function submit(e) {
       e.preventDefault(); setTried(true);
       if (Object.values(errs).some(Boolean)) {
         const first = document.querySelector('.lg [aria-invalid="true"]'); if (first) first.focus();
         return;
       }
-      onSignup({ ...f, email, role, logo });
-      setStep('sent');
+      setBusy(true); setServerErr('');
+      try { await onSignup({ ...f, email, role, logo }); setStep('sent'); }
+      catch (x) { setServerErr(x.message); }
+      finally { setBusy(false); }
     }
     const ref = React.useRef(null), bodyRef = React.useRef(null);
     useAuthArt(ref);
@@ -1297,10 +1318,13 @@
             field('site', 'su-site', 'Site da empresa (opcional)', { placeholder: 'suaempresa.com.br' }),
             h(SelectField, { id: 'su-uf', label: 'Estado', value: f.uf, onChange: set('uf'), error: err('uf'), options: ufOptions }),
             field('city', 'su-cidade', 'Cidade', {}))),
-        h(B.Button, { type: 'submit', className: 'lg-submit' }, 'Enviar cadastro')));
+        serverErr ? h('p', { className: 'lg-msg is-danger', role: 'alert' }, serverErr) : null,
+        h(B.Button, { type: 'submit', className: 'lg-submit', loading: busy }, busy ? 'Enviando' : 'Enviar cadastro')));
     if (step === 'sent') body = h(React.Fragment, null,
       h('h1', null, 'Cadastro enviado'),
-      h('p', { className: 'lg-text', role: 'status' }, 'Recebemos o cadastro ', isBlog ? 'do blog ' : 'da empresa ', h('b', null, isBlog ? f.blog.trim() : f.company.trim()), '. A equipe do BlogSim analisa em até 24 horas e responde no e-mail ', h('b', null, email), '.'),
+      confirmByEmail
+        ? h('p', { className: 'lg-text', role: 'status' }, 'Enviamos um link para ', h('b', null, email), '. Confirme o e-mail para mandar o cadastro ', isBlog ? 'do blog ' : 'da empresa ', h('b', null, isBlog ? f.blog.trim() : f.company.trim()), ' para análise. A equipe do BlogSim responde em até 24 horas.')
+        : h('p', { className: 'lg-text', role: 'status' }, 'Recebemos o cadastro ', isBlog ? 'do blog ' : 'da empresa ', h('b', null, isBlog ? f.blog.trim() : f.company.trim()), '. A equipe do BlogSim analisa em até 24 horas e responde no e-mail ', h('b', null, email), '.'),
       h('p', { className: 'lg-text' }, isBlog ? 'Depois da aprovação, você entra e instala o script no blog para liberar o painel.' : 'Depois da aprovação, você entra, adiciona saldo e cria a primeira campanha.'),
       h(B.Button, { className: 'lg-submit', onClick: onBack }, 'Voltar para o site'));
 
@@ -1310,9 +1334,81 @@
         h('div', { className: 'lg-body', ref: bodyRef }, body)),
       h(AuthArt));
   }
+  function ResetPassword({ token, resetPassword, onLogin, onBack }) {
+    const [pw, setPw] = useState('');
+    const [pw2, setPw2] = useState('');
+    const [tried, setTried] = useState(false);
+    const [err, setErr] = useState('');
+    const [done, setDone] = useState(false);
+    const [busy, setBusy] = useState(false);
+    const ref = React.useRef(null);
+    useAuthArt(ref);
+    const pwErr = pw.length >= 8 && /[A-Za-z]/.test(pw) && /\d/.test(pw) ? '' : 'Use pelo menos 8 caracteres, com letras e números.';
+    const pw2Err = pw2 && pw2 === pw ? '' : 'As senhas não são iguais.';
+    async function submit(e) {
+      e.preventDefault(); setTried(true);
+      if (pwErr || pw2Err) return;
+      setBusy(true); setErr('');
+      try { await resetPassword(token, pw); setDone(true); } catch (x) { setErr(x.message); } finally { setBusy(false); }
+    }
+    const body = done ? h(React.Fragment, null,
+      h('h1', null, 'Senha alterada'),
+      h('p', { className: 'lg-text', role: 'status' }, 'Pronto. Use a senha nova para entrar. Por segurança, as outras sessões da sua conta foram encerradas.'),
+      h(B.Button, { className: 'lg-submit', onClick: onLogin }, 'Entrar'))
+      : h(React.Fragment, null,
+        h('h1', null, 'Criar senha nova'),
+        h('form', { className: 'lg-form', onSubmit: submit, noValidate: true },
+          h(B.TextField, { id: 'nova-senha', label: 'Senha nova', type: 'password', autoComplete: 'new-password', value: pw, onChange: e => setPw(e.target.value), error: tried && pwErr || undefined, hint: '8 caracteres ou mais, com letras e números.' }),
+          h(B.TextField, { id: 'nova-senha2', label: 'Confirmar senha nova', type: 'password', autoComplete: 'new-password', value: pw2, onChange: e => setPw2(e.target.value), error: tried && pw2Err || undefined }),
+          err ? h('p', { className: 'lg-msg is-danger', role: 'alert' }, err) : null,
+          h(B.Button, { type: 'submit', className: 'lg-submit', loading: busy }, busy ? 'Salvando' : 'Salvar senha nova')));
+    return h('main', { className: 'lg', ref },
+      h('div', { className: 'lg-card' },
+        h('button', { type: 'button', className: 'lg-home', onClick: onBack, 'aria-label': 'Ir para o site do BlogSim' }, Wordmark()),
+        h('div', { className: 'lg-body' }, body)),
+      h(AuthArt));
+  }
+
+  // ---------- API ----------
+  // Com a API local rodando (api/, em localhost:4100), o painel usa dados reais.
+  // Sem ela (site publicado), tudo roda em modo demonstração, só no navegador.
+  async function api(path, body, method) {
+    const m = method || (body === undefined ? 'GET' : 'POST');
+    const res = await fetch(path, { method: m, credentials: 'same-origin', headers: m === 'GET' ? {} : { 'content-type': 'application/json' }, body: m === 'GET' ? undefined : JSON.stringify(body || {}) });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      const e = data.error || {};
+      const err = new Error(e.code === 'RATE_LIMIT' ? 'Muitas tentativas seguidas. Aguarde alguns minutos e tente de novo.' : e.message || 'Não foi possível falar com o servidor. Tente de novo.');
+      err.code = e.code; err.status = res.status; err.reason = e.reason;
+      throw err;
+    }
+    return data;
+  }
+  const digits = v => String(v || '').replace(/\D/g, '');
+  function signupPayload(d) {
+    const base = { role: d.role, name: d.name.trim(), email: d.email, password: d.pw };
+    if (d.role === 'blogueiro') return { ...base, blog: { name: d.blog.trim(), site: d.site.trim(), niche: d.niche, audience: Number(digits(d.audience)) || 0, city: d.city.trim(), uf: d.uf, logo: d.logo || undefined } };
+    return { ...base, company: { tradeName: d.company.trim(), legalName: d.legal.trim(), cnpj: digits(d.cnpj), phone: d.phone.trim(), site: d.site.trim(), city: d.city.trim(), uf: d.uf } };
+  }
+  // Links que chegam por e-mail: #email-confirmado, #email-invalido e #nova-senha=TOKEN.
+  function readHash() {
+    let hash = '';
+    try { hash = location.hash; } catch (e) { return { screen: 'site' }; }
+    const clear = () => { try { history.replaceState(null, '', location.pathname); } catch (e) {} };
+    if (hash.startsWith('#nova-senha=')) { clear(); return { screen: 'reset', token: hash.slice(12) }; }
+    if (hash === '#email-confirmado') { clear(); return { screen: 'login', flash: { tone: 'success', text: 'E-mail confirmado. Seu cadastro foi para análise e a resposta chega no seu e-mail em até 24 horas.' } }; }
+    if (hash === '#email-invalido') { clear(); return { screen: 'login', flash: { tone: 'danger', text: 'Este link de confirmação expirou ou já foi usado. Entre com seu e-mail e senha para receber um link novo.' } }; }
+    return { screen: { '#entrar': 'login', '#cadastro': 'cadastro' }[hash] || 'site' };
+  }
+
   // ---------- App ----------
   function App() {
-    const [screen, setScreen] = useState(() => { try { return { '#entrar': 'login', '#cadastro': 'cadastro' }[location.hash] || 'site'; } catch (e) { return 'site'; } });
+    const [entry] = useState(readHash);
+    const [screen, setScreen] = useState(entry.screen);
+    const [mode, setMode] = useState('demo');
+    const [remote, setRemote] = useState(null);
+    const [flash, setFlash] = useState(entry.flash);
+    const lastState = React.useRef(null);
     const [signupRole, setSignupRole] = useState(null);
     const [users, setUsers] = useState(SEED_USERS);
     const [meId, setMeId] = useState(null);
@@ -1335,133 +1431,261 @@
     const [toast, setToast] = useState(null);
     const [menuOpen, setMenuOpen] = useState(false);
 
-    const me = users.find(u => u.id === meId) || null;
+    const live = mode === 'api';
+    const r = live && remote ? remote : null;
+    const me = r ? r.me : users.find(u => u.id === meId) || null;
+    // Os espaços de Explorar blogs vêm da API quando ela está ligada.
+    SLOTS = r && r.slots ? r.slots : DEMO_SLOTS;
+    const D = r ? {
+      campaigns: r.campaigns || [], blogs: r.blogs || [], users: r.users || [], payouts: r.payouts || [],
+      balance: r.me.role === 'blogueiro' ? 0 : r.balance || 0, txns: r.txns || [],
+      myBlog: r.blog, mySlots: r.mySlots || [], bloggerBalance: r.me.role === 'blogueiro' ? r.balance : 0,
+      fresh: !!r.fresh, received: r.received, verified: !!(r.blog && r.blog.scriptVerified),
+      pct: r.settings.commissionPct, billing: { min: r.settings.rechargeMin, installFrom: r.settings.installmentsFrom, maxInstallments: r.settings.maxInstallments }
+    } : null;
     const advertiser = me && me.company ? me.company.name : ME;
-    const balance = advBal[advertiser] || 0;
-    const txns = advTxns[advertiser] || [];
-    const myBlog = blogs.find(b => b.id === blogger.blogId) || blogs[0];
-    const mySlots = slotsByBlog[blogger.blogId] || [];
+    const myBlogDemo = blogs.find(b => b.id === blogger.blogId) || blogs[0];
+    const mySlotsDemo = slotsByBlog[blogger.blogId] || [];
     const setMySlots = fn => setSlotsByBlog(m => ({ ...m, [blogger.blogId]: typeof fn === 'function' ? fn(m[blogger.blogId] || []) : fn }));
-    const bloggerBalance = balByBlog[blogger.blogId] || 0;
-    const pendingSignups = users.filter(u => u.role !== 'admin' && u.status === 'pendente').length;
+    const data = D || {
+      campaigns, blogs, users, payouts, balance: advBal[advertiser] || 0, txns: advTxns[advertiser] || [],
+      myBlog: myBlogDemo, mySlots: mySlotsDemo, bloggerBalance: balByBlog[blogger.blogId] || 0,
+      fresh: blogger.fresh, received: undefined, verified: blogger.verified, pct, billing
+    };
+    const pendingSignups = data.users.filter(u => u.role !== 'admin' && u.status === 'pendente').length;
 
     const sideRef = React.useRef(null);
     useMotion(sideRef, (g, root) => {
       g.from(root.querySelectorAll('.bs-wordmark, .bs-nav > .bs-badge, .bs-nav-item, .bs-nav-user'), { x: -12, opacity: 0, stagger: .035, duration: .45, ease: 'power3.out' });
-    }, [screen, role, blogger.verified]);
+    }, [screen, role, data.verified]);
 
     const notify = msg => setToast({ msg, k: Date.now() });
     useEffect(() => { if (!toast) return; const t = setTimeout(() => setToast(null), 3200); return () => clearTimeout(t); }, [toast]);
     useEffect(() => { if (!menuOpen) return; const f = e => { if (e.key === 'Escape') setMenuOpen(false); }; document.addEventListener('keydown', f); return () => document.removeEventListener('keydown', f); }, [menuOpen]);
 
+    // Descobre se a API está no ar e, se a sessão ainda vale, volta direto para o painel.
+    useEffect(() => {
+      let off = false;
+      api('/api/health').then(hc => {
+        if (off || !hc.api) return;
+        setMode('api');
+        // Quem chegou por um link de e-mail (senha nova, confirmação) fica nessa tela, mesmo com sessão aberta.
+        if (entry.token || entry.flash) return;
+        return api('/api/state').then(s => { if (!off) enter(s); }).catch(() => {});
+      }).catch(() => {});
+      return () => { off = true; };
+    }, []);
+
     const top = () => { try { window.scrollTo(0, 0); } catch (e) {} };
     const go = p => { setMenuOpen(false); setPage(p); top(); };
     const toSite = () => { setScreen('site'); top(); };
     function openLogin() { setScreen('login'); top(); }
-    function openSignup(r) { setSignupRole(r || null); setScreen('cadastro'); top(); }
+    function openSignup(r2) { setSignupRole(r2 || null); setScreen('cadastro'); top(); }
+    const refresh = () => api('/api/state').then(setRemote);
+    // Roda uma ação na API, recarrega os dados e avisa. Erro vira aviso e volta para quem chamou.
+    async function act(fn, msg) {
+      try { const out = await fn(); await refresh(); if (msg) notify(typeof msg === 'function' ? msg(out) : msg); return out; }
+      catch (e) { if (e.status === 401) { setRemote(null); setScreen('login'); } notify(e.message); throw e; }
+    }
+
+    function enter(s) {
+      setRemote(s);
+      const u = s.me;
+      let start = START_PAGE[u.role];
+      if (u.role === 'blogueiro' && !(s.blog && s.blog.scriptVerified)) start = 'Instalar script';
+      setRole(u.role); setPage(start); setMenuOpen(false); setScreen('app'); setFlash(null); top();
+    }
+    // Confere e-mail e senha. Na API a senha só existe no servidor; na demonstração, o hash fica no front.
+    async function authenticate(email, pw, remember) {
+      if (!live) {
+        const u = users.find(x => x.email === email);
+        if (!u || !u.hash || passHash(u.salt, pw) !== u.hash) throw { tone: 'danger', message: 'E-mail ou senha incorretos. Confira os dados e tente de novo.' };
+        if (u.status === 'pendente') throw { tone: 'warning', message: 'Seu cadastro ainda está em análise. A equipe do BlogSim responde em até 24 horas no seu e-mail.' };
+        if (u.status === 'negado') throw { tone: 'danger', message: 'Seu cadastro não foi aprovado.' + (u.reason ? ' Motivo: ' + u.reason : '') };
+        return u;
+      }
+      try {
+        await api('/api/auth/login', { email, password: pw, remember });
+        const s = await api('/api/state');
+        lastState.current = s;
+        return s.me;
+      } catch (e) {
+        if (e.code === 'EMAIL_NOT_VERIFIED') {
+          api('/api/auth/resend-verification', { email }).catch(() => {});
+          throw { tone: 'warning', message: 'Confirme seu e-mail para mandar o cadastro para análise. Enviamos um link novo para ' + email + '.' };
+        }
+        if (e.code === 'PENDING') throw { tone: 'warning', message: e.message };
+        if (e.code === 'DENIED') throw { tone: 'danger', message: e.message + (e.reason ? ' Motivo: ' + e.reason : '') };
+        throw { tone: 'danger', message: e.message };
+      }
+    }
+    const requestReset = email => live ? api('/api/auth/forgot-password', { email }) : Promise.resolve();
+    const resetPassword = (token, password) => api('/api/auth/reset-password', { token, password });
 
     function login(u) {
+      if (live) { enter(lastState.current); return; }
       let start = START_PAGE[u.role];
       if (u.role === 'blogueiro') {
         const verified = !!u.scriptVerified;
         setBlogger({ blogId: u.blogId, fresh: u.id !== 'u-blog', verified });
         if (!verified) start = 'Instalar script';
       }
-      setMeId(u.id); setRole(u.role); setPage(start); setMenuOpen(false); setScreen('app'); top();
+      setMeId(u.id); setRole(u.role); setPage(start); setMenuOpen(false); setScreen('app'); setFlash(null); top();
     }
-    function logout() { setMenuOpen(false); setMeId(null); setScreen('site'); top(); notify('Você saiu da sua conta.'); }
+    async function logout() {
+      setMenuOpen(false);
+      if (live) { try { await api('/api/auth/logout', {}); } catch (e) {} setRemote(null); }
+      setMeId(null); setScreen('site'); top(); notify('Você saiu da sua conta.');
+    }
 
     // Cadastro: a conta nasce em análise. O blog do blogueiro também, até o admin aprovar.
-    function signup(d) {
+    async function signup(d) {
+      if (live) { await api('/api/auth/signup', signupPayload(d)); return; }
       const id = 'u' + Date.now(), salt = newSalt();
       const user = { id, role: d.role, name: d.name.trim(), email: d.email, salt, hash: passHash(salt, d.pw), status: 'pendente', createdAt: TODAY };
       if (d.role === 'blogueiro') {
         user.blogId = 'b' + Date.now();
-        setBlogs(list => [...list, { id: user.blogId, name: d.blog.trim(), niche: d.niche, owner: user.name, audience: parseInt(String(d.audience).replace(/\D/g, ''), 10) || 0, city: d.city.trim(), uf: d.uf, color: '#2a49de', site: d.site.trim(), logo: d.logo, desc: '', slots: 0, status: 'pendente' }]);
+        setBlogs(list => [...list, { id: user.blogId, name: d.blog.trim(), niche: d.niche, owner: user.name, audience: parseInt(digits(d.audience), 10) || 0, city: d.city.trim(), uf: d.uf, color: '#2a49de', site: d.site.trim(), logo: d.logo, desc: '', slots: 0, status: 'pendente' }]);
       } else {
         user.company = { name: d.company.trim(), legal: d.legal.trim(), cnpj: d.cnpj, site: d.site.trim(), phone: d.phone.trim(), city: d.city.trim(), uf: d.uf };
       }
       setUsers(list => [...list, user]);
     }
     function approve(id) {
-      const u = users.find(x => x.id === id);
+      const u = data.users.find(x => x.id === id);
+      const msg = 'Cadastro aprovado. ' + (u ? u.name.split(' ')[0] : 'A pessoa') + ' já pode entrar.';
+      if (live) return act(() => api(`/api/admin/signups/${id}/approve`, {}), msg).catch(() => {});
       setUsers(list => list.map(x => x.id === id ? { ...x, status: 'aprovado', reason: undefined } : x));
       if (u && u.blogId) setBlogs(list => list.map(b => b.id === u.blogId && b.status === 'pendente' ? { ...b, status: 'script' } : b));
-      notify('Cadastro aprovado. ' + (u ? u.name.split(' ')[0] : 'A pessoa') + ' já pode entrar.');
+      notify(msg);
     }
     function deny(id, reason) {
+      if (live) return act(() => api(`/api/admin/signups/${id}/deny`, { reason }), 'Cadastro negado. A pessoa foi avisada por e-mail.').catch(() => {});
       const u = users.find(x => x.id === id);
       setUsers(list => list.map(x => x.id === id ? { ...x, status: 'negado', reason } : x));
       if (u && u.blogId) setBlogs(list => list.map(b => b.id === u.blogId ? { ...b, status: 'negado' } : b));
       notify('Cadastro negado.');
     }
-    function verifyScript() {
-      setBlogger(b => ({ ...b, verified: true }));
-      setUsers(list => list.map(x => x.id === meId ? { ...x, scriptVerified: true } : x));
-      setBlogs(list => list.map(b => b.id === blogger.blogId && b.status === 'script' ? { ...b, status: 'ativo' } : b));
+    async function verifyScript() {
+      if (live) await act(() => api('/api/blogs/me/verify-script', {}), 'Script encontrado. Seu painel está liberado.');
+      else {
+        setBlogger(b => ({ ...b, verified: true }));
+        setUsers(list => list.map(x => x.id === meId ? { ...x, scriptVerified: true } : x));
+        setBlogs(list => list.map(b => b.id === blogger.blogId && b.status === 'script' ? { ...b, status: 'ativo' } : b));
+        notify('Script encontrado. Seu painel está liberado.');
+      }
       setPage('Meus espaços'); top();
-      notify('Script encontrado. Seu painel está liberado.');
     }
     function saveBlog(patch) {
-      const old = myBlog.name;
+      if (live) return act(() => api('/api/blogs/me', patch, 'PUT'), 'Blog atualizado').catch(() => {});
+      const old = myBlogDemo.name;
       setBlogs(list => list.map(b => b.id === blogger.blogId ? { ...b, ...patch } : b));
       if (patch.name && patch.name !== old) setPayouts(list => list.map(p => p.blog === old ? { ...p, blog: patch.name } : p));
       notify('Blog atualizado');
     }
-    const addTxn = (desc, value) => setAdvTxns(m => ({ ...m, [advertiser]: [{ date: TODAY, desc, value }, ...(m[advertiser] || [])] }));
-    function publishCampaign(c) {
-      setCampaigns(list => [{ id: 'c' + Date.now(), name: c.name, advertiser, objective: c.objective, status: 'revisao', invested: c.total, clicks: 0, results: 0, blogs: c.blogs, blogNames: c.blogNames }, ...list]);
-      setAdvBal(m => ({ ...m, [advertiser]: (m[advertiser] || 0) - c.total }));
-      addTxn(`${c.name} · ${c.slots} ${c.slots > 1 ? 'espaços' : 'espaço'}`, -c.total);
-      setPage('Campanhas');
-      notify('Campanha enviada para revisão. O admin aprova antes de ela entrar no ar.');
+    function saveSlot(s, msg) {
+      if (live) return act(() => api('/api/blogs/me/slots/' + s.id, { price: s.price, active: s.active }, 'PATCH'), msg).catch(() => {});
+      setMySlots(list => list.map(x => x.id === s.id ? s : x)); notify(msg);
     }
+    function addSlot(p) {
+      const msg = 'Espaço ' + PLACE[p] + ' criado';
+      if (live) return act(() => api('/api/blogs/me/slots', { placement: p, price: 200 }), msg).catch(() => {});
+      setMySlots(list => [...list, { id: 'm' + Date.now(), placement: p, price: 200, active: true, rent: null }]); notify(msg);
+    }
+    const addTxn = (desc, value) => setAdvTxns(m => ({ ...m, [advertiser]: [{ date: TODAY, desc, value }, ...(m[advertiser] || [])] }));
+    async function publishCampaign(c) {
+      const msg = 'Campanha enviada para revisão. O admin aprova antes de ela entrar no ar.';
+      if (live) await act(() => api('/api/campaigns', { name: c.name, objective: c.objective, slotIds: c.slotIds, weeks: c.weeks, ad: c.ad }), msg);
+      else {
+        setCampaigns(list => [{ id: 'c' + Date.now(), name: c.name, advertiser, objective: c.objective, status: 'revisao', invested: c.total, clicks: 0, results: 0, blogs: c.blogs, blogNames: c.blogNames }, ...list]);
+        setAdvBal(m => ({ ...m, [advertiser]: (m[advertiser] || 0) - c.total }));
+        addTxn(`${c.name} · ${c.slots} ${c.slots > 1 ? 'espaços' : 'espaço'}`, -c.total);
+        notify(msg);
+      }
+      setPage('Campanhas');
+    }
+    // Na API a recarga fica pendente até o pagamento ser confirmado (aqui, simulado no ambiente local).
     function addBalance(v, method, n) {
+      if (live) return act(() => api('/api/billing/recharges', { amount: v, method, installments: n || 1 }), 'Recarga criada. O saldo entra quando o pagamento for confirmado.').catch(() => {});
       setAdvBal(m => ({ ...m, [advertiser]: (m[advertiser] || 0) + v }));
       addTxn('Recarga via ' + (method === 'cartao' ? 'cartão de crédito' + (n > 1 ? ` em ${n}x` : '') : 'Pix'), v);
       notify('Saldo adicionado: ' + money(v));
     }
+    const confirmRecharge = id => act(() => api(`/api/dev/recharges/${id}/confirm`, {}), 'Pagamento confirmado. O saldo já está disponível.').catch(() => {});
     function withdraw() {
-      setPayouts(list => [{ id: 'r' + Date.now(), blog: myBlog.name, value: bloggerBalance, date: TODAY, status: 'pendente' }, ...list]);
+      const msg = 'Saque solicitado. O valor cai em até 2 dias úteis.';
+      if (live) return act(() => api('/api/payouts', {}), msg).catch(() => {});
+      setPayouts(list => [{ id: 'r' + Date.now(), blog: myBlogDemo.name, value: data.bloggerBalance, date: TODAY, status: 'pendente' }, ...list]);
       setBalByBlog(m => ({ ...m, [blogger.blogId]: 0 }));
-      notify('Saque solicitado. O valor cai em até 2 dias úteis.');
+      notify(msg);
     }
+    function decideCampaign(id, ok) {
+      const msg = ok ? 'Campanha aprovada e no ar' : 'Campanha recusada. O anunciante foi avisado e o valor voltou para o saldo.';
+      if (live) return act(() => ok ? api(`/api/admin/campaigns/${id}/approve`, {}) : api(`/api/admin/campaigns/${id}/deny`, { reason: 'O anúncio não segue as regras de conteúdo do BlogSim.' }), msg).catch(() => {});
+      setCampaigns(list => list.map(c => c.id === id ? { ...c, status: ok ? 'ativa' : 'recusada' } : c)); notify(msg);
+    }
+    function payPayout(id) {
+      if (live) return act(() => api(`/api/admin/payouts/${id}/paid`, {}), 'Saque marcado como pago').catch(() => {});
+      setPayouts(list => list.map(p => p.id === id ? { ...p, status: 'pago' } : p)); notify('Saque marcado como pago');
+    }
+    function saveSettings(patch, msg) {
+      if (live) {
+        const body = patch.pct !== undefined ? { commissionPct: patch.pct } : { rechargeMin: patch.billing.min, installmentsFrom: patch.billing.installFrom, maxInstallments: patch.billing.maxInstallments };
+        return act(() => api('/api/admin/settings', body, 'PUT'), msg).catch(() => {});
+      }
+      if (patch.pct !== undefined) setPct(patch.pct); else setBilling(patch.billing);
+      notify(msg);
+    }
+    const runDailyReport = () => act(() => api('/api/dev/reports/daily', {}), out => 'Relatório do dia enviado' + (out && out.sent !== undefined ? ` para ${out.sent} ${out.sent === 1 ? 'pessoa' : 'pessoas'}` : '') + '.').catch(() => {});
+
+    // Ferramentas do ambiente local: só aparecem com a API ligada.
+    const devTools = live && r && r.me.role === 'admin' ? h(Card, { title: 'Ambiente local' },
+      h('p', null, 'Ações de teste que só existem rodando no seu computador. Em produção, o pagamento é confirmado pelo provedor e o relatório sai sozinho todo dia.'),
+      (r.pendingRecharges || []).length ? h(Table, { cols: [{ label: 'Anunciante' }, { label: 'Recarga' }, { label: 'Valor', num: true }, { label: '' }], empty: '',
+        rows: r.pendingRecharges.map(t => [h('b', null, t.advertiser), t.desc, money(t.value), h(B.Button, { size: 'sm', variant: 'secondary', onClick: () => confirmRecharge(t.id) }, 'Confirmar pagamento')]) })
+        : h('p', { className: 'app-note' }, 'Nenhuma recarga aguardando pagamento.'),
+      h('div', { className: 'app-actions' },
+        h(B.Button, { size: 'sm', onClick: runDailyReport }, 'Enviar relatório do dia agora'),
+        h('a', { className: 'bs-btn bs-btn-secondary bs-btn-sm', href: '/dev/emails', target: '_blank', rel: 'noopener' }, 'Ver e-mails enviados'))) : null;
 
     const toastEl = h('div', { className: 'app-toast', role: 'status', 'aria-live': 'polite', hidden: !toast }, toast ? toast.msg : '');
-    if (screen === 'login') return h('div', { className: 'lp-root' }, h(Login, { users, onLogin: login, onBack: toSite, onSignup: openSignup }), toastEl);
-    if (screen === 'cadastro') return h('div', { className: 'lp-root' }, h(Signup, { key: signupRole || 'escolha', users, preset: signupRole, onSignup: signup, onLogin: openLogin, onBack: toSite }), toastEl);
+    if (screen === 'reset') return h('div', { className: 'lp-root' }, h(ResetPassword, { token: entry.token, resetPassword, onLogin: openLogin, onBack: toSite }), toastEl);
+    if (screen === 'login') return h('div', { className: 'lp-root' }, h(Login, { authenticate, requestReset, flash, onLogin: login, onBack: toSite, onSignup: openSignup }), toastEl);
+    if (screen === 'cadastro') return h('div', { className: 'lp-root' }, h(Signup, { key: signupRole || 'escolha', users: live ? [] : users, preset: signupRole, onSignup: signup, onLogin: openLogin, onBack: toSite, confirmByEmail: live }), toastEl);
     if (screen !== 'app' || !me) return h('div', { className: 'lp-root' }, h(Landing, { onLogin: openLogin, onSignup: openSignup, blogs }), toastEl);
 
-    const ctx = { go, notify, campaigns, setCampaigns, cart, setCart, balance, blogs, advertiser };
+    const myBlog = data.myBlog || {};
+    const balance = data.balance;
+    const ctx = { go, notify, campaigns: data.campaigns, cart, setCart, balance, blogs: data.blogs, advertiser };
     const screens = {
       anunciante: {
         'Painel': () => h(AdvPainel, ctx),
         'Campanhas': () => h(AdvCampanhas, ctx),
         'Criar campanha': () => h(CreateCampaign, { ...ctx, onPublish: publishCampaign }),
         'Explorar blogs': () => h(AdvExplorar, ctx),
-        'Pixel e rastreamento': () => h(AdvPixel, { notify, site: me.company ? me.company.site : '', fresh: !campaigns.some(c => c.advertiser === advertiser) }),
-        'Faturamento': () => h(AdvBilling, { balance, txns, onAdd: addBalance, campaigns, billing, advertiser })
+        'Pixel e rastreamento': () => h(AdvPixel, { notify, site: me.company ? me.company.site : '', fresh: !data.campaigns.some(c => c.advertiser === advertiser) }),
+        'Faturamento': () => h(AdvBilling, { balance, txns: data.txns, onAdd: addBalance, onConfirm: live ? confirmRecharge : undefined, campaigns: data.campaigns, billing: data.billing, advertiser })
       },
       blogueiro: {
-        'Painel': () => h(BlogPainel, { mySlots, blog: myBlog, fresh: blogger.fresh }),
+        'Painel': () => h(BlogPainel, { mySlots: data.mySlots, blog: myBlog, fresh: data.fresh }),
         'Meu blog': () => h(BlogMeuBlog, { key: myBlog.id, blog: myBlog, onSave: saveBlog }),
-        'Meus espaços': () => h(BlogEspacos, { mySlots, setMySlots, notify, blog: myBlog }),
-        'Receita': () => h(BlogReceita, { bloggerBalance, onWithdraw: withdraw, payouts, pct, blog: myBlog, fresh: blogger.fresh }),
-        'Insights': () => h(BlogInsights, { blog: myBlog, fresh: blogger.fresh }),
-        'Instalar script': () => h(BlogScript, { notify, blog: myBlog, verified: blogger.verified, onVerify: verifyScript })
+        'Meus espaços': () => h(BlogEspacos, { mySlots: data.mySlots, onSlotSave: saveSlot, onSlotAdd: addSlot, blog: myBlog }),
+        'Receita': () => h(BlogReceita, { bloggerBalance: data.bloggerBalance, onWithdraw: withdraw, payouts: data.payouts, pct: data.pct, blog: myBlog, fresh: data.fresh, received: data.received }),
+        'Insights': () => h(BlogInsights, { blog: myBlog, fresh: data.fresh }),
+        'Instalar script': () => h(BlogScript, { notify, blog: myBlog, verified: data.verified, onVerify: verifyScript })
       },
       admin: {
-        'Visão geral': () => h(AdminVisao, { campaigns, setCampaigns, blogs, pct, notify, pendingSignups, go }),
-        'Cadastros': () => h(AdminCadastros, { users, blogs, onApprove: approve, onDeny: deny }),
-        'Blogs parceiros': () => h(AdminBlogs, { blogs: blogs.map(b => slotsByBlog[b.id] ? { ...b, slots: slotsByBlog[b.id].length } : b) }),
-        'Anunciantes': () => h(AdminAnunciantes, { campaigns }),
-        'Campanhas': () => h(AdminCampanhas, { campaigns, setCampaigns, notify }),
-        'Saques': () => h(AdminSaques, { payouts, setPayouts, notify }),
-        'Configurações': () => h(AdminConfig, { pct, setPct, billing, setBilling, notify })
+        'Visão geral': () => h(AdminVisao, { campaigns: data.campaigns, onDecide: decideCampaign, blogs: data.blogs, pct: data.pct, pendingSignups, go }),
+        'Cadastros': () => h(AdminCadastros, { users: data.users, blogs: data.blogs, onApprove: approve, onDeny: deny }),
+        'Blogs parceiros': () => h(AdminBlogs, { blogs: live ? data.blogs : blogs.map(b => slotsByBlog[b.id] ? { ...b, slots: slotsByBlog[b.id].length } : b) }),
+        'Anunciantes': () => h(AdminAnunciantes, { campaigns: data.campaigns }),
+        'Campanhas': () => h(AdminCampanhas, { campaigns: data.campaigns, onDecide: decideCampaign }),
+        'Saques': () => h(AdminSaques, { payouts: data.payouts, onPay: payPayout }),
+        'Configurações': () => h(AdminConfig, { pct: data.pct, billing: data.billing, onSave: saveSettings, devTools })
       }
     };
     const screenFn = screens[role][page];
-    const navItems = role === 'blogueiro' ? (blogger.verified ? ['Painel', 'Meu blog', 'Meus espaços', 'Receita', 'Insights', 'Instalar script'] : ['Instalar script', 'Meu blog'])
+    const navItems = role === 'blogueiro' ? (data.verified ? ['Painel', 'Meu blog', 'Meus espaços', 'Receita', 'Insights', 'Instalar script'] : ['Instalar script', 'Meu blog'])
       : role === 'admin' ? ['Visão geral', 'Cadastros', 'Blogs parceiros', 'Anunciantes', 'Campanhas', 'Saques', 'Configurações'] : undefined;
     const first = me.name.split(' ')[0];
     const userLabel = role === 'blogueiro' ? first + ' · ' + myBlog.name : role === 'anunciante' ? first + ' · ' + advertiser : me.name;
@@ -1474,7 +1698,7 @@
         menuOpen ? h('div', { className: 'app-backdrop', onClick: () => setMenuOpen(false) }) : null,
         h('aside', { id: 'app-nav', ref: sideRef, className: 'app-side' + (menuOpen ? ' is-open' : '') },
           h('button', { type: 'button', className: 'app-drawer-close', 'aria-label': 'Fechar menu', onClick: () => setMenuOpen(false) }, ICON('M6 6l12 12M18 6L6 18')),
-          h(B.SideNav, { key: role + blogger.verified, role, items: navItems, active: page === 'Criar campanha' ? 'Campanhas' : page, onNavigate: go, onLogout: logout, user: userLabel })),
+          h(B.SideNav, { key: role + data.verified, role, items: navItems, active: page === 'Criar campanha' ? 'Campanhas' : page, onNavigate: go, onLogout: logout, user: userLabel })),
         h('main', { className: 'app-main', key: role + page }, h(Reveal, null, screenFn ? screenFn() : null))),
       toastEl);
   }

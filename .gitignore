@@ -3,3 +3,8 @@ BRIEFING.md
 __pycache__/
 # Senhas das contas de QA (só local)
 QA_CONTAS.md
+
+# API local
+api/node_modules/
+api/data/
+api/.env

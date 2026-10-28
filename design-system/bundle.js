@@ -120,7 +120,7 @@
   }
 
   var OBJ_META = { visitas: ['brand', 'Visitas no site', 'visitas'], conversas: ['teal', 'Conversas no WhatsApp', 'conversas'], vendas: ['accent', 'Vendas', 'vendas'] };
-  var STATUS = { ativa: ['success', 'Ativa'], pausada: ['warning', 'Pausada'], revisao: ['neutral', 'Em revisão'], encerrada: ['neutral', 'Encerrada'] };
+  var STATUS = { ativa: ['success', 'Ativa'], pausada: ['warning', 'Pausada'], revisao: ['neutral', 'Em revisão'], encerrada: ['neutral', 'Encerrada'], recusada: ['danger', 'Recusada'] };
 
   function CampaignTable(p) {
     var rows = p.rows || [];

@@ -16,7 +16,8 @@ As animações usam GSAP com ScrollTrigger e respeitam a opção "reduzir movime
 - Todo cadastro entra **em análise**. O admin aprova ou nega em **Cadastros**. Em análise ou negado, o login mostra o status e não entra.
 - Blogueiro aprovado só vê **Instalar script** e **Meu blog** até clicar em **Verificar instalação**.
 - As contas de QA (admin master, anunciante e blogueiro) ficam em `QA_CONTAS.md`, só na máquina local. No código vão apenas sal e hash.
-- Tudo isso é simulado no navegador e some ao recarregar. O plano do back-end (API, segurança, e-mails pelo SMTP) está em [`docs/BACKEND.md`](docs/BACKEND.md).
+- No site publicado tudo é simulado no navegador e some ao recarregar. Com a API local rodando ([`api/README.md`](api/README.md)), o mesmo front usa dados reais e envia os e-mails. O plano completo está em [`docs/BACKEND.md`](docs/BACKEND.md).
+
 ## Estrutura
 
 | Caminho | O que é |
@@ -29,6 +30,7 @@ As animações usam GSAP com ScrollTrigger e respeitam a opção "reduzir movime
 | `design-system/bundle.css` | Estilos dos componentes. |
 | `design-system/index.d.ts` | Props de cada componente. |
 | `build.py` | Junta tokens, design system e app em `index.html` (para o link do Claude) e `dist/index.html` (documento completo para servidor web). |
+| `api/` | Back-end (só local por enquanto). Veja `api/README.md`. |
 | `dist/index.html` | O que vai para o servidor. Em produção fica em `/www/wwwroot/blogsim.com.br/` no nginx. |
 
 ## Editar e gerar de novo

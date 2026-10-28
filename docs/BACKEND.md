@@ -1,6 +1,6 @@
 # Back-end do BlogSim
 
-**Situação: planejado, ainda não construído.** O site em `blogsim.com.br` é só front-end: cadastro, login, aprovação e painéis funcionam simulados no navegador, e tudo some ao recarregar a página. Este documento é o plano do back-end que vai substituir essa simulação.
+**Situação: construído e rodando só no ambiente local** (pasta [`api/`](../api/README.md), Node + SQLite). O site em `blogsim.com.br` continua em modo demonstração. Este documento é o plano; como rodar está em [`api/README.md`](../api/README.md). Antes de ir para produção faltam: PostgreSQL, provedor de pagamento (Pix e cartão), medição de visualizações e cliques pelo script e o proxy `/api/` no nginx.
 
 ## O que o front já faz e o que o back-end precisa fazer
 

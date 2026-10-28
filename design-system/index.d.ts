@@ -73,7 +73,7 @@ export interface CampaignRow {
   id?: string;
   name: string;
   objective: Objective;
-  status: 'ativa' | 'pausada' | 'revisao' | 'encerrada';
+  status: 'ativa' | 'pausada' | 'revisao' | 'encerrada' | 'recusada';
   invested: number;
   clicks: number;
   results: number;
