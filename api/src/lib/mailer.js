@@ -18,7 +18,8 @@ function allowed(to) {
 
 export async function sendMail(to, template, data, log = console) {
   if (!to) return;
-  const { subject, html, text } = render(template, data);
+  const { subject: base, html, text } = render(template, data);
+  const subject = (config.MAIL_SUBJECT_PREFIX || '') + base;
   const outboxId = id();
   const live = transport && allowed(to);
   await run('INSERT INTO email_outbox (id, to_email, template, subject, html, text, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',

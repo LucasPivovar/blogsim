@@ -27,6 +27,8 @@ const schema = z.object({
   // Fora de produção, e-mail de verdade só sai para estes domínios ou endereços (separados por vírgula).
   // Os outros ficam como 'simulado' na caixa de saída, para contas de exemplo nunca receberem nada.
   MAIL_ONLY_TO: z.string().default('blogsim.com.br'),
+  // Texto antes do assunto, para separar e-mails de teste (ex.: "[TESTE] ").
+  MAIL_SUBJECT_PREFIX: z.string().optional(),
   // Em desenvolvimento os blogs de exemplo não existem de verdade; isto aceita a verificação do script sem visitar o site.
   DEV_FAKE_SCRIPT_CHECK: bool.default('true'),
   QA_ADMIN_PASSWORD: z.string().min(8).optional(),
