@@ -47,7 +47,7 @@ def main():
 
     # Protótipo só no tema claro (visual clean e branco); o design system mantém o escuro.
     light_tokens = tokens_css(tokens).split("@media (prefers-color-scheme: dark)")[0]
-    html = f"""<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    head = f"""<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>BlogSim</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="{FONTS}">
@@ -56,7 +56,8 @@ def main():
 {ds_css}
 {app_css}
 </style>
-<div id="app"></div>
+"""
+    body = f"""<div id="app"></div>
 <script src="{REACT}"></script>
 <script src="{REACT_DOM}"></script>
 <script src="{GSAP}"></script>
@@ -68,10 +69,18 @@ def main():
 {scripts["app.js"]}
 </script>
 """
-    out = ROOT / "index.html"
-    out.write_text(html, encoding="utf-8")
+    # index.html: página para o artifact do Claude, que completa doctype, html, head e body sozinho.
+    html = head + body
+    (ROOT / "index.html").write_text(html, encoding="utf-8")
     print(f"index.html: {len(html.encode('utf-8')) / 1024:.0f} KB")
 
+    # dist/index.html: documento completo para servir num servidor web (nginx, Vercel).
+    page = ('<!doctype html>\n<html lang="pt-BR">\n<head>\n<meta charset="utf-8">\n'
+            + head + '<meta name="description" content="Anuncie nos blogs que seu cliente já lê. Escolha blogs por nicho e região e acompanhe visitas, conversas e vendas.">\n'
+            + '</head>\n<body>\n' + body + '</body>\n</html>\n')
+    (ROOT / "dist").mkdir(exist_ok=True)
+    (ROOT / "dist" / "index.html").write_text(page, encoding="utf-8")
+    print(f"dist/index.html: {len(page.encode('utf-8')) / 1024:.0f} KB")
 
 if __name__ == "__main__":
     main()

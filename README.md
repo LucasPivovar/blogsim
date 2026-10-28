@@ -27,7 +27,8 @@ Blogueiros também podem se cadastrar ("Tenho um blog" na landing ou "Cadastre-s
 | `design-system/bundle.js` | Componentes do design system (Button, Badge, TextField, MetricCard, ObjectivePicker, SlotCard, CampaignTable, SideNav). |
 | `design-system/bundle.css` | Estilos dos componentes. |
 | `design-system/index.d.ts` | Props de cada componente. |
-| `build.py` | Junta tokens, design system e app num único `index.html`. |
+| `build.py` | Junta tokens, design system e app em `index.html` (para o link do Claude) e `dist/index.html` (documento completo para servidor web). |
+| `dist/index.html` | O que vai para o servidor. Em produção fica em `/www/wwwroot/blogsim.com.br/` no nginx. |
 
 ## Editar e gerar de novo
 
