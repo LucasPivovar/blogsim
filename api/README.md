@@ -55,9 +55,24 @@ npm test
 
 Rodam com um Postgres em memória: rotas sem sessão (401), perfil errado (403), espaço de outro blog (IDOR), campos extras ignorados, CSRF por Origin, limite de tentativas, link de senha nova de uso único, fluxo completo de cadastro até o saque e a medição (script, visualização, clique, robô, link adulterado e relatório).
 
-## Subir para produção (quando for a hora)
+## Produção
 
-No servidor:
+**No ar desde 28/10/2026.** Código em `/www/wwwroot/blogsim-api/app` (clone do GitHub), `.env` em `/www/wwwroot/blogsim-api/.env`, processo `blogsim-api` no pm2 com o Node 24 do aaPanel, na porta 4110. O nginx manda `/api/`, `/c/`, `/uploads/` e `/slots.js` para a API pelo arquivo `extension/blogsim.com.br/blogsim-api.conf` (o conf principal do site não foi mexido). O front anterior está em `index.html.antes-api`.
+
+Atualizar depois de um push:
+
+```bash
+cd /www/wwwroot/blogsim-api/app && git pull && cd api && npm ci --omit=dev && pm2 restart blogsim-api
+cp /www/wwwroot/blogsim-api/app/dist/index.html /www/wwwroot/blogsim.com.br/index.html
+```
+
+Criar admin (com o SMTP ligado; a pessoa recebe o link para criar a senha):
+
+```bash
+cd /www/wwwroot/blogsim-api/app/api && /www/server/nodejs/v24.19.0/bin/node --env-file=../../.env src/jobs/create-admin.js email@blogsim.com.br "Nome"
+```
+
+Como foi montado:
 
 1. **PostgreSQL** (feito em 28/10/2026): PostgreSQL 14 instalado pelo apt, escutando só em 127.0.0.1. Usuário e banco `blogsim` criados, com as tabelas. O `DATABASE_URL` completo, com a senha, está em `/root/blogsim-db.env` no servidor (só o root lê); copie a linha para o `.env` de produção. Fora do aaPanel: o banco não aparece na aba Bancos de Dados do painel.
 2. **Node 22** (o servidor tem o 20; o aaPanel instala outra versão no gerenciador de Node).
