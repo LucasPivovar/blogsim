@@ -57,9 +57,9 @@ Rodam com um Postgres em memória: rotas sem sessão (401), perfil errado (403),
 
 ## Subir para produção (quando for a hora)
 
-Nada disto foi feito ainda. No servidor:
+No servidor:
 
-1. **PostgreSQL**: instalar (`apt install postgresql`, escuta só em 127.0.0.1) e criar usuário e banco `blogsim` com senha forte. As tabelas são criadas pela API na subida.
+1. **PostgreSQL** (feito em 28/10/2026): PostgreSQL 14 instalado pelo apt, escutando só em 127.0.0.1. Usuário e banco `blogsim` criados, com as tabelas. O `DATABASE_URL` completo, com a senha, está em `/root/blogsim-db.env` no servidor (só o root lê); copie a linha para o `.env` de produção. Fora do aaPanel: o banco não aparece na aba Bancos de Dados do painel.
 2. **Node 22** (o servidor tem o 20; o aaPanel instala outra versão no gerenciador de Node).
 3. **Porta**: a 4100 já é usada pelo criptobot.pro. Use `PORT=4110`, por exemplo.
 4. **`.env` de produção**: `NODE_ENV=production`, `APP_URL=https://blogsim.com.br`, `DATABASE_URL=postgres://blogsim:SENHA@127.0.0.1:5432/blogsim`, `TRACK_SECRET` (gerado), `SMTP_PASS`, `ADMIN_NOTIFY_EMAIL`. A API não sobe em produção sem https, sem `TRACK_SECRET` ou com banco embutido.
