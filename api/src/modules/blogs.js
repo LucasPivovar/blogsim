@@ -75,6 +75,19 @@ export default async function blogs(app) {
     return { verified: true, blog: blogView(await one('SELECT * FROM blogs WHERE id = ?', blog.id)) };
   });
 
+  // Admin libera o painel sem achar o script (ex.: testes, ou blog que bloqueia robôs). Os anúncios só aparecem com o script.
+  app.post('/api/admin/blogs/:id/verify', async req => {
+    const adminUser = requireRole(req, 'admin');
+    const blog = await one('SELECT * FROM blogs WHERE id = ?', req.params.id);
+    if (!blog) throw notFound('Blog não encontrado.');
+    const moved = await run("UPDATE blogs SET script_verified_at = ?, status = 'ativo' WHERE id = ? AND status = 'script'", now(), blog.id);
+    if (!moved.changes) throw conflict('Só dá para liberar blog aprovado que ainda está aguardando o script.');
+    await audit(adminUser.id, 'blog_liberado_sem_script', blog.id);
+    const user = await one('SELECT * FROM users WHERE id = ?', blog.user_id);
+    if (user) queueMail(user.email, 'script_verificado', { blog: blog.name, site: blog.site, manual: true, link: `${config.APP_URL}/#entrar` }, req.log);
+    return { blog: blogView(await one('SELECT * FROM blogs WHERE id = ?', blog.id)) };
+  });
+
   app.post('/api/blogs/me/slots', async (req, reply) => {
     const blog = await myBlog(req, { verified: true });
     const d = parse(newSlot, req.body);

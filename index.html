@@ -1466,7 +1466,7 @@ h1, h2, h3 { text-wrap: balance; }
         h(B.Button, { size: 'sm', variant: 'secondary', onClick: () => decide(c.id, 'recusada') }, 'Recusar')))));
   }
 
-  function AdminVisao({ campaigns, onDecide, blogs, pct, pendingSignups, go, stats }) {
+  function AdminVisao({ campaigns, onDecide, blogs, pct, pendingSignups, go, stats, recharges }) {
     const s = stats && stats.volume;
     const volume = s ? s.total : sum(campaigns, 'invested');
     const advertisers = new Set(campaigns.map(c => c.advertiser)).size;
@@ -1481,12 +1481,14 @@ h1, h2, h3 { text-wrap: balance; }
         h(B.MetricCard, { label: 'Blogs ativos', value: blogs.length - pending, format: 'count', hint: pending ? pending + ' aguardando aprovação' : 'nenhum pendente' }),
         h(B.MetricCard, { label: 'Anunciantes', value: advertisers, format: 'count', hint: 'com pelo menos uma campanha' })),
       h(Card, { title: 'Volume em aluguéis por dia' }, h(BarChart, { data: s ? s.series : DAILY.volume, isMoney: true, label: 'Volume em aluguéis por dia nos últimos 14 dias' })),
-      h(Section, { title: 'Campanhas aguardando revisão' }, h(ReviewList, { campaigns, onDecide })));
+      h(Section, { title: 'Campanhas aguardando revisão' }, h(ReviewList, { campaigns, onDecide })),
+      recharges || null);
   }
 
-  function AdminBlogs({ blogs }) {
+  function AdminBlogs({ blogs, onRelease }) {
     const status = b => b.status === 'ativo' ? h(B.Badge, { tone: 'success', dot: true }, 'Ativo')
-      : b.status === 'script' ? h(B.Badge, { dot: true }, 'Aguardando script')
+      : b.status === 'script' ? h('div', { className: 'app-actions' }, h(B.Badge, { dot: true }, 'Aguardando script'),
+          onRelease ? h(B.Button, { size: 'sm', variant: 'secondary', onClick: () => onRelease(b) }, 'Liberar sem script') : null)
       : b.status === 'negado' ? h(B.Badge, { tone: 'danger', dot: true }, 'Negado')
       : h(B.Badge, { tone: 'warning', dot: true }, 'Em análise');
     return h(Page, { title: 'Blogs parceiros', subtitle: blogs.length + ' blogs cadastrados' },
@@ -2250,6 +2252,7 @@ h1, h2, h3 { text-wrap: balance; }
     const [entry] = useState(readHash);
     const [screen, setScreen] = useState(entry.screen);
     const [mode, setMode] = useState('demo');
+    const [devApi, setDevApi] = useState(false);
     const [remote, setRemote] = useState(null);
     const [flash, setFlash] = useState(entry.flash);
     const lastState = React.useRef(null);
@@ -2314,6 +2317,7 @@ h1, h2, h3 { text-wrap: balance; }
       api('/api/health').then(hc => {
         if (off || !hc.api) return;
         setMode('api');
+        setDevApi(!!hc.dev);
         // Quem chegou por um link de e-mail (senha nova, confirmação) fica nessa tela, mesmo com sessão aberta.
         if (entry.token || entry.flash) return;
         return api('/api/state').then(s => { if (!off) enter(s); }).catch(() => {});
@@ -2465,7 +2469,10 @@ h1, h2, h3 { text-wrap: balance; }
       addTxn('Recarga via ' + (method === 'cartao' ? 'cartão de crédito' + (n > 1 ? ` em ${n}x` : '') : 'Pix'), v);
       notify('Saldo adicionado: ' + money(v));
     }
-    const confirmRecharge = id => act(() => api(`/api/dev/recharges/${id}/confirm`, {}), 'Pagamento confirmado. O saldo já está disponível.').catch(() => {});
+    // Admin confirma o pagamento de verdade; o anunciante só simula, e só no computador (rota de desenvolvimento).
+    const confirmRecharge = (id, asAdmin) => act(() => api(asAdmin ? `/api/admin/recharges/${id}/confirm` : `/api/dev/recharges/${id}/confirm`, {}),
+      'Pagamento confirmado. O saldo já está disponível.').catch(() => {});
+    const releaseBlog = b => act(() => api(`/api/admin/blogs/${b.id}/verify`, {}), b.name + ' liberado. O blogueiro foi avisado por e-mail.').catch(() => {});
     function withdraw() {
       const msg = 'Saque solicitado. O valor cai em até 2 dias úteis.';
       if (live) return act(() => api('/api/payouts', {}), msg).catch(() => {});
@@ -2492,12 +2499,16 @@ h1, h2, h3 { text-wrap: balance; }
     }
     const runDailyReport = () => act(() => api('/api/dev/reports/daily', {}), out => 'Relatório do dia enviado' + (out && out.sent !== undefined ? ` para ${out.sent} ${out.sent === 1 ? 'pessoa' : 'pessoas'}` : '') + '.').catch(() => {});
 
-    // Ferramentas do ambiente local: só aparecem com a API ligada.
-    const devTools = live && r && r.me.role === 'admin' ? h(Card, { title: 'Ambiente local' },
-      h('p', null, 'Ações de teste que só existem rodando no seu computador. Em produção, o pagamento é confirmado pelo provedor e o relatório sai sozinho todo dia.'),
-      (r.pendingRecharges || []).length ? h(Table, { cols: [{ label: 'Anunciante' }, { label: 'Recarga' }, { label: 'Valor', num: true }, { label: '' }], empty: '',
-        rows: r.pendingRecharges.map(t => [h('b', null, t.advertiser), t.desc, money(t.value), h(B.Button, { size: 'sm', variant: 'secondary', onClick: () => confirmRecharge(t.id) }, 'Confirmar pagamento')]) })
-        : h('p', { className: 'app-note' }, 'Nenhuma recarga aguardando pagamento.'),
+    // Recargas esperando pagamento: até o gateway existir, o admin confere o Pix ou o cartão e confirma aqui.
+    const pendingRecharges = live && r && r.me.role === 'admin' ? r.pendingRecharges || [] : [];
+    const rechargesCard = live && r && r.me.role === 'admin' ? h(Section, { title: 'Recargas aguardando pagamento' },
+      h(Table, { cols: [{ label: 'Anunciante' }, { label: 'Recarga' }, { label: 'Pedida em' }, { label: 'Valor', num: true }, { label: '' }], empty: 'Nenhuma recarga aguardando pagamento.',
+        rows: pendingRecharges.map(t => [h('b', null, t.advertiser), t.desc, t.date, money(t.value),
+          h(B.Button, { size: 'sm', variant: 'secondary', onClick: () => confirmRecharge(t.id, true) }, 'Confirmar pagamento')]) })) : null;
+
+    // Ferramentas do ambiente local: só aparecem com a API rodando no computador.
+    const devTools = live && devApi && r && r.me.role === 'admin' ? h(Card, { title: 'Ambiente local' },
+      h('p', null, 'Ações de teste que só existem rodando no seu computador. Em produção, o relatório sai pelo agendamento diário.'),
       h('div', { className: 'app-actions' },
         h(B.Button, { size: 'sm', onClick: runDailyReport }, 'Enviar relatório do dia agora'),
         h('a', { className: 'bs-btn bs-btn-secondary bs-btn-sm', href: '/dev/emails', target: '_blank', rel: 'noopener' }, 'Ver e-mails enviados'))) : null;
@@ -2518,7 +2529,7 @@ h1, h2, h3 { text-wrap: balance; }
         'Criar campanha': () => h(CreateCampaign, { ...ctx, onPublish: publishCampaign }),
         'Explorar blogs': () => h(AdvExplorar, ctx),
         'Pixel e rastreamento': () => h(AdvPixel, { notify, site: me.company ? me.company.site : '', fresh: !data.campaigns.some(c => c.advertiser === advertiser) }),
-        'Faturamento': () => h(AdvBilling, { balance, txns: data.txns, onAdd: addBalance, onConfirm: live ? confirmRecharge : undefined, campaigns: data.campaigns, billing: data.billing, advertiser })
+        'Faturamento': () => h(AdvBilling, { balance, txns: data.txns, onAdd: addBalance, onConfirm: live && devApi ? id => confirmRecharge(id, false) : undefined, campaigns: data.campaigns, billing: data.billing, advertiser })
       },
       blogueiro: {
         'Painel': () => h(BlogPainel, { mySlots: data.mySlots, blog: myBlog, fresh: data.fresh, stats: data.stats }),
@@ -2529,9 +2540,9 @@ h1, h2, h3 { text-wrap: balance; }
         'Instalar script': () => h(BlogScript, { notify, blog: myBlog, verified: data.verified, onVerify: verifyScript })
       },
       admin: {
-        'Visão geral': () => h(AdminVisao, { campaigns: data.campaigns, onDecide: decideCampaign, blogs: data.blogs, pct: data.pct, pendingSignups, go, stats: data.stats }),
+        'Visão geral': () => h(AdminVisao, { campaigns: data.campaigns, onDecide: decideCampaign, blogs: data.blogs, pct: data.pct, pendingSignups, go, stats: data.stats, recharges: rechargesCard }),
         'Cadastros': () => h(AdminCadastros, { users: data.users, blogs: data.blogs, onApprove: approve, onDeny: deny }),
-        'Blogs parceiros': () => h(AdminBlogs, { blogs: live ? data.blogs : blogs.map(b => slotsByBlog[b.id] ? { ...b, slots: slotsByBlog[b.id].length } : b) }),
+        'Blogs parceiros': () => h(AdminBlogs, { blogs: live ? data.blogs : blogs.map(b => slotsByBlog[b.id] ? { ...b, slots: slotsByBlog[b.id].length } : b), onRelease: live ? releaseBlog : undefined }),
         'Anunciantes': () => h(AdminAnunciantes, { campaigns: data.campaigns }),
         'Campanhas': () => h(AdminCampanhas, { campaigns: data.campaigns, onDecide: decideCampaign }),
         'Saques': () => h(AdminSaques, { payouts: data.payouts, onPay: payPayout }),

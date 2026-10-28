@@ -84,7 +84,9 @@ export const TEMPLATES = {
     body: d => ({
       preheader: 'Seu painel completo está liberado.',
       title: 'Blog verificado',
-      blocks: [p(`Encontramos o script do BlogSim em <b>${esc(d.site)}</b>. O painel completo está liberado.`),
+      blocks: [p(d.manual
+          ? `A equipe do BlogSim liberou o painel completo do <b>${esc(d.site)}</b>. Instale o script quando puder: é ele que mostra os anúncios no blog e mede visualizações e cliques.`
+          : `Encontramos o script do BlogSim em <b>${esc(d.site)}</b>. O painel completo está liberado.`),
         p('Agora crie os espaços onde os anúncios podem aparecer (lateral, banner no topo, pop-up ou no meio do post) e defina o preço por semana de cada um.'),
         button('Criar meus espaços', d.link)]
     }),

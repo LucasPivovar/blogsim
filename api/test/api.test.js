@@ -235,6 +235,20 @@ test('senha nova: link vale uma vez e derruba as sessões', async () => {
   PW.blogueiro = nova;
   await loginAs('blogueiro');
 });
+test('admin libera blog sem o script (e só o admin)', async () => {
+  const admin = await loginAs('admin');
+  const blogger = await loginAs('blogueiro');
+  const leo = await one("SELECT u.id AS user_id, b.id AS blog_id FROM users u JOIN blogs b ON b.user_id = u.id WHERE u.email = 'leo@bikeurbana.com.br'");
+  assert.equal((await admin('POST', `/api/admin/blogs/${leo.blog_id}/verify`, {})).status, 409, 'blog ainda em análise não pode ser liberado');
+  assert.equal((await admin('POST', `/api/admin/signups/${leo.user_id}/approve`, {})).status, 200);
+  assert.equal((await blogger('POST', `/api/admin/blogs/${leo.blog_id}/verify`, {})).status, 403);
+  const r = await admin('POST', `/api/admin/blogs/${leo.blog_id}/verify`, {});
+  assert.equal(r.status, 200);
+  assert.deepEqual([r.body.blog.status, r.body.blog.scriptVerified], ['ativo', true]);
+  assert.match((await lastMail('leo@bikeurbana.com.br', 'script_verificado')).text, /A equipe do BlogSim liberou/);
+  assert.equal((await admin('POST', `/api/admin/blogs/${leo.blog_id}/verify`, {})).status, 409, 'liberar duas vezes');
+});
+
 test('script do blog: entrega anúncio e mede visualização e clique', async () => {
   const blog = await one("SELECT script_token FROM blogs WHERE name = 'Treino em Casa'");
   const camp = await one("SELECT id, views, clicks FROM campaigns WHERE name = 'Black Friday – Tênis'");
