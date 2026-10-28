@@ -34,7 +34,8 @@ const schema = z.object({
   QA_BLOGUEIRO_PASSWORD: z.string().min(8).optional()
 });
 
-const parsed = schema.safeParse(process.env);
+// Campo vazio no .env (ex.: ADMIN_NOTIFY_EMAIL=) vale como não preenchido.
+const parsed = schema.safeParse(Object.fromEntries(Object.entries(process.env).filter(([, v]) => v !== '')));
 if (!parsed.success) {
   console.error('Configuração inválida no .env:\n' + parsed.error.issues.map(i => `- ${i.path.join('.')}: ${i.message}`).join('\n'));
   process.exit(1);
