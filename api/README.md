@@ -84,6 +84,7 @@ Enquanto isso não acontece, o front publicado continua em modo demonstração: 
 
 | Caminho | O que é |
 | --- | --- |
+| `src/main.js` | Ponto de partida: cria as tabelas e sobe a API (é o arquivo que o pm2 ou o aaPanel executa) |
 | `src/server.js` | Monta o Fastify: helmet, cookies, limite de tentativas, checagem de Origin, rotas |
 | `src/config.js` | Lê e valida o `.env` |
 | `src/db/` | Conexão PostgreSQL (ou PGlite no computador), esquema e seed |

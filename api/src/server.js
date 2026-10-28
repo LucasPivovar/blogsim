@@ -6,7 +6,7 @@ import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
 import fastifyStatic from '@fastify/static';
 import { dirname, resolve } from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { fileURLToPath } from 'node:url';
 import { existsSync } from 'node:fs';
 import { config } from './config.js';
 import { HttpError, forbidden } from './lib/errors.js';
@@ -21,8 +21,6 @@ import payouts from './modules/payouts.js';
 import state from './modules/state.js';
 import dev from './modules/dev.js';
 import ads from './modules/ads.js';
-import { migrate, closeDb } from './db/index.js';
-import { seed } from './db/seed.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const frontDir = resolve(here, '../../dist');
@@ -84,15 +82,4 @@ export async function buildApp() {
   await app.register(fastifyStatic, { root: uploadDir, prefix: '/uploads/', decorateReply: false, setHeaders: res => res.setHeader('X-Content-Type-Options', 'nosniff') });
 
   return app;
-}
-
-if (import.meta.url === pathToFileURL(process.argv[1]).href) {
-  await migrate();
-  // No computador o banco começa com as contas de QA e os dados de exemplo; em produção começa vazio.
-  if (!config.isProd && config.QA_ADMIN_PASSWORD) await seed({ quiet: true });
-  const app = await buildApp();
-  for (const signal of ['SIGINT', 'SIGTERM']) process.once(signal, async () => { await app.close(); await closeDb(); process.exit(0); });
-  await app.listen({ host: config.HOST, port: config.PORT });
-  console.log(`BlogSim API em ${config.APP_URL}`);
-  if (!config.isProd) console.log(`E-mails (templates e caixa de saída): ${config.APP_URL}/dev/emails`);
 }
