@@ -1003,7 +1003,6 @@
         from(t, big.querySelectorAll('.mp-slot'), { ...RENT_FROM, stagger: .35, duration: .5, ease: 'power1.inOut' }, '-=.2');
         from(t, big.querySelectorAll('.mp-slot em'), { y: 8, opacity: 0, stagger: .35, duration: .4, ease: 'back.out(2)' }, '<.25');
       }
-      q('.lp-filter').forEach((f, i) => g.from(f.querySelectorAll('.app-chip'), { y: 8, opacity: 0, stagger: .03, duration: .4, delay: i * .1, ease: 'power3.out', scrollTrigger: { trigger: f, start: 'top 90%' } }));
       q('.lp-checks').forEach(list => g.from(list.children, { x: -12, opacity: 0, stagger: .08, duration: .5, ease: 'power3.out', scrollTrigger: { trigger: list, start: 'top 88%' } }));
 
       const cards = q('.lp-blog');
@@ -1035,11 +1034,7 @@
     useLandingMotion(ref);
     const active = blogs.filter(b => b.status === 'ativo');
     const partners = active.map(b => ({ ...b, places: SLOTS.filter(s => s.blogId === b.id).map(s => s.placement) }));
-    const [nicheF, setNicheF] = useState('Todos');
-    const [regionF, setRegionF] = useState('Todas');
-    const niches = [...new Set(active.map(b => b.niche))];
-    const regions = [...new Set(active.map(b => b.uf))].sort();
-    const shown = partners.filter(b => (nicheF === 'Todos' || b.niche === nicheF) && (regionF === 'Todas' || b.uf === regionF));
+
     const pin = h('svg', { width: 13, height: 13, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2.2, 'aria-hidden': true }, h('path', { d: 'M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z' }), h('circle', { cx: 12, cy: 9.5, r: 2.5 }));
     const readers = COMPACT.format(sum(active, 'audience'));
     const ctas = h('div', { className: 'app-actions' },
@@ -1082,18 +1077,10 @@
 
         h('section', { id: 'blogs-parceiros', className: 'lp-section lp-wrap' },
           h('h2', null, Words('Blogs por nicho e por região.')),
-          h('p', { className: 'lp-sub' }, 'Escolha pelo assunto do blog e pelo lugar onde ele é lido, por estado e cidade. Depois escolha a posição do anúncio na página.'),
-          h('div', { className: 'lp-filters' },
-            h('div', { className: 'lp-filter' }, h('span', { className: 'lp-filter-label', id: 'filtro-nicho' }, 'Nicho'),
-              h('div', { className: 'app-chips-row', role: 'group', 'aria-labelledby': 'filtro-nicho' }, ['Todos', ...niches].map(x =>
-                h('button', { key: x, type: 'button', className: 'app-chip', 'aria-pressed': nicheF === x, onClick: () => setNicheF(x) }, x)))),
-            h('div', { className: 'lp-filter' }, h('span', { className: 'lp-filter-label', id: 'filtro-regiao' }, 'Estado'),
-              h('div', { className: 'app-chips-row', role: 'group', 'aria-labelledby': 'filtro-regiao' }, ['Todas', ...regions].map(x =>
-                h('button', { key: x, type: 'button', className: 'app-chip', 'aria-pressed': regionF === x, onClick: () => setRegionF(x) }, x === 'Todas' ? 'Todos' : x))))),
-          h('p', { className: 'lp-count', 'aria-live': 'polite' }, shown.length ? `Mostrando ${shown.length} ${shown.length > 1 ? 'blogs' : 'blog'}` : ''),
-          shown.length ? h('div', { className: 'lp-blogs' }, shown.map(b => h('article', { key: b.id, className: 'lp-blog' },
+          h('p', { className: 'lp-sub' }, 'Cada blog tem um nicho e uma região. Você escolhe os que falam com o seu cliente e a posição do anúncio na página.'),
+          h('div', { className: 'lp-blogs' }, partners.map(b => h('article', { key: b.id, className: 'lp-blog' },
             h('div', { className: 'lp-blog-brand' }, h(BlogLogo, { blog: b, size: 'lg' }), h('div', null, h('b', null, b.name), h('span', null, b.site))),
-            h('div', { className: 'lp-blog-meta' }, h(B.Badge, null, b.niche), h('span', { className: 'lp-loc' }, pin, place(b))),
+            h('div', { className: 'lp-blog-meta' }, h('span', { className: 'lp-pill' }, b.niche), h('span', { className: 'lp-pill is-place' }, pin, place(b))),
             h('div', { className: 'lp-blog-foot' },
               h('div', { className: 'lp-reach' }, h('b', null, COMPACT.format(b.audience)), h('span', null, 'leitores por mês')),
               h('div', { className: 'lp-glyphs', role: 'list', 'aria-label': 'Espaços de anúncio' }, b.places.map(p => h('span', { key: p, role: 'listitem', className: 'lp-glyph', title: PLACE[p] },
@@ -1102,8 +1089,7 @@
                   [18, 23, 40, 45].map((y, i) => h('rect', { key: i, className: 'bs-wf-text', x: 6, y, width: i % 2 ? 28 : 36, height: 3, rx: 1.5 })),
                   p !== 'lateral' ? h('rect', { className: 'bs-wf-text', x: 46, y: 16, width: 14, height: 30, rx: 2 }) : null,
                   h('rect', { className: 'bs-wf-slot', x: PLACE_R[p][0], y: PLACE_R[p][1], width: PLACE_R[p][2], height: PLACE_R[p][3], rx: 2 })),
-                h('span', null, PLACE[p]))))))))
-            : h('p', { className: 'app-empty' }, 'Ainda não temos blogs de ' + nicheF + ' em ' + regionF + '. Troque o filtro ou cadastre-se para ser avisado quando entrarem.')),
+                h('span', null, PLACE[p]))))))))),
         h('section', { className: 'lp-wrap lp-close-wrap' }, h('div', { className: 'lp-close' },
           h('span', { className: 'lp-close-tag' }, 'Espaço disponível'),
           h('h2', null, Words('Este espaço pode ser do seu anúncio.')),
