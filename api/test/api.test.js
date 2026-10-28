@@ -10,7 +10,8 @@ const uploads = mkdtempSync(join(tmpdir(), 'blogsim-test-'));
 const secret = () => 'T' + randomBytes(9).toString('hex') + '9';
 const PW = { admin: secret(), anunciante: secret(), blogueiro: secret() };
 Object.assign(process.env, {
-  NODE_ENV: 'test', DATABASE_URL: 'pglite:memory', TRACK_SECRET: randomBytes(32).toString('hex'), UPLOAD_DIR: uploads, APP_URL: 'http://localhost:4100',
+  // TEST_DATABASE_URL roda os testes num Postgres de verdade (um banco vazio, só para teste).
+  NODE_ENV: 'test', DATABASE_URL: process.env.TEST_DATABASE_URL || 'pglite:memory', TRACK_SECRET: randomBytes(32).toString('hex'), UPLOAD_DIR: uploads, APP_URL: 'http://localhost:4100',
   SMTP_HOST: '', SMTP_USER: '', SMTP_PASS: '', ADMIN_NOTIFY_EMAIL: 'admin.qa@blogsim.com.br',
   QA_ADMIN_PASSWORD: PW.admin, QA_ANUNCIANTE_PASSWORD: PW.anunciante, QA_BLOGUEIRO_PASSWORD: PW.blogueiro
 });

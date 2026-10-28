@@ -13,7 +13,8 @@
     "seed": "node --env-file-if-exists=.env src/db/seed.js",
     "report:daily": "node --env-file-if-exists=.env src/jobs/daily-report.js",
     "test": "node --test --test-concurrency=1 \"test/**/*.test.js\"",
-    "mail:test": "node --env-file-if-exists=.env src/jobs/mail-test.js"
+    "mail:test": "node --env-file-if-exists=.env src/jobs/mail-test.js",
+    "admin:create": "node --env-file-if-exists=.env src/jobs/create-admin.js"
   },
   "dependencies": {
     "@fastify/cookie": "^11.1.5",
